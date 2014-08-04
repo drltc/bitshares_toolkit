@@ -744,7 +744,6 @@ config load_config( const fc::path& datadir )
               {
                   try
                   {
-                      FC_ASSERT( _in_sync, "Blockchain must be synced to produce blocks!" );
                       FC_ASSERT( network_get_connection_count() >= _min_delegate_connection_count,
                                  "Client must have ${count} connections before you may produce blocks!",
                                  ("count",_min_delegate_connection_count) );
@@ -1407,7 +1406,7 @@ config load_config( const fc::path& datadir )
     client::client()
     :my( new detail::client_impl(this))
     {
-       my->rebroadcast_pending();
+      my->_rebroadcast_pending_loop = fc::async([this]{my->rebroadcast_pending();});
     }
 
     client::client(bts::net::simulated_network_ptr network_to_connect_to)
@@ -1415,7 +1414,7 @@ config load_config( const fc::path& datadir )
     {
       network_to_connect_to->add_node_delegate(my.get());
       my->_p2p_node = network_to_connect_to;
-      my->rebroadcast_pending();
+      my->_rebroadcast_pending_loop = fc::async([this]{my->rebroadcast_pending();});
     }
 
     void client::simulate_disconnect( bool state )
@@ -3240,10 +3239,12 @@ config load_config( const fc::path& datadir )
 
   bool rpc_server_config::is_valid() const
   {
+#ifndef _WIN32
     if (rpc_user.empty())
       return false;
     if (rpc_password.empty())
       return false;
+#endif
     return true;
   }
 
