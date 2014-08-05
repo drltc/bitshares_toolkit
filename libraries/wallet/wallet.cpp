@@ -4964,7 +4964,9 @@ namespace bts { namespace wallet {
         {
             auto rec = my->_blockchain->get_domain_record( wallet_domain_rec.first );
             FC_ASSERT(rec.valid(), "a domain is in your wallet but not in the blockchain");
-            if (rec->get_true_state(my->_blockchain->now().sec_since_epoch()) != domain_record::unclaimed) //expired
+            if (rec->get_true_state(my->_blockchain->now().sec_since_epoch()) == domain_record::unclaimed) //expired
+                continue;
+            if( my->_wallet_db.has_private_key(rec->owner) )
                 result.push_back(*rec);
         }
         return result;
