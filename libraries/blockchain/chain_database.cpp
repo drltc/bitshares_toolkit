@@ -1992,7 +1992,7 @@ namespace bts { namespace blockchain {
           my->_auction_db.remove( old_domain_rec.value().get_auction_key() );
       }
       my->_domain_db.store( rec.domain_name, rec );
-      if( rec.get_true_state() == domain_record::in_auction )
+      if( rec.get_true_state(now().sec_since_epoch()) == domain_record::in_auction )
       {
          my->_auction_db.store( rec.get_auction_key(), rec.domain_name );
       }

@@ -100,16 +100,7 @@ namespace bts { namespace blockchain {
 
         uint32_t                                      time_in_top;
 
-        domain_state_type get_true_state() const
-        {
-            if (domain_state_type(this->state) == owned)
-            {
-                if (fc::time_point::now().sec_since_epoch() > last_update + P2P_EXPIRE_DURATION_SECS)
-                    return unclaimed;
-                return owned;
-            }
-            return this->state;
-        }
+        domain_state_type get_true_state(uint32_t sec_since_epoch) const;
 
         auction_index_key get_auction_key() const
         {

@@ -1048,7 +1048,7 @@ namespace bts { namespace wallet {
         if( _wallet_db.has_private_key( op.owner ) )
         {
            cache_transfer = true;
-           //_wallet_db.cache_domain( op.domain_name );
+           _wallet_db.cache_domain( op.domain_name );
         }
         else if( op.memo )
         {
@@ -1078,7 +1078,7 @@ namespace bts { namespace wallet {
                     }
                     trx_rec.ledger_entries.push_back( entry );
                     cache_transfer = true;
-                    //_wallet_db.cache_domain( op.domain_name );
+                    _wallet_db.cache_domain( op.domain_name );
                  }
               }
            } ).wait();
@@ -4964,7 +4964,7 @@ namespace bts { namespace wallet {
         {
             auto rec = my->_blockchain->get_domain_record( wallet_domain_rec.first );
             FC_ASSERT(rec.valid(), "a domain is in your wallet but not in the blockchain");
-            if (rec->get_true_state() != domain_record::unclaimed) //expired
+            if (rec->get_true_state(my->_blockchain->now().sec_since_epoch()) != domain_record::unclaimed) //expired
                 result.push_back(*rec);
         }
         return result;
@@ -4995,7 +4995,7 @@ namespace bts { namespace wallet {
 
         auto priority_fee = get_priority_fee();
 
-        if ( ! odomain_rec.valid() || odomain_rec->get_true_state() == domain_record::unclaimed)
+        if ( ! odomain_rec.valid() || odomain_rec->get_true_state(my->_blockchain->now().sec_since_epoch()) == domain_record::unclaimed)
         {
             priority_fee.amount += bid_amount;
             my->withdraw_to_transaction( priority_fee, bidder_pubkey, trx, required_signatures );
@@ -5210,7 +5210,7 @@ namespace bts { namespace wallet {
         auto odomain_rec = my->_blockchain->get_domain_record( domain_name );
 
         FC_ASSERT( odomain_rec.valid(), "That domain does not appear in the blockchain." )
-        FC_ASSERT( odomain_rec->get_true_state() == domain_record::owned,
+        FC_ASSERT( odomain_rec->get_true_state(my->_blockchain->now().sec_since_epoch()) == domain_record::owned,
                    "Attempting to update a name which is not in 'owned' state");
         FC_ASSERT( is_valid_value( value ), "Trying to update with invalid value" );
 

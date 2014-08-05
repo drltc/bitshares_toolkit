@@ -23,8 +23,9 @@ namespace bts { namespace blockchain {
     {
         FC_ASSERT( is_valid_domain( this->domain_name ) );
         auto odomain_rec = eval_state._current_state->get_domain_record( this->domain_name );
+        auto now = eval_state._current_state->now().sec_since_epoch();
         /* If record is invalid, nobody has bid on it yet. You can bid if you exceed current minimum bid. */
-        if ( ! odomain_rec.valid() || odomain_rec->get_true_state() == domain_record::unclaimed)
+        if ( ! odomain_rec.valid() || odomain_rec->get_true_state(now) == domain_record::unclaimed)
         {
             FC_ASSERT( this->bid_amount >= P2P_MIN_INITIAL_BID, "Initial bid does not exceed min required bid");
             eval_state.required_fees += asset(this->bid_amount, 0);
@@ -40,7 +41,7 @@ namespace bts { namespace blockchain {
         }
         else
         {
-            FC_ASSERT( odomain_rec->get_true_state() == domain_record::in_auction,
+            FC_ASSERT( odomain_rec->get_true_state(now) == domain_record::in_auction,
                        "Trying to bid on a domain that is not in auction" );
             if (false) // TODO if signed by owner, allow adjusting bid
             {
@@ -86,8 +87,9 @@ namespace bts { namespace blockchain {
     {
         auto odomain_rec = eval_state._current_state->get_domain_record( this->domain_name );
         FC_ASSERT( odomain_rec.valid(), "Trying to sell domain which does not exist" );
-        FC_ASSERT( odomain_rec->get_true_state() == domain_record::owned
-                || odomain_rec->get_true_state() == domain_record::in_sale,
+        auto now = eval_state._current_state->now().sec_since_epoch();
+        FC_ASSERT( odomain_rec->get_true_state(now) == domain_record::owned
+                || odomain_rec->get_true_state(now) == domain_record::in_sale,
                    "Attempting to sell a domain which is not in 'owned' or 'in_sale' state");
         FC_ASSERT( eval_state.check_signature( odomain_rec->owner ), "Sale not signed by owner" );
         if ( false ) //if there are any offers
@@ -107,7 +109,8 @@ namespace bts { namespace blockchain {
     {
         auto odomain_rec = eval_state._current_state->get_domain_record( this->domain_name );
         FC_ASSERT( odomain_rec.valid(), "Trying to cancel sale for domain which does not exist" );
-        FC_ASSERT( odomain_rec->get_true_state() == domain_record::in_sale,
+        auto now = eval_state._current_state->now().sec_since_epoch();
+        FC_ASSERT( odomain_rec->get_true_state(now) == domain_record::in_sale,
                    "Attempting to cancel sale for a domain which is not in 'in_sale' state");
         FC_ASSERT( eval_state.check_signature( odomain_rec->owner ), "Cancel sale not signed by owner" );
         odomain_rec->state = domain_record::owned;
@@ -120,10 +123,11 @@ namespace bts { namespace blockchain {
     {
         FC_ASSERT( is_valid_domain( this->domain_name ), "Trying to buy an invalid domain name" );
 
+        auto now = eval_state._current_state->now().sec_since_epoch();
         auto odomain_rec = eval_state._current_state->get_domain_record( this->domain_name );
         /* If it already exists and hasn't expired and you offered enough */
         if( odomain_rec.valid() 
-            && odomain_rec->get_true_state() == domain_record::in_sale
+            && odomain_rec->get_true_state(now) == domain_record::in_sale
             && this->price >= odomain_rec->price )
         {
             share_type paid_to_owner = 0;
@@ -230,8 +234,9 @@ namespace bts { namespace blockchain {
     void domain_transfer_operation::evaluate( transaction_evaluation_state& eval_state )
     {
         auto odomain_rec = eval_state._current_state->get_domain_record( this->domain_name );
+        auto now = eval_state._current_state->now().sec_since_epoch();
         FC_ASSERT( odomain_rec.valid(), "Trying to update domain which does not exist" );
-        FC_ASSERT( odomain_rec->get_true_state() == domain_record::owned,
+        FC_ASSERT( odomain_rec->get_true_state(now) == domain_record::owned,
                    "Attempting to update a domain which is not in 'owned' state");
         FC_ASSERT( eval_state.check_signature( odomain_rec->owner ), "Update not signed by owner" );
         odomain_rec->owner = this->owner;
@@ -284,8 +289,9 @@ namespace bts { namespace blockchain {
     void domain_update_info_operation::evaluate( transaction_evaluation_state& eval_state )
     {
         auto odomain_rec = eval_state._current_state->get_domain_record( this->domain_name );
+        auto now = eval_state._current_state->now().sec_since_epoch();
         FC_ASSERT( odomain_rec.valid(), "Trying to update domain which does not exist" );
-        FC_ASSERT( odomain_rec->get_true_state() == domain_record::owned,
+        FC_ASSERT( odomain_rec->get_true_state(now) == domain_record::owned,
                    "Attempting to update a domain which is not in 'owned' state");
         FC_ASSERT( is_valid_value( this->value ), "Trying to update with invalid value" );
         FC_ASSERT( eval_state.check_signature( odomain_rec->owner ), "Update not signed by owner" );
