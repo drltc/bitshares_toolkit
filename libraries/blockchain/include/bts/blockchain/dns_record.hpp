@@ -81,7 +81,8 @@ namespace bts { namespace blockchain {
 
     struct domain_record
     {
-        domain_record():domain_name(""),value(variant("")),last_update(0),time_in_top(0){};
+        domain_record():domain_name(""),value(variant("")),last_update(0),time_in_top(0),signin_key(){};
+
         enum domain_state_type
         {
             unclaimed,
@@ -92,8 +93,10 @@ namespace bts { namespace blockchain {
 
         string                                        domain_name;
         address                                       owner;
+        fc::optional<public_key_type>                 signin_key;
         variant                                       value;
         uint32_t                                      last_update;
+        uint32_t                                      last_renewed;
         fc::enum_type<uint8_t,domain_state_type>      state;
         share_type                                    price;
         share_type                                    next_required_bid;
@@ -121,6 +124,6 @@ namespace bts { namespace blockchain {
 #include <fc/reflect/reflect.hpp>
 
 FC_REFLECT_ENUM( bts::blockchain::domain_record::domain_state_type, (unclaimed)(in_auction)(in_sale)(owned) );
-FC_REFLECT( bts::blockchain::domain_record, (domain_name)(owner)(value)(last_update)(state)(price)(next_required_bid)(time_in_top) );
+FC_REFLECT( bts::blockchain::domain_record, (domain_name)(owner)(signin_key)(value)(last_update)(last_renewed)(state)(price)(next_required_bid)(time_in_top) );
 FC_REFLECT( bts::blockchain::auction_index_key, (domain_name)(price)(bid_time) );
 FC_REFLECT( bts::blockchain::offer_index_key, (domain_name)(price)(offer_address)(offer_time) );

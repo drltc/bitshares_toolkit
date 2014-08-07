@@ -3,8 +3,8 @@
     "methods":
     [
         {
-            "method_name": "domain_bid",
-            "description": "Place a bid on a domain.",
+            "method_name": "dotp2p_bid",
+            "description": "Place a bid on a .p2p domain.",
             "return_type": "signed_transaction",
             "parameters": 
             [
@@ -27,8 +27,8 @@
             "prerequisites": ["wallet_open", "wallet_unlocked"]
         },
         {
-            "method_name": "domain_sell",
-            "description": "Start an auction for a domain you own at a particular price.",
+            "method_name": "dotp2p_sell",
+            "description": "Start an auction for a .p2p domain you own at a particular price.",
             "return_type": "signed_transaction",
             "parameters": 
             [
@@ -46,8 +46,8 @@
             "prerequisites": ["wallet_open", "wallet_unlocked"]
         },
         {
-            "method_name": "domain_cancel_sell",
-            "description": "Start an auction for a domain you own at a particular price.",
+            "method_name": "dotp2p_cancel_sell",
+            "description": "Start an auction for a .p2p domain you own at a particular price.",
             "return_type": "signed_transaction",
             "parameters": 
             [
@@ -60,7 +60,7 @@
             "prerequisites": ["wallet_open", "wallet_unlocked"]
         },
         {
-            "method_name": "domain_update",
+            "method_name": "dotp2p_update",
             "description": "Update a domain's value.",
             "return_type": "signed_transaction",
             "parameters": 
@@ -79,8 +79,8 @@
             "prerequisites": ["wallet_open", "wallet_unlocked"]
         },
         {
-            "method_name": "domain_buy",
-            "description": "Buy or make an offer for a domain",
+            "method_name": "dotp2p_buy",
+            "description": "Buy or make an offer for a .p2p domain",
             "return_type": "signed_transaction",
             "parameters": 
             [
@@ -103,8 +103,8 @@
             "prerequisites": ["wallet_open", "wallet_unlocked"]
         },
         {
-            "method_name": "domain_cancel_buy",
-            "description": "Cancel an offer for a domain",
+            "method_name": "dotp2p_cancel_buy",
+            "description": "Cancel an offer for a .p2p domain",
             "return_type": "signed_transaction",
             "parameters": 
             [
@@ -117,8 +117,8 @@
             "prerequisites": ["wallet_open", "wallet_unlocked"]
         },
         {
-            "method_name": "domain_list_offers",
-            "description": "See all the offers for a domain",
+            "method_name": "dotp2p_list_offers",
+            "description": "See all the offers for a .p2p domain",
             "return_type": "domain_offer_array",
             "parameters": 
             [
@@ -138,8 +138,8 @@
         },
 
         {
-            "method_name": "domain_transfer",
-            "description": "Update a domain's owner.",
+            "method_name": "dotp2p_transfer",
+            "description": "Update a .p2p domain's owner.",
             "return_type": "signed_transaction",
             "parameters": 
             [
@@ -157,26 +157,40 @@
             "prerequisites": ["wallet_open", "wallet_unlocked"]
         },
         {
-            "method_name": "domain_list_auctions",
-            "description": "List all the domains currently in auction",
-            "return_type": "domain_record_array",
+            "method_name": "dotp2p_list_auctions",
+            "description": "List all the .p2p domains currently in auction",
+            "return_type": "domain_auction_info_array",
             "parameters": 
             [
             ],
             "prerequisites": ["json_authenticated"]
         },
         {
-            "method_name": "domain_list_mine",
-            "description": "List all the domains controlled by this wallet",
-            "return_type": "domain_record_array",
+            "method_name": "dotp2p_list_mine",
+            "description": "List all the .p2p domains controlled by this wallet",
+            "return_type": "domain_info_array",
             "parameters": 
             [
             ],
             "prerequisites": ["json_authenticated"]
         },
         {
-            "method_name": "domain_info",
-            "description": "Gets metadata associated with this domain.",
+            "method_name": "dotp2p_info",
+            "description": "Gets metadata associated with this .p2p domain.",
+            "return_type": "odomain_info",
+            "parameters": 
+            [
+                {
+                    "name": "domain_name",
+                    "type": "string",
+                    "description": ""
+                }
+            ],
+            "prerequisites": ["json_authenticated"]
+        },
+        {
+            "method_name": "dotp2p_show",
+            "description": "Gets the user-specified value associated with this .p2p domain.",
             "return_type": "json_variant",
             "parameters": 
             [
@@ -189,15 +203,20 @@
             "prerequisites": ["json_authenticated"]
         },
         {
-            "method_name": "domain_show",
-            "description": "Gets the user-specified value associated with this domain.",
-            "return_type": "json_variant",
+            "method_name": "dotp2p_set_signin_key",
+            "description": "Set the .p2p domain's SignIn key, or generate a new one.",
+            "return_type": "signed_transaction",
             "parameters": 
             [
                 {
                     "name": "domain_name",
                     "type": "string",
                     "description": ""
+                },
+                {
+                    "name": "optional_public_key",
+                    "type": "string",
+                    "description": "A valid public key, or an empty string to generate a new one."
                 }
             ],
             "prerequisites": ["json_authenticated"]

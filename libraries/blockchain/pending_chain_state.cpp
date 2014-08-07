@@ -44,17 +44,17 @@ namespace bts { namespace blockchain {
        auto prev_state = _prev_state.lock();
        auto auctions = prev_state->get_domains_in_auction();
        for(auto domain_rec : auctions)
-      {
+       {
           if (k >= max)
               break;
-          domain_rec.time_in_top += BTS_BLOCKCHAIN_BLOCK_INTERVAL_SEC; // todo missed blocks
+          domain_rec.time_in_top += fc::time_point((now() - prev_state->now())).sec_since_epoch();
           if (domain_rec.time_in_top >= P2P_AUCTION_DURATION_SECS)
           {
               domain_rec.state = domain_record::owned;
           }
           store_domain_record( domain_rec );
           k++;
-      }
+       }
    }
 
    /** polymorphically allcoate a new state */

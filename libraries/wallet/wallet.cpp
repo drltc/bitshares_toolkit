@@ -4957,7 +4957,34 @@ namespace bts { namespace wallet {
 
     // DNS
 
-    vector<domain_record> wallet::domain_list_mine()
+    pretty_domain_info    wallet::to_pretty_domain_info( domain_record& rec )
+    {
+        auto pretty = pretty_domain_info();
+        pretty.domain_name = rec.domain_name;
+        pretty.owner = rec.owner;
+        pretty.signin_key = rec.signin_key;
+        pretty.last_renewed = fc::time_point_sec( rec.last_renewed );
+        pretty.domain_state = rec.get_true_state( my->_blockchain->now().sec_since_epoch() );
+        return pretty;
+    }
+
+    pretty_domain_offer   wallet::to_pretty_domain_offer( offer_index_key& offer )
+    {
+        FC_ASSERT(!"unimplemented");
+    }
+
+    pretty_domain_auction_summary  wallet::to_pretty_auction_summary( domain_record& rec )
+    {
+        FC_ASSERT( rec.get_true_state( my->_blockchain->now().sec_since_epoch()) == domain_record::in_auction );
+        auto pretty = pretty_domain_auction_summary();
+        pretty.domain_name = rec.domain_name;
+        pretty.last_bid_price = rec.price;
+        pretty.next_required_bid_price = rec.next_required_bid;
+        pretty.last_bid_time = fc::time_point_sec( rec.last_update );
+        pretty.time_in_top = rec.time_in_top;
+    }    
+
+    vector<pretty_domain_info> wallet::domain_list_mine()
     {
         vector<domain_record> result;
         for( auto wallet_domain_rec : my->_wallet_db.get_domains() )
@@ -4969,7 +4996,11 @@ namespace bts { namespace wallet {
             if( my->_wallet_db.has_private_key(rec->owner) )
                 result.push_back(*rec);
         }
-        return result;
+        vector<pretty_domain_info> infos;
+        infos.reserve(result.size());
+        for( auto item : result)
+            infos.push_back( to_pretty_domain_info( item ) );
+        return infos;
     }
    
     signed_transaction wallet::domain_bid( const string& domain_name,

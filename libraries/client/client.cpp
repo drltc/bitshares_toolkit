@@ -3129,12 +3129,12 @@ config load_config( const fc::path& datadir )
 
     /* DNS methods */
 
-    vector<domain_record>     client_impl::domain_list_mine()
+    vector<pretty_domain_info>     client_impl::dotp2p_list_mine()
     {
         return _wallet->domain_list_mine();
     }
 
-    signed_transaction        client_impl::domain_bid( const string& domain_name,
+    signed_transaction        client_impl::dotp2p_bid( const string& domain_name,
                                                        const share_type& bid_amount,
                                                        const string& owner_name )
     {
@@ -3143,7 +3143,7 @@ config load_config( const fc::path& datadir )
         return trx;
     }
 
-    signed_transaction        client_impl::domain_sell( const string& domain_name,
+    signed_transaction        client_impl::dotp2p_sell( const string& domain_name,
                                                         const share_type& min_amount )
     {
         auto trx = _wallet->domain_sell( domain_name, min_amount, true);
@@ -3151,14 +3151,14 @@ config load_config( const fc::path& datadir )
         return trx;
     }
 
-    signed_transaction        client_impl::domain_cancel_sell( const string& domain_name )
+    signed_transaction        client_impl::dotp2p_cancel_sell( const string& domain_name )
     {
         auto trx = _wallet->domain_cancel_sell( domain_name, true);
         network_broadcast_transaction( trx );
         return trx;
     }
 
-    signed_transaction        client_impl::domain_buy( const string& domain_name,
+    signed_transaction        client_impl::dotp2p_buy( const string& domain_name,
                                                        const share_type& price,
                                                        const string& pay_from_account )
     {
@@ -3167,7 +3167,7 @@ config load_config( const fc::path& datadir )
         return trx;
     }
 
-    signed_transaction        client_impl::domain_cancel_buy( const balance_id_type& offer_id )
+    signed_transaction        client_impl::dotp2p_cancel_buy( const balance_id_type& offer_id )
     {
         FC_ASSERT(!"unimplemented");
         auto trx = _wallet->domain_cancel_buy( offer_id, true);
@@ -3176,7 +3176,7 @@ config load_config( const fc::path& datadir )
     }
 
 
-    signed_transaction        client_impl::domain_transfer( const string& domain_name,
+    signed_transaction        client_impl::dotp2p_transfer( const string& domain_name,
                                                             const string& account_name )
     {
         auto trx = _wallet->domain_transfer( domain_name, account_name, true );
@@ -3184,7 +3184,7 @@ config load_config( const fc::path& datadir )
         return trx;
     }
 
-    signed_transaction        client_impl::domain_update( const string& domain_name,
+    signed_transaction        client_impl::dotp2p_update( const string& domain_name,
                                                           const variant& value )
     {
         auto trx = _wallet->domain_update( domain_name, value, true );
@@ -3192,26 +3192,33 @@ config load_config( const fc::path& datadir )
         return trx;
     }
 
-    variant                   client_impl::domain_info( const string& domain_name )
+    fc::optional<pretty_domain_info>     client_impl::dotp2p_info( const string& domain_name )
     {
         auto record = _chain_db->get_domain_record( domain_name );
-        record->value = variant("use domain_show");
-        return fc::variant( record );
+        if( !record.valid())
+            return fc::optional<pretty_domain_info>();
+        auto pretty = _wallet->to_pretty_domain_info( *record );
+        return pretty;
     }    
 
-    variant                   client_impl::domain_show( const string& domain_name )
+    variant                   client_impl::dotp2p_show( const string& domain_name )
     {
         return fc::variant( _chain_db->get_domain_record( domain_name )->value );
     }    
 
-    vector<offer_index_key>     client_impl::domain_list_offers(const string& domain_name, uint32_t limit)
+    vector<pretty_domain_offer>     client_impl::dotp2p_list_offers(const string& domain_name, uint32_t limit)
     {
         FC_ASSERT(!"unimplemented");
     }
 
-    vector<domain_record>     client_impl::domain_list_auctions()
+    vector<pretty_domain_auction_summary>     client_impl::dotp2p_list_auctions()
     {
-        return _chain_db->get_domains_in_auction();
+        auto auctions = _chain_db->get_domains_in_auction();
+        auto pretties = vector<pretty_domain_auction_summary>();
+        pretties.reserve(auctions.size());
+        for( auto item : auctions )
+            pretties.push_back( _wallet->to_pretty_auction_summary( item ) );
+        return pretties;
     }
 
     signed_transaction        client_impl::keyid_adjust_points(const string& name, const share_type& points,
@@ -3220,6 +3227,11 @@ config load_config( const fc::path& datadir )
         auto trx = _wallet->keyid_adjust_points( name, points, pay_from_account, true );
         network_broadcast_transaction( trx );
         return trx;
+    }
+
+    signed_transaction       client_impl::dotp2p_set_signin_key(const string& name, const string& opt_pubkey)
+    {
+        FC_ASSERT(!"unimplemented");
     }
 
     /* End DNS methods */

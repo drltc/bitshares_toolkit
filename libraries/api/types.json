@@ -584,18 +584,31 @@
         "cpp_return_type" : "bts::wallet::vote_selection_method"
       },
       {
-        "type_name" : "domain_record",
-        "cpp_return_type" : "bts::blockchain::domain_record"
+        "type_name" : "domain_info",
+        "cpp_return_type" : "bts::wallet::pretty_domain_info"
       },
       {
-        "type_name" : "domain_record_array",
+        "type_name" : "domain_auction_info",
+        "cpp_return_type" : "bts::wallet::pretty_domain_auction_summary"
+      },
+      {
+        "type_name" : "domain_auction_info_array",
         "container_type" : "array",
-        "contained_type" : "domain_record"
+        "contained_type" : "domain_auction_info"
+      },
+      {
+        "type_name" : "odomain_info",
+        "cpp_return_type" : "fc::optional<bts::wallet::pretty_domain_info>"
+      },
+      {
+        "type_name" : "domain_info_array",
+        "container_type" : "array",
+        "contained_type" : "domain_info"
       },
       {
         "type_name" : "domain_offer",
-        "cpp_return_type": "bts::blockchain::offer_index_key",
-        "cpp_include_file" : "bts/blockchain/dns_record.hpp"
+        "cpp_return_type": "bts::wallet::pretty_domain_offer",
+        "cpp_include_file" : "bts/wallet/pretty_dns.hpp"
       },
       {
         "type_name": "domain_offer_array",

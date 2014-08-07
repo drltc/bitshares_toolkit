@@ -3,6 +3,7 @@
 #include <bts/blockchain/chain_database.hpp>
 #include <bts/blockchain/config.hpp>
 #include <bts/wallet/pretty.hpp>
+#include <bts/wallet/pretty_dns.hpp>
 #include <bts/wallet/wallet_db.hpp>
 #include <fc/signals.hpp>
 
@@ -468,7 +469,7 @@ namespace bts { namespace wallet {
 
          // DNS
             
-         vector<domain_record>     domain_list_mine();
+         vector<pretty_domain_info>     domain_list_mine();
 
          signed_transaction        domain_bid( const string& domain_name,
                                                const share_type& bid_amount,
@@ -503,6 +504,13 @@ namespace bts { namespace wallet {
                                                         const share_type& points,
                                                         const string& pay_from_account,
                                                         bool sign);
+
+         pretty_domain_info             to_pretty_domain_info( domain_record& rec );
+
+         pretty_domain_offer            to_pretty_domain_offer( offer_index_key& offer );
+
+         pretty_domain_auction_summary  to_pretty_auction_summary( domain_record& rec );
+
 
 
 
