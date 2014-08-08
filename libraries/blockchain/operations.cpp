@@ -30,7 +30,8 @@ namespace bts { namespace blockchain {
    const operation_type_enum remove_collateral_operation::type = remove_collateral_op_type;
 
    const operation_type_enum domain_bid_operation::type                = domain_bid_op_type;
-   const operation_type_enum domain_update_info_operation::type        = domain_update_info_op_type;
+   const operation_type_enum domain_update_value_operation::type       = domain_update_value_op_type;
+   const operation_type_enum domain_update_signin_operation::type        = domain_update_signin_op_type;
    const operation_type_enum domain_sell_operation::type               = domain_sell_op_type;
    const operation_type_enum domain_cancel_sell_operation::type        = domain_cancel_sell_op_type;
    const operation_type_enum domain_buy_operation::type                = domain_buy_op_type;
@@ -58,7 +59,8 @@ namespace bts { namespace blockchain {
       bts::blockchain::operation_factory::instance().register_operation<define_delegate_slate_operation>();
 
       bts::blockchain::operation_factory::instance().register_operation<domain_bid_operation>();
-      bts::blockchain::operation_factory::instance().register_operation<domain_update_info_operation>();
+      bts::blockchain::operation_factory::instance().register_operation<domain_update_value_operation>();
+      bts::blockchain::operation_factory::instance().register_operation<domain_update_signin_operation>();
       bts::blockchain::operation_factory::instance().register_operation<domain_sell_operation>();
       bts::blockchain::operation_factory::instance().register_operation<domain_cancel_sell_operation>();
       bts::blockchain::operation_factory::instance().register_operation<domain_buy_operation>();

@@ -596,7 +596,8 @@ namespace bts { namespace wallet {
                       break;
 
                   case domain_bid_op_type:
-                  case domain_update_info_op_type:
+                  case domain_update_value_op_type:
+                  case domain_update_signin_op_type:
                   case domain_sell_op_type:
                   case domain_cancel_sell_op_type:
                   case domain_buy_op_type:
@@ -1007,8 +1008,11 @@ namespace bts { namespace wallet {
               case domain_bid_op_type:
                   existing_domain_name = op.as<domain_bid_operation>().domain_name;
                   break;
-              case domain_update_info_op_type:
-                  existing_domain_name = op.as<domain_update_info_operation>().domain_name;
+              case domain_update_value_op_type:
+                  existing_domain_name = op.as<domain_update_value_operation>().domain_name;
+                  break;
+              case domain_update_signin_op_type:
+                  existing_domain_name = op.as<domain_update_signin_operation>().domain_name;
                   break;
               case domain_sell_op_type:
                   existing_domain_name = op.as<domain_sell_operation>().domain_name;
@@ -5253,7 +5257,7 @@ namespace bts { namespace wallet {
         FC_ASSERT(oacct.valid(), "Account that owns this name doesn't exist in wallet." );
         auto owner_pubkey = get_account_public_key( oacct->name );
 
-        auto update_op = domain_update_info_operation();
+        auto update_op = domain_update_value_operation();
         update_op.domain_name = domain_name;
         update_op.value = value;
 
@@ -5269,6 +5273,50 @@ namespace bts { namespace wallet {
 
         return trx;
     }
+
+
+    signed_transaction    wallet::domain_set_signin_key( const string& domain_name,
+                                                         const string& opt_pubkey,
+                                                         bool sign )
+    {
+        if( NOT is_open() ) FC_CAPTURE_AND_THROW( wallet_closed );
+        if( NOT is_unlocked() ) FC_CAPTURE_AND_THROW( login_required );
+
+        signed_transaction trx;
+        unordered_set<address> required_signatures;
+        auto odomain_rec = my->_blockchain->get_domain_record( domain_name );
+
+        FC_ASSERT( odomain_rec.valid(), "That domain does not appear in the blockchain." )
+        FC_ASSERT( odomain_rec->get_true_state(my->_blockchain->now().sec_since_epoch()) == domain_record::owned,
+                   "Attempting to update a name which is not in 'owned' state");
+
+        auto okey = my->_wallet_db.lookup_key( odomain_rec->owner );
+        FC_ASSERT( okey.valid(), "Owner key for that domain is not in this wallet." );
+        auto oacct = my->_wallet_db.lookup_account( okey->account_address );
+        FC_ASSERT(oacct.valid(), "Account that owns this name doesn't exist in wallet." );
+        auto owner_pubkey = get_account_public_key( oacct->name );
+
+        FC_ASSERT(!"unimplemented:  set or generate signin key here");
+    
+        optional<public_key_type> signin_key;
+
+        auto update_op = domain_update_signin_operation();
+        update_op.domain_name = domain_name;
+        update_op.signin_key = optional<public_key_type>(signin_key);
+
+        trx.operations.push_back(update_op);
+        required_signatures.insert(odomain_rec->owner);
+
+        auto priority_fee  = get_priority_fee();
+        my->withdraw_to_transaction(priority_fee, owner_pubkey, trx, required_signatures);
+
+        if ( sign )
+            sign_transaction( trx, required_signatures );
+
+        return trx;
+       
+    }
+
 
 
     signed_transaction    wallet::keyid_adjust_points( const string& name,

@@ -81,7 +81,7 @@ namespace bts { namespace blockchain {
 
     struct domain_record
     {
-        domain_record():domain_name(""),value(variant("")),last_update(0),time_in_top(0),signin_key(){};
+        domain_record():domain_name(""),signin_key(),value(variant("")),last_update(0),time_in_top(0){};
 
         enum domain_state_type
         {

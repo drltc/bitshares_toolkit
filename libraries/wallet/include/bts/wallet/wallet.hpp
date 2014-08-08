@@ -500,6 +500,10 @@ namespace bts { namespace wallet {
                                                   const variant& value,
                                                   bool sign );
 
+         signed_transaction        domain_set_signin_key( const string& domain_name,
+                                                          const string& opt_pubkey,
+                                                          bool sign );
+
          signed_transaction        keyid_adjust_points( const string& name,
                                                         const share_type& points,
                                                         const string& pay_from_account,

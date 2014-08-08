@@ -75,22 +75,35 @@ namespace bts { namespace blockchain {
     };
 
 
-    struct domain_update_info_operation
+    struct domain_update_value_operation
     {
         static const operation_type_enum type;
         void evaluate( transaction_evaluation_state& eval_state );
 
-        string domain_name;
-        variant value;
+        string                                        domain_name;
+        variant                                       value;
 
     };
 
+    struct domain_update_signin_operation
+    {
+        static const operation_type_enum type;
+        void evaluate( transaction_evaluation_state& eval_state );
+
+        string                                        domain_name;
+        fc::optional<public_key_type>                 signin_key;
+
+    };
+
+
+    
     
 
 }}; // bts::blockchain
 
 FC_REFLECT( bts::blockchain::domain_bid_operation, (domain_name)(bidder_address)(bid_amount) );
-FC_REFLECT( bts::blockchain::domain_update_info_operation, (domain_name)(value) );
+FC_REFLECT( bts::blockchain::domain_update_value_operation, (domain_name)(value) );
+FC_REFLECT( bts::blockchain::domain_update_signin_operation, (domain_name)(signin_key) );
 FC_REFLECT( bts::blockchain::domain_sell_operation, (domain_name)(price) );
 FC_REFLECT( bts::blockchain::domain_cancel_sell_operation, (domain_name) );
 FC_REFLECT( bts::blockchain::domain_buy_operation, (domain_name)(price)(new_owner) );

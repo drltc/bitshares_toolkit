@@ -286,7 +286,7 @@ namespace bts { namespace blockchain {
    } FC_RETHROW_EXCEPTIONS( warn, "" ) }
 
 
-    void domain_update_info_operation::evaluate( transaction_evaluation_state& eval_state )
+    void domain_update_value_operation::evaluate( transaction_evaluation_state& eval_state )
     {
         auto odomain_rec = eval_state._current_state->get_domain_record( this->domain_name );
         auto now = eval_state._current_state->now().sec_since_epoch();
