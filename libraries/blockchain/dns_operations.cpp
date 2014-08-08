@@ -300,4 +300,18 @@ namespace bts { namespace blockchain {
         eval_state._current_state->store_domain_record( *odomain_rec );
     }
 
+    void domain_update_signin_operation::evaluate( transaction_evaluation_state& eval_state )
+    {
+        auto odomain_rec = eval_state._current_state->get_domain_record( this->domain_name );
+        auto now = eval_state._current_state->now().sec_since_epoch();
+        FC_ASSERT( odomain_rec.valid(), "Trying to update domain which does not exist" );
+        FC_ASSERT( odomain_rec->get_true_state(now) == domain_record::owned,
+                   "Attempting to update a domain which is not in 'owned' state");
+        FC_ASSERT( eval_state.check_signature( odomain_rec->owner ), "Update not signed by owner" );
+        odomain_rec->signin_key = this->signin_key;
+        odomain_rec->last_update = eval_state._current_state->now().sec_since_epoch();
+        eval_state._current_state->store_domain_record( *odomain_rec );
+    }
+
+
 }} // bts::blockchain
