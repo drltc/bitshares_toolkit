@@ -47,7 +47,7 @@ namespace bts { namespace blockchain {
        {
           if (k >= max)
               break;
-          domain_rec.time_in_top += fc::time_point((now() - prev_state->now())).sec_since_epoch();
+          domain_rec.time_in_top += BTS_BLOCKCHAIN_BLOCK_INTERVAL_SEC;
           if (domain_rec.time_in_top >= P2P_AUCTION_DURATION_SECS)
           {
               domain_rec.state = domain_record::owned;

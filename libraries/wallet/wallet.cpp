@@ -4986,6 +4986,7 @@ namespace bts { namespace wallet {
         pretty.next_required_bid_price = rec.next_required_bid;
         pretty.last_bid_time = fc::time_point_sec( rec.last_update );
         pretty.time_in_top = rec.time_in_top;
+        return pretty;
     }    
 
     vector<pretty_domain_info> wallet::domain_list_mine()
