@@ -3208,7 +3208,12 @@ config load_config( const fc::path& datadir )
 
     vector<pretty_domain_offer>     client_impl::dotp2p_list_offers(const string& domain_name, uint32_t limit)
     {
-        FC_ASSERT(!"unimplemented");
+        auto offers = _chain_db->get_domain_offers( domain_name, limit );
+        auto key = offer_index_key::lower_bound_for_domain( domain_name );
+        auto pretties = vector<pretty_domain_offer>();
+        for( auto offer : offers )
+            pretties.push_back( _wallet->to_pretty_domain_offer( offer ) );
+        return pretties;
     }
 
     vector<pretty_domain_auction_summary>     client_impl::dotp2p_list_auctions()

@@ -4974,7 +4974,11 @@ namespace bts { namespace wallet {
 
     pretty_domain_offer   wallet::to_pretty_domain_offer( offer_index_key& offer )
     {
-        FC_ASSERT(!"unimplemented");
+        auto pretty = pretty_domain_offer();
+        pretty.domain_name = offer.domain_name;
+        pretty.price = offer.price;
+        pretty.offer_address = offer.offer_address;
+        return pretty;
     }
 
     pretty_domain_auction_summary  wallet::to_pretty_auction_summary( domain_record& rec )
