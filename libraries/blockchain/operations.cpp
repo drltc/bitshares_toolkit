@@ -6,11 +6,8 @@
 #include <bts/blockchain/account_operations.hpp>
 #include <bts/blockchain/proposal_operations.hpp>
 #include <bts/blockchain/asset_operations.hpp>
-<<<<<<< HEAD
 #include <bts/blockchain/dns_operations.hpp>
-=======
 #include <bts/blockchain/feed_operations.hpp>
->>>>>>> c6a3c16aa297c977d3f5de61194f30e1af186e8c
 #include <fc/reflect/variant.hpp>
 #include <fc/io/raw_variant.hpp>
 
