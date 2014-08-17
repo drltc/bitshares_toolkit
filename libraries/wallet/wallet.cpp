@@ -5846,7 +5846,7 @@ namespace bts { namespace wallet {
         required_signatures.insert(odomain_rec->owner);
 
         public_key_type  receiver_public_key = get_account_public_key( account_name );
-        private_key_type sender_private_key  = get_account_private_key( omyacct->name );
+        private_key_type sender_private_key  = get_private_key( omyacct->account_address );
         public_key_type  sender_public_key   = sender_private_key.get_public_key();
         address          sender_account_address( sender_private_key.get_public_key() );
  

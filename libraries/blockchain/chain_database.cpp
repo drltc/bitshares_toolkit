@@ -838,16 +838,10 @@ namespace bts { namespace blockchain {
             update_delegate_production_info( block_data, pending_state, block_signee );
 
             // apply any deterministic operations such as market operations before we perturb indexes
-<<<<<<< HEAD
             pending_state->apply_deterministic_updates();
 
-            // pay delegate and adjust current and total share supply
-            pay_delegate( block_data.id(), pending_state, block_signee );
-=======
-            //apply_deterministic_updates(pending_state);
             
             pay_delegate( block_id, pending_state, block_signee );
->>>>>>> c6a3c16aa297c977d3f5de61194f30e1af186e8c
 
             apply_transactions( block_data, block_data.user_transactions, pending_state );
 
