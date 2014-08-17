@@ -83,9 +83,16 @@ namespace bts { namespace blockchain {
       for( const auto& item : slots )           prev_state->store_slot_record( item.second );
       for( const auto& item : market_history )  prev_state->store_market_history_record( item.first, item.second );
       for( const auto& item : market_statuses ) prev_state->store_market_status( item.second );
+      for( const auto& item : feeds )           prev_state->set_feed( item.second );
+      for( const auto& items : recent_operations )
+      {
+         for( const auto& item : items.second )    prev_state->store_recent_operation( item );
+      }
+
 
       for( const auto& item : domains )         prev_state->store_domain_record( item.second );
       for( const auto& item : offers )          prev_state->store_domain_offer( item.first );
+
 
       prev_state->set_market_transactions( market_transactions );
    }
@@ -111,6 +118,9 @@ namespace bts { namespace blockchain {
                                                 const transaction_record& rec )
    {
       transactions[id] = rec;
+
+      for( const auto& op : rec.trx.operations )
+        store_recent_operation(op);
    }
 
    void pending_chain_state::get_undo_state( const chain_interface_ptr& undo_state_arg )const
@@ -213,6 +223,14 @@ namespace bts { namespace blockchain {
             undo_state->store_market_status( market_status() );
          }
       }
+      
+
+      for( auto const& item : feeds )
+      {
+         auto prev_value = prev_state->get_feed( item.first );
+         if( prev_value ) undo_state->set_feed( *prev_value );
+         else undo_state->set_feed( feed_record{item.first} );
+      }
 
       for( const auto& item : domains )
       {
@@ -228,6 +246,7 @@ namespace bts { namespace blockchain {
          if( prev_value.valid() ) undo_state->store_domain_offer( *prev_value );
          //else  undo_state->store_domain_offer( offer_index_key() );
       }
+
 
 
    }
@@ -431,6 +450,22 @@ namespace bts { namespace blockchain {
       key_to_account[address(r.owner_key)] = r.id;
    }
 
+   vector<operation> pending_chain_state::get_recent_operations(operation_type_enum t)
+   {
+      const auto& recent_op_queue = recent_operations[t];
+      vector<operation> recent_ops(recent_op_queue.size());
+      std::copy(recent_op_queue.begin(), recent_op_queue.end(), recent_ops.begin());
+      return recent_ops;
+   }
+
+   void pending_chain_state::store_recent_operation(const operation& o)
+   {
+      auto& recent_op_queue = recent_operations[o.type];
+      recent_op_queue.push_back(o);
+      if( recent_op_queue.size() > MAX_RECENT_OPERATIONS )
+        recent_op_queue.pop_front();
+   }
+
    fc::variant pending_chain_state::get_property( chain_property_enum property_id )const
    {
       auto property_itr = properties.find( property_id );
@@ -542,6 +577,10 @@ namespace bts { namespace blockchain {
       shorts[key] = rec;
       _dirty_markets[key.order_price.quote_asset_id] = key.order_price.base_asset_id;
    }
+   void pending_chain_state::set_market_dirty( asset_id_type quote_id, asset_id_type base_id ) 
+   {
+      _dirty_markets[quote_id] = base_id;
+   }
 
    void pending_chain_state::store_collateral_record( const market_index_key& key, const collateral_record& rec ) 
    {
@@ -591,5 +630,23 @@ namespace bts { namespace blockchain {
    void              pending_chain_state::store_market_status( const market_status& s ) 
    {
       market_statuses[std::make_pair(s.quote_id,s.base_id)] = s;
+   }
+   void            pending_chain_state::set_feed( const feed_record& r ) 
+   {
+      feeds[r.feed] = r;
+   }
+
+   ofeed_record    pending_chain_state::get_feed( const feed_index& i )const 
+   {
+      auto itr = feeds.find(i);
+      if( itr != feeds.end() ) return itr->second;
+
+      chain_interface_ptr prev_state = _prev_state.lock();
+      return prev_state->get_feed(i);
+   }
+   oprice    pending_chain_state::get_median_delegate_price( asset_id_type asset_id )const
+   {
+      chain_interface_ptr prev_state = _prev_state.lock();
+      return prev_state->get_median_delegate_price( asset_id );
    }
 } } // bts::blockchain

@@ -6,7 +6,11 @@
 #include <bts/blockchain/account_operations.hpp>
 #include <bts/blockchain/proposal_operations.hpp>
 #include <bts/blockchain/asset_operations.hpp>
+<<<<<<< HEAD
 #include <bts/blockchain/dns_operations.hpp>
+=======
+#include <bts/blockchain/feed_operations.hpp>
+>>>>>>> c6a3c16aa297c977d3f5de61194f30e1af186e8c
 #include <fc/reflect/variant.hpp>
 #include <fc/io/raw_variant.hpp>
 
@@ -28,6 +32,7 @@ namespace bts { namespace blockchain {
    const operation_type_enum cover_operation::type             = cover_op_type;
    const operation_type_enum add_collateral_operation::type    = add_collateral_op_type;
    const operation_type_enum remove_collateral_operation::type = remove_collateral_op_type;
+   const operation_type_enum update_feed_operation::type       = update_feed_op_type;
 
    const operation_type_enum domain_bid_operation::type                = domain_bid_op_type;
    const operation_type_enum domain_update_value_operation::type       = domain_update_value_op_type;
@@ -57,6 +62,7 @@ namespace bts { namespace blockchain {
       bts::blockchain::operation_factory::instance().register_operation<add_collateral_operation>();
       bts::blockchain::operation_factory::instance().register_operation<remove_collateral_operation>();
       bts::blockchain::operation_factory::instance().register_operation<define_delegate_slate_operation>();
+      bts::blockchain::operation_factory::instance().register_operation<update_feed_operation>();
 
       bts::blockchain::operation_factory::instance().register_operation<domain_bid_operation>();
       bts::blockchain::operation_factory::instance().register_operation<domain_update_value_operation>();
@@ -66,6 +72,7 @@ namespace bts { namespace blockchain {
       bts::blockchain::operation_factory::instance().register_operation<domain_buy_operation>();
       bts::blockchain::operation_factory::instance().register_operation<domain_cancel_buy_operation>();
       bts::blockchain::operation_factory::instance().register_operation<domain_transfer_operation>();
+
       return true;
    }();
 
