@@ -5703,15 +5703,37 @@ namespace bts { namespace wallet {
         FC_ASSERT( okey.valid(), "Owner key for that domain is not in this wallet." );
         auto oacct = my->_wallet_db.lookup_account( okey->account_address );
         FC_ASSERT(oacct.valid(), "Account that owns this name doesn't exist in wallet." );
+
         auto seller_pubkey = get_account_public_key( oacct->name );
 
         auto priority_fee = get_priority_fee();
-        my->withdraw_to_transaction( priority_fee, seller_pubkey, trx, required_signatures );
-        auto sell_op = domain_sell_operation();
-        sell_op.domain_name = domain_name;
-        sell_op.price = min_amount;
-        trx.operations.push_back(sell_op);
-        required_signatures.insert( odomain_rec->owner );
+
+        auto offers = my->_blockchain->get_domain_offers( domain_name, 1 );
+
+        // If there is an offer, then transfer ownership and withdraw the offer instead of
+        // putting it up for sale
+        if( offers.size() > 0 && offers[0].price >= min_amount )
+        {
+            auto balance = my->_blockchain->get_balance_record( offers[0].offer_address );
+            FC_ASSERT( balance.valid(), "No balance for a valid domain offer" );
+            auto withdraw_domain_op = withdraw_operation( balance->id(), balance->get_balance().amount );
+            auto transfer_op = domain_transfer_operation();
+            transfer_op.domain_name = domain_name;
+            transfer_op.owner = offers[0].offer_address;
+            transfer_op.memo = fc::optional<titan_memo>();
+            trx.operations.push_back( withdraw_domain_op );
+            trx.operations.push_back( transfer_op );
+            required_signatures.insert( transfer_op.owner );
+        }
+        else
+        {
+            my->withdraw_to_transaction( priority_fee, seller_pubkey, trx, required_signatures );
+            auto sell_op = domain_sell_operation();
+            sell_op.domain_name = domain_name;
+            sell_op.price = min_amount;
+            trx.operations.push_back(sell_op);
+            required_signatures.insert( odomain_rec->owner );
+        }
 
         if ( sign )
             sign_transaction( trx, required_signatures );
