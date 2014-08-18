@@ -1,4 +1,5 @@
 #include <bts/blockchain/balance_operations.hpp>
+#include <bts/blockchain/dns_operations.hpp>
 #include <bts/blockchain/chain_interface.hpp>
 #include <bts/blockchain/exceptions.hpp>
 
@@ -192,11 +193,11 @@ namespace bts { namespace blockchain {
                 {
                     for (auto op : eval_state.trx.operations)
                     {
-                        if (op.type == operation_type_enum::domain_transfer_operation)
+                        if (op.type == operation_type_enum::domain_transfer_op_type)
                         {
                             auto transfer = op.as<domain_transfer_operation>();
                             FC_ASSERT( transfer.domain_name == offer.domain_name, "transferring wrong domain name" );
-                            FC_ASSERT( transfer.owner == offer.owner_address, "transferring to wrong owner" );
+                            FC_ASSERT( transfer.owner == offer.owner, "transferring to wrong owner" );
                         }
                     }
                 }
