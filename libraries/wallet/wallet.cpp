@@ -5674,17 +5674,11 @@ namespace bts { namespace wallet {
         }
         else
         {
-            if (false) // TODO if I have the private key
-            {
-            }
-            else
-            {
-                FC_ASSERT(bid_amount >= odomain_rec->next_required_bid, "Did not bid high enough");
-                priority_fee.amount += bid_amount;
-                my->withdraw_to_transaction( priority_fee, bidder_pubkey, trx, required_signatures);
-                trx.deposit( odomain_rec->owner, 
-                             asset(odomain_rec->price * (1-P2P_PENALTY_RATE), 0), 0);
-            }
+            FC_ASSERT(bid_amount >= odomain_rec->next_required_bid, "Did not bid high enough");
+            priority_fee.amount += bid_amount;
+            my->withdraw_to_transaction( priority_fee, bidder_pubkey, trx, required_signatures);
+            trx.deposit( odomain_rec->owner, 
+                         asset(odomain_rec->price * (1-P2P_PENALTY_RATE), 0), 0);
         }
 
         if ( sign )

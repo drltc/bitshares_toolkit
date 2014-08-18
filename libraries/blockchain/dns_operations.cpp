@@ -43,41 +43,36 @@ namespace bts { namespace blockchain {
         {
             FC_ASSERT( odomain_rec->get_true_state(now) == domain_record::in_auction,
                        "Trying to bid on a domain that is not in auction" );
-            if (false) // TODO if signed by owner, allow adjusting bid
-            {
-            }
-            else
-            {
-                FC_ASSERT( this->bid_amount >= odomain_rec->next_required_bid );
-                auto to_last_bidder = odomain_rec->price * (1 - P2P_PENALTY_RATE);
-                auto to_fees = this->bid_amount - to_last_bidder;
-                eval_state.required_fees += asset(to_fees, 0);
 
-                share_type paid_to_previous_bidder = 0;
-                for (auto op : eval_state.trx.operations)
+            FC_ASSERT( this->bid_amount >= odomain_rec->next_required_bid );
+            auto to_last_bidder = odomain_rec->price * (1 - P2P_PENALTY_RATE);
+            auto to_fees = this->bid_amount - to_last_bidder;
+            eval_state.required_fees += asset(to_fees, 0);
+
+            share_type paid_to_previous_bidder = 0;
+            for (auto op : eval_state.trx.operations)
+            {
+                if (op.type == operation_type_enum::deposit_op_type)
                 {
-                    if (op.type == operation_type_enum::deposit_op_type)
+                    auto deposit = op.as<deposit_operation>();
+                    if (deposit.condition.type == withdraw_condition_types::withdraw_signature_type)
                     {
-                        auto deposit = op.as<deposit_operation>();
-                        if (deposit.condition.type == withdraw_condition_types::withdraw_signature_type)
+                        auto condition = deposit.condition.as<withdraw_with_signature>();
+                        if (condition.owner == odomain_rec->owner)
                         {
-                            auto condition = deposit.condition.as<withdraw_with_signature>();
-                            if (condition.owner == odomain_rec->owner)
-                            {
-                                paid_to_previous_bidder += deposit.amount;
-                            }
+                            paid_to_previous_bidder += deposit.amount;
                         }
                     }
                 }
-
-                FC_ASSERT(paid_to_previous_bidder >= to_last_bidder, "Did not pay back enough to previous bidder");
-
-                odomain_rec->owner = this->bidder_address;
-                odomain_rec->last_update = eval_state._current_state->now().sec_since_epoch();
-                odomain_rec->price = this->bid_amount;
-                odomain_rec->next_required_bid = P2P_NEXT_REQ_BID( odomain_rec->next_required_bid, this->bid_amount );
-                odomain_rec->time_in_top = 0;
             }
+
+            FC_ASSERT(paid_to_previous_bidder >= to_last_bidder, "Did not pay back enough to previous bidder");
+
+            odomain_rec->owner = this->bidder_address;
+            odomain_rec->last_update = eval_state._current_state->now().sec_since_epoch();
+            odomain_rec->price = this->bid_amount;
+            odomain_rec->next_required_bid = P2P_NEXT_REQ_BID( odomain_rec->next_required_bid, this->bid_amount );
+            odomain_rec->time_in_top = 0;
             eval_state._current_state->store_domain_record( *odomain_rec );
         }
     }
@@ -92,17 +87,12 @@ namespace bts { namespace blockchain {
                 || odomain_rec->get_true_state(now) == domain_record::in_sale,
                    "Attempting to sell a domain which is not in 'owned' or 'in_sale' state");
         FC_ASSERT( eval_state.check_signature( odomain_rec->owner ), "Sale not signed by owner" );
-        if ( false ) //if there are any offers
-        {
-        }
-        else
-        {
-            FC_ASSERT( this->price > 0, "Price must be positive" );
-            odomain_rec->state = domain_record::in_sale;
-            odomain_rec->price = this->price;
-            odomain_rec->last_update = eval_state._current_state->now().sec_since_epoch();
-            eval_state._current_state->store_domain_record( *odomain_rec );
-        }
+
+        FC_ASSERT( this->price > 0, "Price must be positive" );
+        odomain_rec->state = domain_record::in_sale;
+        odomain_rec->price = this->price;
+        odomain_rec->last_update = eval_state._current_state->now().sec_since_epoch();
+        eval_state._current_state->store_domain_record( *odomain_rec );
     }
  
     void domain_cancel_sell_operation::evaluate( transaction_evaluation_state& eval_state )

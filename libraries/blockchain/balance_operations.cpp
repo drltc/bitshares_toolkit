@@ -185,28 +185,22 @@ namespace bts { namespace blockchain {
                 // If it's yours it's free
                 if( eval_state.check_signature( offer.owner ) )
                 {
+                    FC_ASSERT(!"unimplemented withdraw_domain_offer_type for cancels");
+                    //TODO remove offer from state
                 }
-                else  // otherwise there has to be enough sent to the last address
+                else  // otherwise there has to be a domain transfer to the previous owner
                 {
-                    share_type paid_to_deposit = 0;
                     for (auto op : eval_state.trx.operations)
                     {
-                        if (op.type == operation_type_enum::deposit_op_type)
+                        if (op.type == operation_type_enum::domain_transfer_operation)
                         {
-                            auto deposit = op.as<deposit_operation>();
-                            if (deposit.condition.type == withdraw_condition_types::withdraw_signature_type)
-                            {
-                                auto condition = deposit.condition.as<withdraw_with_signature>();
-                                if (condition.owner == offer.owner)
-                                {
-                                    paid_to_deposit += deposit.amount;
-                                }
-                            }
+                            auto transfer = op.as<domain_transfer_operation>();
+                            FC_ASSERT( transfer.domain_name == offer.domain_name, "transferring wrong domain name" );
+                            FC_ASSERT( transfer.owner == offer.owner_address, "transferring to wrong owner" );
                         }
                     }
                 }
             } FC_CAPTURE_AND_RETHROW( (offer) )
-
         }
 
          case withdraw_null_type:
