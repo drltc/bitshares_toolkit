@@ -158,6 +158,10 @@ namespace bts { namespace blockchain {
 
 
         virtual vector<domain_record>       get_domains_in_auction()const                           = 0;
+    
+        virtual uint32_t                    get_auction_throttle()const                             = 0;
+
+        virtual bool                        is_top_domain( const string& domain_name )const         = 0;
         // END DNS
 
 

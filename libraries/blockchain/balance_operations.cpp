@@ -62,6 +62,7 @@ namespace bts { namespace blockchain {
        if( cur_record->condition.asset_id == 0 && cur_record->condition.delegate_slate_id ) 
           eval_state.adjust_vote( cur_record->condition.delegate_slate_id, this->amount );
 
+       ulog( "about to store balance record: ${rec}", ("rec", *cur_record) );
        eval_state._current_state->store_balance_record( *cur_record );
    } FC_CAPTURE_AND_RETHROW( (*this) ) }
 

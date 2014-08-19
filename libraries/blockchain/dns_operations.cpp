@@ -34,18 +34,18 @@ namespace bts { namespace blockchain {
             rec.owner = this->bidder_address;
             rec.value = fc::variant("");
             rec.last_update = eval_state._current_state->now().sec_since_epoch();
-            rec.state = domain_record::in_auction;
+            rec.state = domain_record::in_auction_first;
             rec.price = this->bid_amount;
             rec.next_required_bid = P2P_NEXT_REQ_BID(0, this->bid_amount);
             eval_state._current_state->store_domain_record( rec );
         }
-        else
+        else if( odomain_rec->get_true_state(now) == domain_record::in_auction_first )
         {
-            FC_ASSERT( odomain_rec->get_true_state(now) == domain_record::in_auction,
-                       "Trying to bid on a domain that is not in auction" );
+            FC_ASSERT( this->bid_amount >= odomain_rec->next_required_bid,
+                       "Did not bid enough: ${bid}, required: ${required}",
+                       ("bid", this->bid_amount)("required", odomain_rec->next_required_bid) );
 
-            FC_ASSERT( this->bid_amount >= odomain_rec->next_required_bid );
-            auto to_last_bidder = odomain_rec->price * (1 - P2P_PENALTY_RATE);
+            auto to_last_bidder = P2P_RETURN_WITH_PENALTY( odomain_rec->price );
             auto to_fees = this->bid_amount - to_last_bidder;
             eval_state.required_fees += asset(to_fees, 0);
 
@@ -73,7 +73,97 @@ namespace bts { namespace blockchain {
             odomain_rec->price = this->bid_amount;
             odomain_rec->next_required_bid = P2P_NEXT_REQ_BID( odomain_rec->next_required_bid, this->bid_amount );
             odomain_rec->time_in_top = 0;
+            if( eval_state._current_state->is_top_domain( this->domain_name ) )
+                odomain_rec->state = domain_record::in_auction_kickback;
+            else
+                odomain_rec->state = domain_record::in_auction_default;
             eval_state._current_state->store_domain_record( *odomain_rec );
+
+        }
+        else if( odomain_rec->get_true_state(now) == domain_record::in_auction_default )
+        {
+            FC_ASSERT( this->bid_amount >= odomain_rec->next_required_bid,
+                       "Did not bid enough: ${bid}, required: ${required}",
+                       ("bid", this->bid_amount)("required", odomain_rec->next_required_bid) );
+
+            auto to_last_bidder = odomain_rec->price;
+            auto to_fees = this->bid_amount - to_last_bidder;
+            eval_state.required_fees += asset(to_fees, 0);
+
+            share_type paid_to_previous_bidder = 0;
+            for (auto op : eval_state.trx.operations)
+            {
+                if (op.type == operation_type_enum::deposit_op_type)
+                {
+                    auto deposit = op.as<deposit_operation>();
+                    if (deposit.condition.type == withdraw_condition_types::withdraw_signature_type)
+                    {
+                        auto condition = deposit.condition.as<withdraw_with_signature>();
+                        if (condition.owner == odomain_rec->owner)
+                        {
+                            paid_to_previous_bidder += deposit.amount;
+                        }
+                    }
+                }
+            }
+
+            FC_ASSERT(paid_to_previous_bidder >= to_last_bidder, "Did not pay back enough to previous bidder");
+
+            odomain_rec->owner = this->bidder_address;
+            odomain_rec->last_update = eval_state._current_state->now().sec_since_epoch();
+            odomain_rec->price = this->bid_amount;
+            odomain_rec->next_required_bid = P2P_NEXT_REQ_BID( odomain_rec->next_required_bid, this->bid_amount );
+            odomain_rec->time_in_top = 0;
+            if( eval_state._current_state->is_top_domain( this->domain_name ) )
+                odomain_rec->state = domain_record::in_auction_kickback;
+            else
+                odomain_rec->state = domain_record::in_auction_default;
+            eval_state._current_state->store_domain_record( *odomain_rec );
+
+        }
+        else if( odomain_rec->get_true_state(now) == domain_record::in_auction_kickback )
+        {
+            FC_ASSERT( this->bid_amount >= odomain_rec->next_required_bid,
+                       "Did not bid enough: ${bid}, required: ${required}",
+                       ("bid", this->bid_amount)("required", odomain_rec->next_required_bid) );
+
+            auto to_last_bidder = P2P_RETURN_WITH_KICKBACK( odomain_rec->price, this->bid_amount );
+            auto to_fees = this->bid_amount - to_last_bidder;
+            eval_state.required_fees += asset(to_fees, 0);
+
+            share_type paid_to_previous_bidder = 0;
+            for (auto op : eval_state.trx.operations)
+            {
+                if (op.type == operation_type_enum::deposit_op_type)
+                {
+                    auto deposit = op.as<deposit_operation>();
+                    if (deposit.condition.type == withdraw_condition_types::withdraw_signature_type)
+                    {
+                        auto condition = deposit.condition.as<withdraw_with_signature>();
+                        if (condition.owner == odomain_rec->owner)
+                        {
+                            paid_to_previous_bidder += deposit.amount;
+                        }
+                    }
+                }
+            }
+
+            FC_ASSERT(paid_to_previous_bidder >= to_last_bidder, "Did not pay back enough to previous bidder");
+
+            odomain_rec->owner = this->bidder_address;
+            odomain_rec->last_update = eval_state._current_state->now().sec_since_epoch();
+            odomain_rec->price = this->bid_amount;
+            odomain_rec->next_required_bid = P2P_NEXT_REQ_BID( odomain_rec->next_required_bid, this->bid_amount );
+            odomain_rec->time_in_top = 0;
+            if( eval_state._current_state->is_top_domain( this->domain_name ) )
+                odomain_rec->state = domain_record::in_auction_kickback;
+            else
+                odomain_rec->state = domain_record::in_auction_default;
+            eval_state._current_state->store_domain_record( *odomain_rec );
+        }
+        else
+        {
+            FC_ASSERT(!"Trying to bid on a domain that is not in auction");
         }
     }
 
@@ -172,6 +262,7 @@ namespace bts { namespace blockchain {
             offer_key.domain_name = this->domain_name;
             offer_key.offer_address = this->new_owner;
             offer_key.offer_time = eval_state._current_state->now().sec_since_epoch();
+            ulog( "about to store offer\n" );
             eval_state._current_state->store_domain_offer( offer_key );
         }
     }

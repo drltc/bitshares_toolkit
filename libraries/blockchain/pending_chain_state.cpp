@@ -244,6 +244,7 @@ namespace bts { namespace blockchain {
       {
          auto prev_value = prev_state->get_domain_offer( item.first.offer_address );
          if( prev_value.valid() ) undo_state->store_domain_offer( *prev_value );
+         // TODO
          //else  undo_state->store_domain_offer( offer_index_key() );
       }
 
@@ -360,6 +361,8 @@ namespace bts { namespace blockchain {
    void                        pending_chain_state::store_domain_offer( const offer_index_key& offer )
     {
         offers[offer] = offer.offer_address;
+        ulog( "stored offer in pending chain state\n" );
+        ulog( "  owner: ${owner}\n", ("owner", offer.offer_address));
     }
     vector<offer_index_key>     pending_chain_state::get_domain_offers( const string& domain_name, uint32_t limit ) const
     {
@@ -389,17 +392,30 @@ namespace bts { namespace blockchain {
         index_key.offer_address = owner;
         index_key.domain_name = condition.domain_name;
         index_key.price = condition.price;
-        // index time = now
-        FC_ASSERT(!"unimplemented");
-/*
-        auto offer_itr = offers.find( index_key );
-        if ( offer_itr != offers.end() )
-            return itr;
-        else
-            return ooffer_index_key();
-*/
+        return fc::optional<offer_index_key>( index_key );
     }
 
+    uint32_t pending_chain_state::get_auction_throttle() const
+    {
+        return 3; //lol
+    }
+
+    // TODO do better than naive scan - cache during deterministic trxs
+    bool pending_chain_state::is_top_domain( const string& domain_name ) const
+    {
+        uint32_t count = 0; auto max = get_auction_throttle();
+        auto prev_state = _prev_state.lock();
+        auto auctions = prev_state->get_domains_in_auction();
+        for( auto item : auctions )
+        {
+            if (count >= max)
+                break;
+            if( item.domain_name == domain_name )
+                return true;
+            count++;
+        }
+        return false;
+    }
 
 
     // END DNS

@@ -1,15 +1,15 @@
 #pragma once
 
 #define P2P_MIN_INITIAL_BID (10)
-#define P2P_MIN_BID_INCREASE_RATIO (101.0 / 100.0)
+#define P2P_MIN_BID_INCREASE(amount) ((amount * 101) / 100)
 #define P2P_REQUIRED_BID_DIFF_RATIO (1)  // my_required = prev_bid + R*(prev_bid - prev_required)
 
-#define P2P_PENALTY_RATE (0.05)
+#define P2P_RETURN_WITH_PENALTY(amount) ((amount * 95) / 100)
+#define P2P_RETURN_WITH_KICKBACK(last_bid, current_bid) (last_bid + ((current_bid - last_bid) / 10))
 
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
-#define P2P_NEXT_REQ_BID(req, bid) MAX((bid + (P2P_REQUIRED_BID_DIFF_RATIO*(bid - req))), P2P_MIN_BID_INCREASE_RATIO * bid)
+#define P2P_NEXT_REQ_BID(req, bid) MAX((bid + (P2P_REQUIRED_BID_DIFF_RATIO*(bid - req))), P2P_MIN_BID_INCREASE(bid))
 
-#define P2P_MAX_CONCURRENT_AUCTIONS_FOR_BLOCK(block) (50)
 #define P2P_AUCTION_DURATION_SECS (20) //(60 * 5) //(60*60*24  * 3)
 #define P2P_EXPIRE_DURATION_SECS (60 * 120) //(60*60*24  * 365)
 

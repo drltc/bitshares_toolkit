@@ -1601,12 +1601,12 @@ namespace bts { namespace blockchain {
    { try {
       // delete the old auction index if it exists
       auto old_domain_rec = my->_domain_db.find( rec.domain_name );
-      if( old_domain_rec.valid() && old_domain_rec.value().state == domain_record::in_auction )
+      if( old_domain_rec.valid() && old_domain_rec.value().is_in_auction() )
       {
           my->_auction_db.remove( old_domain_rec.value().get_auction_key() );
       }
       my->_domain_db.store( rec.domain_name, rec );
-      if( rec.get_true_state(now().sec_since_epoch()) == domain_record::in_auction )
+      if( rec.is_in_auction() )
       {
          my->_auction_db.store( rec.get_auction_key(), rec.domain_name );
       }
@@ -1621,6 +1621,7 @@ namespace bts { namespace blockchain {
     ooffer_index_key             chain_database::get_domain_offer( const balance_id_type& owner )
     {
         auto itr = my->_balance_db.find( owner );
+        ulog( "looking up balance for owner: ${owner}", ("owner", owner) );
         if (itr.valid())
         {
             auto key = offer_index_key();
@@ -1675,6 +1676,21 @@ namespace bts { namespace blockchain {
         }
         return domains;
     }
+
+
+    
+    uint32_t                    chain_database::get_auction_throttle()const
+    {
+        FC_ASSERT(!"unimplemented");
+    }
+
+    bool                        chain_database::is_top_domain( const string& domain_name )const
+    {
+        FC_ASSERT(!"unimplemented");
+    }
+
+
+
 
 
 // END DNS

@@ -86,10 +86,12 @@ namespace bts { namespace blockchain {
         enum domain_state_type
         {
             unclaimed,
-            in_auction,
+            in_auction_first,
+            in_auction_kickback,
+            in_auction_default,
             in_sale,
             owned
-        };    
+        };
 
         string                                        domain_name;
         address                                       owner;
@@ -103,11 +105,18 @@ namespace bts { namespace blockchain {
 
         uint32_t                                      time_in_top;
 
+        bool is_in_auction() const
+        {
+            return (state == in_auction_first 
+                 || state == in_auction_kickback
+                 || state == in_auction_default);
+        }
+
         domain_state_type get_true_state(uint32_t sec_since_epoch) const;
 
         auction_index_key get_auction_key() const
         {
-            FC_ASSERT(this->state == in_auction, "get_auction_key:  trying to get an auction key for domain not in auction");
+            FC_ASSERT(this->is_in_auction(), "get_auction_key:  trying to get an auction key for domain not in auction");
             auto key = auction_index_key();
             key.domain_name = this->domain_name;
             key.price = this->price;
@@ -123,7 +132,7 @@ namespace bts { namespace blockchain {
 
 #include <fc/reflect/reflect.hpp>
 
-FC_REFLECT_ENUM( bts::blockchain::domain_record::domain_state_type, (unclaimed)(in_auction)(in_sale)(owned) );
+FC_REFLECT_ENUM( bts::blockchain::domain_record::domain_state_type, (unclaimed)(in_auction_default)(in_auction_first)(in_auction_kickback)(in_sale)(owned) );
 FC_REFLECT( bts::blockchain::domain_record, (domain_name)(owner)(signin_key)(value)(last_update)(last_renewed)(state)(price)(next_required_bid)(time_in_top) );
 FC_REFLECT( bts::blockchain::auction_index_key, (domain_name)(price)(bid_time) );
 FC_REFLECT( bts::blockchain::offer_index_key, (domain_name)(price)(offer_address)(offer_time) );

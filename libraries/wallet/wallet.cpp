@@ -5613,7 +5613,9 @@ namespace bts { namespace wallet {
 
     pretty_domain_auction_summary  wallet::to_pretty_auction_summary( domain_record& rec )
     {
-        FC_ASSERT( rec.get_true_state( my->_blockchain->now().sec_since_epoch()) == domain_record::in_auction );
+        FC_ASSERT( rec.get_true_state( my->_blockchain->now().sec_since_epoch()) == domain_record::in_auction_first
+                || rec.get_true_state( my->_blockchain->now().sec_since_epoch()) == domain_record::in_auction_default
+                || rec.get_true_state( my->_blockchain->now().sec_since_epoch()) == domain_record::in_auction_kickback );
         auto pretty = pretty_domain_auction_summary();
         pretty.domain_name = rec.domain_name;
         pretty.last_bid_price = rec.price;
@@ -5677,8 +5679,25 @@ namespace bts { namespace wallet {
             FC_ASSERT(bid_amount >= odomain_rec->next_required_bid, "Did not bid high enough");
             priority_fee.amount += bid_amount;
             my->withdraw_to_transaction( priority_fee, bidder_pubkey, trx, required_signatures);
-            trx.deposit( odomain_rec->owner, 
-                         asset(odomain_rec->price * (1-P2P_PENALTY_RATE), 0), 0);
+            if( odomain_rec->state == domain_record::in_auction_first )
+            {
+                trx.deposit( odomain_rec->owner, 
+                             asset(P2P_RETURN_WITH_PENALTY( odomain_rec->price ), 0), 0);
+            }
+            else if (odomain_rec->state == domain_record::in_auction_default )
+            {
+                trx.deposit( odomain_rec->owner, 
+                             asset( odomain_rec->price, 0), 0);
+            }
+            else if (odomain_rec->state == domain_record::in_auction_kickback )
+            {
+                trx.deposit( odomain_rec->owner, 
+                             asset( P2P_RETURN_WITH_KICKBACK( odomain_rec->price, bid_amount ), 0), 0);
+            }
+            else
+            {
+                FC_ASSERT(!"Bidding on a domain which is not in auction or unclaimed" );
+            }
         }
 
         if ( sign )
@@ -5715,6 +5734,7 @@ namespace bts { namespace wallet {
         if( offers.size() > 0 && offers[0].price >= min_amount )
         {
             auto balance = my->_blockchain->get_balance_record( offers[0].offer_address );
+            ulog( "balance: ${bal}\n", ("bal", balance) );
             FC_ASSERT( balance.valid(), "No balance for a valid domain offer" );
             auto withdraw_domain_op = withdraw_operation( balance->id(), balance->get_balance().amount );
             auto transfer_op = domain_transfer_operation();
