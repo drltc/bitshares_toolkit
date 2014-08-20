@@ -5823,6 +5823,7 @@ namespace bts { namespace wallet {
 
         } else // else we are placing a new offer
         {
+            FC_ASSERT(!"You cannot make offers for domains in this dry run. You can only buy domains already for sale.");
             auto addr = get_new_address( account_name );
 
             auto offer_op = domain_buy_operation();

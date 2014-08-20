@@ -604,13 +604,19 @@ namespace bts { namespace blockchain {
             const auto prev_accumulated_fees = pending_state->get_accumulated_fees();
             pending_state->set_accumulated_fees( prev_accumulated_fees - pay );
 
-            delegate_record->delegate_info->pay_balance += pay;
-            delegate_record->delegate_info->votes_for += pay;
+            auto base_asset_record = pending_state->get_asset_record( asset_id_type(0) );
+
+            const auto pending_subsidy_pay = (base_asset_record->maximum_share_supply - base_asset_record->current_share_supply) / P2P_DILUTION_RATE;
+            const auto subsidy_pay = (pay_percent * pending_pay) / 100;
+
+            delegate_record->delegate_info->pay_balance += pay + subsidy_pay;
+            delegate_record->delegate_info->votes_for += pay + subsidy_pay;
             pending_state->store_account_record( *delegate_record );
 
-            auto base_asset_record = pending_state->get_asset_record( asset_id_type(0) );
             FC_ASSERT( base_asset_record.valid() );
             base_asset_record->current_share_supply -= (pending_pay - pay);
+            base_asset_record->current_share_supply += subsidy_pay;
+            base_asset_record->maximum_share_supply -= (pending_subsidy_pay - subsidy_pay);
             pending_state->store_asset_record( *base_asset_record );
 
       } FC_RETHROW_EXCEPTIONS( warn, "", ("block_id",block_id) ) }
