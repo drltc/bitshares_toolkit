@@ -27,6 +27,7 @@ namespace bts { namespace blockchain {
         /* If record is invalid, nobody has bid on it yet. You can bid if you exceed current minimum bid. */
         if ( ! odomain_rec.valid() || odomain_rec->get_true_state(now) == domain_record::unclaimed)
         {
+            ulog( "Bidding on a domain that is unclaimed" );
             FC_ASSERT( this->bid_amount >= P2P_MIN_INITIAL_BID, "Initial bid does not exceed min required bid");
             eval_state.required_fees += asset(this->bid_amount, 0);
             auto rec = domain_record();
@@ -45,8 +46,12 @@ namespace bts { namespace blockchain {
                        "Did not bid enough: ${bid}, required: ${required}",
                        ("bid", this->bid_amount)("required", odomain_rec->next_required_bid) );
 
+
+            ulog( "Bidding on a name that is in_auction_first ");
             auto to_last_bidder = P2P_RETURN_WITH_PENALTY( odomain_rec->price );
             auto to_fees = this->bid_amount - to_last_bidder;
+            ulog( "bid_amount: ${amt},  to_last_bidder: ${last},  to_fees: ${fees}",
+                  ("amt", this->bid_amount)("last", to_last_bidder)("fees", to_fees) );
             eval_state.required_fees += asset(to_fees, 0);
 
             share_type paid_to_previous_bidder = 0;

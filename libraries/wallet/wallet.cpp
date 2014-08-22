@@ -5725,6 +5725,7 @@ namespace bts { namespace wallet {
             FC_ASSERT(bid_amount >= odomain_rec->next_required_bid, "Did not bid high enough");
             priority_fee.amount += bid_amount;
             my->withdraw_to_transaction( priority_fee, bidder_pubkey, trx, required_signatures);
+            ulog(" About to make deposit operation to previous owner: ${addr}", ("addr", odomain_rec->owner) );
             if( odomain_rec->state == domain_record::in_auction_first )
             {
                 trx.deposit( odomain_rec->owner, 

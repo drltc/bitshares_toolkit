@@ -1700,12 +1700,20 @@ namespace bts { namespace blockchain {
     
     uint32_t                    chain_database::get_auction_throttle()const
     {
-        FC_ASSERT(!"unimplemented");
+        ulog( "calling get_auction_throttle in chain_database");
+        return 3;
     }
 
+    // TODO this won't scale
     bool                        chain_database::is_top_domain( const string& domain_name )const
     {
-        FC_ASSERT(!"unimplemented");
+        ulog("calling is_top_domain in chain_database");
+        for( auto item : get_domains_in_auction(get_auction_throttle()) )
+        {
+            if( item.domain_name == domain_name )
+                return true;
+        }
+        return false;
     }
 
 

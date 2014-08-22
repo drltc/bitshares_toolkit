@@ -243,8 +243,7 @@ namespace bts { namespace blockchain {
       {
          auto prev_value = prev_state->get_domain_offer( item.first.offer_address );
          if( prev_value.valid() ) undo_state->store_domain_offer( *prev_value );
-         // TODO
-         //else  undo_state->store_domain_offer( offer_index_key() );
+         else  undo_state->store_domain_offer( offer_index_key() );
       }
 
 
