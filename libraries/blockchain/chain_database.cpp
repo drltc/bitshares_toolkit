@@ -610,7 +610,7 @@ namespace bts { namespace blockchain {
             auto base_asset_record = pending_state->get_asset_record( asset_id_type(0) );
 
             const auto pending_subsidy_pay = (base_asset_record->maximum_share_supply - base_asset_record->current_share_supply) / P2P_DILUTION_RATE;
-            const auto subsidy_pay = (pay_percent * pending_pay) / 100;
+            const auto subsidy_pay = (pay_percent * pending_subsidy_pay) / 100;
 
             delegate_record->delegate_info->pay_balance += pay + subsidy_pay;
             delegate_record->delegate_info->votes_for += pay + subsidy_pay;

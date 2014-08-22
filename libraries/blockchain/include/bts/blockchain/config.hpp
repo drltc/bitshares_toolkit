@@ -4,7 +4,7 @@
 
 /* Set to true only for test network */
 #define BTS_TEST_NETWORK                                    true
-#define BTS_TEST_NETWORK_VERSION                            19
+#define BTS_TEST_NETWORK_VERSION                            101
 
 /** @file bts/blockchain/config.hpp
  *  @brief Defines global constants that determine blockchain behavior
@@ -80,10 +80,9 @@
 #define BTS_BLOCKCHAIN_MAX_SHARES                           (1000*1000*int64_t(1000)*1000*int64_t(1000))
 
 /**
- * Initial shares read from the genesis block are scaled to this number. It is divided
- * by 100 so that new shares may be issued without exceeding BTS_BLOCKCHAIN_MAX_SHARES
+ * Initial shares read from the genesis block are scaled to this number.
  */
-#define BTS_BLOCKCHAIN_INITIAL_SHARES                       (BTS_BLOCKCHAIN_MAX_SHARES/5)
+#define BTS_BLOCKCHAIN_INITIAL_SHARES                       (BTS_BLOCKCHAIN_MAX_SHARES/2)
 
 /**
  *   How much XTS must be allocated between the short/ask sides of the market before
