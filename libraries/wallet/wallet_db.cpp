@@ -6,6 +6,8 @@
 #include <fc/io/json.hpp>
 #include <fc/log/logger.hpp>
 
+#include <fstream>
+
 namespace bts { namespace wallet {
 
    using namespace bts::blockchain;
@@ -424,30 +426,34 @@ namespace bts { namespace wallet {
    }
 
    void wallet_db::export_to_json( const path& filename )const
-   {
-      FC_ASSERT( !fc::exists( filename ) );
+   { try {
       FC_ASSERT( is_open() );
-
-      std::vector<generic_wallet_record> records;
-      for( auto itr = my->_records.begin(); itr.valid(); ++itr )
-          records.push_back( itr.value() );
+      FC_ASSERT( !fc::exists( filename ) );
 
       const auto dir = fc::absolute( filename ).parent_path();
       if( !fc::exists( dir ) )
           fc::create_directories( dir );
 
-      fc::json::save_to_file( records, filename, true );
-   }
+      std::ofstream fs( filename.string() );
+      fs.write( "[\n", 2 );
+      for( auto itr = my->_records.begin(); itr.valid(); ++itr )
+      {
+          const auto str = fc::json::to_pretty_string( itr.value() ) + ",\n";
+          fs.write( str.c_str(), str.size() );
+      }
+      fs.seekp( uint64_t( fs.tellp() ) - 2 );
+      fs.write( "\n]", 2 );
+   } FC_RETHROW_EXCEPTIONS( warn, "", ("filename",filename) ) }
 
    void wallet_db::import_from_json( const path& filename )
-   {
+   { try {
       FC_ASSERT( fc::exists( filename ) );
       FC_ASSERT( is_open() );
 
       auto records = fc::json::from_file< std::vector<generic_wallet_record> >( filename );
       for( const auto& record : records )
          store_generic_record( record );
-   }
+   } FC_RETHROW_EXCEPTIONS( warn, "", ("filename",filename) ) }
 
    bool wallet_db::has_private_key( const address& a )const
    { try {
@@ -485,8 +491,7 @@ namespace bts { namespace wallet {
                 keys.push_back( key_rec->decrypt_private_key( password ) );
              } catch ( const fc::exception& e )
              {
-                wlog( "error decrypting private key: ${e}", ("e", e.to_detail_string() ) );
-                throw; // TODO... don't thtrow here, just log
+                elog( "error decrypting private key: ${e}", ("e", e.to_detail_string() ) );
              }
           }
        };
@@ -738,7 +743,14 @@ namespace bts { namespace wallet {
 
    void wallet_db::remove_item( int32_t index )
    {
-      my->_records.remove( index );
+      try
+      {
+          my->_records.remove( index );
+      }
+      catch( const fc::key_not_found_exception& )
+      {
+          wlog("wallet_db tried to remove nonexistent index: ${i}", ("i",index) );
+      }
    }
 
    bool wallet_db::validate_password( const fc::sha512& password )const

@@ -22,7 +22,7 @@
 #include <bts/wallet/exceptions.hpp>
 #include <bts/wallet/config.hpp>
 
-#include <bts/network/node.hpp>
+//#include <bts/network/node.hpp>
 
 #include <bts/db/level_map.hpp>
 
@@ -551,20 +551,11 @@ config load_config( const fc::path& datadir )
               {
                 _chain_db = std::make_shared<chain_database>();
               } FC_RETHROW_EXCEPTIONS(warn,"chain_db")
-              _rebroadcast_pending_loop = fc::async( [=]() { rebroadcast_pending(); },
-                                                     "rebroadcast_pending");
             } FC_RETHROW_EXCEPTIONS( warn, "" ) }
 
             virtual ~client_impl() override 
             {
-              try
-              {
-                _rebroadcast_pending_loop.cancel_and_wait();
-              }
-              catch (const fc::exception& e)
-              {
-                wlog("Unexpected error from rebroadcast_pending(): ${e}", ("e", e));
-              }
+              cancel_rebroadcast_pending_loop();
               _p2p_node.reset();
               delete _cli;
             }
@@ -580,8 +571,10 @@ config load_config( const fc::path& datadir )
             void delegate_loop();
             void set_target_connections( uint32_t target );
 
-            void rebroadcast_pending();
-            fc::future<void> _rebroadcast_pending_loop;
+            void start_rebroadcast_pending_loop();
+            void cancel_rebroadcast_pending_loop();
+            void rebroadcast_pending_loop();
+            fc::future<void> _rebroadcast_pending_loop_done;
 
             void configure_rpc_server(config& cfg, 
                                       const program_options::variables_map& option_variables);
@@ -958,13 +951,34 @@ config load_config( const fc::path& datadir )
          return trxs;
        }
 
-       void client_impl::rebroadcast_pending()
+       void client_impl::start_rebroadcast_pending_loop()
+       {
+         if (!_rebroadcast_pending_loop_done.valid() || _rebroadcast_pending_loop_done.ready())
+           _rebroadcast_pending_loop_done = fc::schedule( [=](){ rebroadcast_pending_loop(); }, 
+                                                          fc::time_point::now() + fc::seconds((int64_t)(BTS_BLOCKCHAIN_BLOCK_INTERVAL_SEC * 1.3)),
+                                                          "rebroadcast_pending" );
+       }
+
+       void client_impl::cancel_rebroadcast_pending_loop()
+       {
+          try
+          {
+            _rebroadcast_pending_loop_done.cancel_and_wait();
+          }
+          catch (const fc::exception& e)
+          {
+            wlog("Unexpected error from rebroadcast_pending(): ${e}", ("e", e));
+          }
+       }
+
+       void client_impl::rebroadcast_pending_loop()
        {
 #ifndef NDEBUG
           static bool currently_running = false;
           struct checker {
             bool& var;
-            checker(bool& var) : var(var) { assert(!var); var = true; }
+            //Log instead of crashing. Failing this test is normal behavior in the tests.
+            checker(bool& var) : var(var) { if(var) elog("Checker failure!"); var = true; }
             ~checker() { var = false; }
           } _checker(currently_running);
 #endif // !NDEBUG
@@ -988,10 +1002,10 @@ config load_config( const fc::path& datadir )
               wlog( "error rebroadcasting transacation: ${e}", ("e",e.to_detail_string() ) );
             }
           }
-          if (!_rebroadcast_pending_loop.canceled())
-            _rebroadcast_pending_loop = fc::schedule( [=](){ rebroadcast_pending(); }, 
-                                                      fc::time_point::now() + fc::seconds((int64_t)(BTS_BLOCKCHAIN_BLOCK_INTERVAL_SEC*1.3)),
-                                                      "rebroadcast_pending" );
+          if (!_rebroadcast_pending_loop_done.canceled())
+            _rebroadcast_pending_loop_done = fc::schedule( [=](){ rebroadcast_pending_loop(); }, 
+                                                           fc::time_point::now() + fc::seconds((int64_t)(BTS_BLOCKCHAIN_BLOCK_INTERVAL_SEC * 1.3)),
+                                                           "rebroadcast_pending" );
        }
 
        ///////////////////////////////////////////////////////
@@ -1139,11 +1153,9 @@ config load_config( const fc::path& datadir )
           }
           return false;
         }
-        catch (const bts::blockchain::insufficient_priority_fee& original_exception)
+        catch (const bts::blockchain::insufficient_relay_fee& original_exception)
         {
-          // was just going to FC_THROW_EXCEPTION(bts::net::insufficient_priority_fee, (original_exception));
-          // but I get errors with reflection?
-          FC_THROW_EXCEPTION(bts::net::insufficient_priority_fee, "Insufficient priority fee, do not propagate.", 
+          FC_THROW_EXCEPTION(bts::net::insufficient_relay_fee, "Insufficient relay fee; do not propagate!",
                              ("original_exception", original_exception.to_detail_string()));
         }
       }
@@ -1248,7 +1260,7 @@ config load_config( const fc::path& datadir )
             {
               // block is a block we know about and is on the main chain
               uint32_t reference_point_block_num = _chain_db->get_block_num(reference_point);
-              FC_ASSERT(reference_point_block_num > 0);
+              assert(reference_point_block_num > 0);
               high_block_num = reference_point_block_num;
               non_fork_high_block_num = high_block_num;
             }
@@ -1258,26 +1270,24 @@ config load_config( const fc::path& datadir )
               try
               {
                 fork_history = _chain_db->get_fork_history(reference_point);
-                FC_ASSERT(fork_history.size() >= 2);
-                FC_ASSERT(fork_history.front() == reference_point);
+                assert(fork_history.size() >= 2);
+                assert(fork_history.front() == reference_point);
                 block_id_type last_non_fork_block = fork_history.back();
                 fork_history.pop_back();
                 boost::reverse(fork_history);
                 try
                 {
                   if( last_non_fork_block == block_id_type() )
-                     return synopsis;
-                  non_fork_high_block_num = _chain_db->get_block_num(last_non_fork_block);
-                  FC_ASSERT(non_fork_high_block_num > 0, "", 
-                            ("non_fork_high_block_num",non_fork_high_block_num)
-                            ("last_non_fork_block",last_non_fork_block) );
+                    non_fork_high_block_num = 0;
+                  else
+                    non_fork_high_block_num = _chain_db->get_block_num(last_non_fork_block);
                 }
                 catch (const fc::key_not_found_exception&)
                 {
-                  FC_ASSERT(!"get_fork_history() returned a history that doesn't link to the main chain");
+                  assert(!"get_fork_history() returned a history that doesn't link to the main chain");
                 }
                 high_block_num = non_fork_high_block_num + fork_history.size();
-                FC_ASSERT(high_block_num == _chain_db->get_block_header(fork_history.back()).block_num);
+                assert(high_block_num == _chain_db->get_block_header(fork_history.back()).block_num);
               }
               catch (const fc::exception& e)
               {
@@ -1291,7 +1301,7 @@ config load_config( const fc::path& datadir )
           }
           catch (const fc::key_not_found_exception&)
           {
-            FC_ASSERT(false); // the logic in the p2p networking code shouldn't call this with a reference_point that we've never seen
+            assert(false); // the logic in the p2p networking code shouldn't call this with a reference_point that we've never seen
             // we've never seen this block
             return synopsis;
           }
@@ -1309,6 +1319,9 @@ config load_config( const fc::path& datadir )
         uint32_t low_block_num = 1;
         do
         {
+          // for each block in the synopsis, figure out where to pull the block id from.
+          // if it's <= non_fork_high_block_num, we grab it from the main blockchain;
+          // if it's not, we pull it from the fork history
           if (low_block_num <= non_fork_high_block_num)
             synopsis.push_back(_chain_db->get_block(low_block_num).id());
           else
@@ -1479,7 +1492,7 @@ config load_config( const fc::path& datadir )
        my->_simulate_disconnect = state;
     }
 
-    void client::open( const path& data_dir, fc::optional<fc::path> genesis_file_path )
+    void client::open( const path& data_dir, fc::optional<fc::path> genesis_file_path, std::function<void(uint32_t)> reindex_status_callback )
     { try {
         my->_config   = load_config(data_dir);
 
@@ -1528,7 +1541,7 @@ config load_config( const fc::path& datadir )
 
         try
         {
-          my->_chain_db->open( data_dir / "chain", genesis_file_path );
+          my->_chain_db->open( data_dir / "chain", genesis_file_path, reindex_status_callback );
         }
         catch( const db::db_in_use_exception& e )
         {
@@ -1536,7 +1549,7 @@ config load_config( const fc::path& datadir )
           {
             elog("Chain database corrupted. Deleting it and attempting to recover.");
             fc::remove_all( data_dir / "chain" );
-            my->_chain_db->open( data_dir / "chain", genesis_file_path );
+            my->_chain_db->open( data_dir / "chain", genesis_file_path, reindex_status_callback );
           }
         }
         catch( const fc::exception& e )
@@ -1554,10 +1567,10 @@ config load_config( const fc::path& datadir )
 
         //if we are using a simulated network, _p2p_node will already be set by client's constructor
         if (!my->_p2p_node)
-        {
           my->_p2p_node = std::make_shared<bts::net::node>();
-        }
         my->_p2p_node->set_node_delegate(my.get());
+
+        my->start_rebroadcast_pending_loop();
     } FC_RETHROW_EXCEPTIONS( warn, "", ("data_dir",data_dir) ) }
 
     client::~client()
@@ -1966,45 +1979,59 @@ config load_config( const fc::path& datadir )
       return optional<digest_block>();
     }
 
-    void detail::client_impl::wallet_import_bitcoin(const fc::path& filename,
-                                                    const string& passphrase,
-                                                    const string& account_name )
+    uint32_t detail::client_impl::wallet_import_bitcoin(
+            const fc::path& filename,
+            const string& passphrase,
+            const string& account_name
+            )
     {
       try
       {
-          _wallet->import_bitcoin_wallet(filename, "", account_name);
+          const auto count = _wallet->import_bitcoin_wallet(filename, "", account_name);
           _wallet->auto_backup( "bitcoin_import" );
-          return;
+          return count;
       }
       catch( const fc::exception& e )
       {
           ilog( "import_bitcoin_wallet failed with empty password: ${e}", ("e",e.to_detail_string() ) );
       }
 
-      _wallet->import_bitcoin_wallet(filename, passphrase, account_name);
+      const auto count = _wallet->import_bitcoin_wallet(filename, passphrase, account_name);
       _wallet->auto_backup( "bitcoin_import" );
-    }
-    void detail::client_impl::wallet_import_multibit(const fc::path& filename,
-                                                    const string& passphrase,
-                                                    const string& account_name )
-    {
-      _wallet->import_multibit_wallet(filename, passphrase, account_name);
-      _wallet->auto_backup( "multibit_import" );
-    }
-    void detail::client_impl::wallet_import_electrum(const fc::path& filename,
-                                                    const string& passphrase,
-                                                    const string& account_name )
-    {
-      _wallet->import_electrum_wallet(filename, passphrase, account_name);
-      _wallet->auto_backup( "electrum_import" );
+      return count;
     }
 
-    void detail::client_impl::wallet_import_armory(const fc::path& filename,
-                                                    const string& passphrase,
-                                                    const string& account_name )
+    uint32_t detail::client_impl::wallet_import_multibit(
+            const fc::path& filename,
+            const string& passphrase,
+            const string& account_name
+            )
     {
-      _wallet->import_armory_wallet(filename, passphrase, account_name);
+      const auto count = _wallet->import_multibit_wallet(filename, passphrase, account_name);
+      _wallet->auto_backup( "multibit_import" );
+      return count;
+    }
+
+    uint32_t detail::client_impl::wallet_import_electrum(
+            const fc::path& filename,
+            const string& passphrase,
+            const string& account_name
+            )
+    {
+      const auto count = _wallet->import_electrum_wallet(filename, passphrase, account_name);
+      _wallet->auto_backup( "electrum_import" );
+      return count;
+    }
+
+    uint32_t detail::client_impl::wallet_import_armory(
+            const fc::path& filename,
+            const string& passphrase,
+            const string& account_name
+            )
+    {
+      const auto count = _wallet->import_armory_wallet(filename, passphrase, account_name);
       _wallet->auto_backup( "armory_import" );
+      return count;
     }
 
     void detail::client_impl::wallet_import_keyhotee(const string& firstname,
@@ -2577,14 +2604,12 @@ config load_config( const fc::path& datadir )
        info["genesis_timestamp"]            = _chain_db->get_genesis_timestamp();
 
        info["block_interval"]               = BTS_BLOCKCHAIN_BLOCK_INTERVAL_SEC;
-       info["target_block_size"]            = BTS_BLOCKCHAIN_TARGET_BLOCK_SIZE;
        info["max_block_size"]               = BTS_BLOCKCHAIN_MAX_BLOCK_SIZE;
        info["max_blockchain_size"]          = BTS_BLOCKCHAIN_MAX_SIZE;
 
        info["address_prefix"]               = BTS_ADDRESS_PREFIX;
-       info["min_block_fee"]                = BTS_BLOCKCHAIN_MIN_FEE / double( 1000 );
        info["inactivity_fee_apr"]           = BTS_BLOCKCHAIN_INACTIVE_FEE_APR;
-       info["priority_fee"]                 = _chain_db->get_priority_fee();
+       info["relay_fee"]                    = _chain_db->get_relay_fee();
 
        info["delegate_num"]                 = BTS_BLOCKCHAIN_NUM_DELEGATES;
        info["delegate_reg_fee"]             = _chain_db->get_delegate_registration_fee();
@@ -2648,7 +2673,8 @@ config load_config( const fc::path& datadir )
       info["blockchain_next_round_timestamp"]                   = variant();
       if( head_block_num > 0 )
       {
-          const auto next_round_timestamp                       = head_block_timestamp + (blocks_left * BTS_BLOCKCHAIN_BLOCK_INTERVAL_SEC);
+          const auto current_round_timestamp                    = blockchain::get_slot_start_time( now );
+          const auto next_round_timestamp                       = current_round_timestamp + (blocks_left * BTS_BLOCKCHAIN_BLOCK_INTERVAL_SEC);
           info["blockchain_next_round_time"]                    = ( next_round_timestamp - now ).to_seconds();
           info["blockchain_next_round_timestamp"]               = next_round_timestamp;
       }
@@ -2682,6 +2708,7 @@ config load_config( const fc::path& datadir )
       info["wallet_unlocked_until"]                             = variant();
       info["wallet_unlocked_until_timestamp"]                   = variant();
 
+      info["wallet_last_scanned_block_timestamp"]               = variant();
       info["wallet_scan_progress"]                              = variant();
 
       info["wallet_block_production_enabled"]                   = variant();
@@ -2698,6 +2725,8 @@ config load_config( const fc::path& datadir )
           info["wallet_unlocked_until"]                         = ( *unlocked_until - now ).to_seconds();
           info["wallet_unlocked_until_timestamp"]               = *unlocked_until;
 
+          const auto last_scanned_block_num                     = _wallet->get_last_scanned_block_number();
+          info["wallet_last_scanned_block_timestamp"]           = _chain_db->get_block_header( last_scanned_block_num ).timestamp;
           info["wallet_scan_progress"]                          = _wallet->get_scan_progress();
 
           const auto enabled_delegates                          = _wallet->get_my_delegates( enabled_delegate_status );
@@ -2728,6 +2757,11 @@ config load_config( const fc::path& datadir )
     { try {
        _wallet->scan_transactions( block_num, transaction_id );
     } FC_RETHROW_EXCEPTIONS( warn, "", ("block_num",block_num)("transaction_id",transaction_id) ) }
+
+    wallet_transaction_record client_impl::wallet_get_transaction( const string& transaction_id )
+    { try {
+       return _wallet->get_transaction( transaction_id );
+    } FC_RETHROW_EXCEPTIONS( warn, "", ("transaction_id",transaction_id) ) }
 
     bts::blockchain::blockchain_security_state client_impl::blockchain_get_security_state()const
     {
@@ -2939,12 +2973,12 @@ config load_config( const fc::path& datadir )
       return trx;
    }
 
-   asset client_impl::wallet_set_priority_fee( double fee )
+   asset client_impl::wallet_set_transaction_fee( double fee )
    { try {
       oasset_record asset_record = _chain_db->get_asset_record( asset_id_type() );
       FC_ASSERT( asset_record.valid() );
-      _wallet->set_priority_fee( asset( fee * asset_record->precision ) );
-      return _wallet->get_priority_fee();
+      _wallet->set_transaction_fee( asset( fee * asset_record->precision ) );
+      return _wallet->get_transaction_fee();
    } FC_CAPTURE_AND_RETHROW( (fee) ) }
 
    bool client_impl::blockchain_is_synced() const

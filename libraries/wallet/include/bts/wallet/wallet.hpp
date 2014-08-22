@@ -49,6 +49,8 @@ namespace bts { namespace wallet {
          fc::signal<void( bool )>  wallet_lock_state_changed;
          //Emitted when wallet claims a new transaction. Argument is new ledger entry.
          fc::signal<void( ledger_entry )> wallet_claimed_transaction;
+         //Emitted when someone (partially or fully) fills your short, thereby giving you a margin position
+         fc::signal<void( ledger_entry )> update_margin_position;
 
          /**
           *  To generate predictable test results we need an option
@@ -92,16 +94,19 @@ namespace bts { namespace wallet {
           */
          ///@{
 
-         void    set_automatic_backups( bool enabled );
-         bool    get_automatic_backups()const;
+         void       set_automatic_backups( bool enabled );
+         bool       get_automatic_backups()const;
 
-         void    set_transaction_scanning( bool enabled );
-         bool    get_transaction_scanning()const;
+         void       set_transaction_scanning( bool enabled );
+         bool       get_transaction_scanning()const;
 
-         void    set_priority_fee( const asset& fee );
-         asset   get_priority_fee()const;
+         void       set_transaction_fee( const asset& fee );
+         asset      get_transaction_fee()const;
 
-         float   get_scan_progress()const;
+         void       set_last_scanned_block_number( uint32_t block_num );
+         uint32_t   get_last_scanned_block_number()const;
+
+         float      get_scan_progress()const;
 
          void                   set_setting( const string& name, const variant& value );
          fc::optional<variant>  get_setting( const string& name )const;
@@ -144,7 +149,7 @@ namespace bts { namespace wallet {
          vector<public_key_type> get_public_keys_in_account( const string& account_name )const;
          ///@}
 
-         owallet_transaction_record lookup_transaction( const transaction_id_type& trx_id )const;
+         wallet_transaction_record get_transaction( const string& transaction_id_prefix )const;
 
          vector<wallet_transaction_record>          get_pending_transactions()const;
          map<transaction_id_type, fc::exception>    get_pending_transaction_errors()const;
@@ -152,7 +157,6 @@ namespace bts { namespace wallet {
          void      scan_state();
          void      scan_chain( uint32_t start = 0, uint32_t end = -1,
                                const scan_progress_callback& progress_callback = scan_progress_callback() );
-         uint32_t  get_last_scanned_block_number()const;
 
          void      scan_transaction( uint32_t block_num, const transaction_id_type& transaction_id );
          void      scan_transactions( uint32_t block_num, const string& transaction_id_prefix );
@@ -217,18 +221,26 @@ namespace bts { namespace wallet {
          vector<wallet_account_record> list_unregistered_accounts()const;
          vector<wallet_account_record> list_my_accounts()const;
 
-         void import_bitcoin_wallet( const path& wallet_dat,
-                                     const string& wallet_dat_passphrase,
-                                     const string& account_name );
-         void import_multibit_wallet( const path& wallet_dat,
-                                     const string& wallet_dat_passphrase,
-                                     const string& account_name );
-         void import_electrum_wallet( const path& wallet_dat,
-                                     const string& wallet_dat_passphrase,
-                                     const string& account_name );
-         void import_armory_wallet( const path& wallet_dat,
-                                     const string& wallet_dat_passphrase,
-                                     const string& account_name );
+         uint32_t import_bitcoin_wallet(
+                 const path& wallet_dat,
+                 const string& wallet_dat_passphrase,
+                 const string& account_name
+                 );
+         uint32_t import_multibit_wallet(
+                 const path& wallet_dat,
+                 const string& wallet_dat_passphrase,
+                 const string& account_name
+                 );
+         uint32_t import_electrum_wallet(
+                 const path& wallet_dat,
+                 const string& wallet_dat_passphrase,
+                 const string& account_name
+                 );
+         uint32_t import_armory_wallet(
+                 const path& wallet_dat,
+                 const string& wallet_dat_passphrase,
+                 const string& account_name
+                 );
 
          void import_keyhotee( const string& firstname,
                             const string& middlename,
@@ -442,8 +454,8 @@ namespace bts { namespace wallet {
 
          void                               remove_transaction_record( const string& record_id );
          signed_transaction                 publish_slate(const string& account, string account_to_pay_with, bool sign = true );
-         signed_transaction                 publish_price( const string& account, 
-                                                           double amount_per_xts, 
+         signed_transaction                 publish_price( const string& account,
+                                                           double amount_per_xts,
                                                            const string& amount_asset_symbol, bool sign = true );
 
          int32_t                            recover_accounts(int32_t number_of_accounts , int32_t max_number_of_attempts);
