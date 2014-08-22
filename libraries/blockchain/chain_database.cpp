@@ -1096,7 +1096,7 @@ namespace bts { namespace blockchain {
           {
              try {
                 auto trx = pending_itr.value();
-                wlog( " laoding pending transaction ${trx}", ("trx",trx) );
+                wlog( " loading pending transaction ${trx}", ("trx",trx) );
                 auto trx_id = trx.id();
                 auto eval_state = evaluate_transaction( trx, my->_relay_fee );
                 share_type fees = eval_state->get_fees();
@@ -1333,11 +1333,14 @@ namespace bts { namespace blockchain {
     */
    block_fork_data chain_database::push_block( const full_block& block_data )
    { try {
-      if( get_head_block_num() > BTS_BLOCKCHAIN_MAX_UNDO_HISTORY )
-      {
-         FC_ASSERT( block_data.block_num > (get_head_block_num() - BTS_BLOCKCHAIN_MAX_UNDO_HISTORY),
-                    "", ("BTS_BLOCKCHAIN_MAX_UNDO_HISTORY", BTS_BLOCKCHAIN_MAX_UNDO_HISTORY) );
-      }
+      if( get_head_block_num() > BTS_BLOCKCHAIN_MAX_UNDO_HISTORY && 
+          block_data.block_num <= (get_head_block_num() - BTS_BLOCKCHAIN_MAX_UNDO_HISTORY) )
+        FC_THROW_EXCEPTION(block_older_than_undo_history, 
+                           "block ${new_block_hash} (number ${new_block_num}) is on a fork older than "
+                           "our undo history would allow us to switch to (current head block is number ${head_block_num}, undo history is ${undo_history})",
+                           ("new_block_hash", block_data.id())("new_block_num", block_data.block_num)
+                           ("head_block_num", get_head_block_num())("undo_history", BTS_BLOCKCHAIN_MAX_UNDO_HISTORY));
+
       // only allow a single fiber attempt to push blocks at any given time,
       // this method is not re-entrant.
       fc::unique_lock<fc::mutex> lock( my->_push_block_mutex );
@@ -2811,7 +2814,23 @@ namespace bts { namespace blockchain {
 
    ofeed_record     chain_database::get_feed( const feed_index& i )const
    {
-      return my->_feed_db.fetch_optional( i );
+       return my->_feed_db.fetch_optional( i );
+   }
+
+   asset chain_database::unclaimed_genesis()
+   {
+        auto balance = my->_balance_db.begin();
+        asset unclaimed_total(0);
+        auto genesis_date = get_genesis_timestamp();
+
+        while (balance.valid()) {
+            if (balance.value().last_update <= genesis_date)
+                unclaimed_total += balance.value().get_balance();
+
+            ++balance;
+        }
+
+        return unclaimed_total;
    }
 
    /**

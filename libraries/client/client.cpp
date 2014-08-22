@@ -666,7 +666,7 @@ config load_config( const fc::path& datadir )
       void client_impl::configure_rpc_server(config& cfg,
                                              const program_options::variables_map& option_variables)
       {
-        if( option_variables.count("server") || option_variables.count("daemon") )
+        if( option_variables.count("server") || option_variables.count("daemon") || cfg.rpc.enable )
         {
           // the user wants us to launch the RPC server.
           // First, override any config parameters they
@@ -1156,6 +1156,11 @@ config load_config( const fc::path& datadir )
         catch (const bts::blockchain::insufficient_relay_fee& original_exception)
         {
           FC_THROW_EXCEPTION(bts::net::insufficient_relay_fee, "Insufficient relay fee; do not propagate!",
+                             ("original_exception", original_exception.to_detail_string()));
+        }
+        catch (const bts::blockchain::block_older_than_undo_history& original_exception)
+        {
+          FC_THROW_EXCEPTION(bts::net::block_older_than_undo_history, "Block is older than undo history, stop fetching blocks!",
                              ("original_exception", original_exception.to_detail_string()));
         }
       }
@@ -1668,6 +1673,12 @@ config load_config( const fc::path& datadir )
     {
         _wallet->set_automatic_backups( enabled );
         return _wallet->get_automatic_backups();
+    }
+
+    uint32_t detail::client_impl::wallet_set_transaction_expiration_time( uint32_t secs )
+    {
+        _wallet->set_transaction_expiration( secs );
+        return _wallet->get_transaction_expiration();
     }
 
     void detail::client_impl::wallet_lock()
@@ -2425,10 +2436,12 @@ config load_config( const fc::path& datadir )
         my->_p2p_node->listen_on_port(port_to_listen, wait_if_not_available);
     }
 
-    void client::configure( const fc::path& configuration_directory )
+    const config& client::configure( const fc::path& configuration_directory )
     {
       my->_data_dir = configuration_directory;
       my->_p2p_node->load_configuration( my->_data_dir );
+
+      return my->_config;
     }
 
     void client::init_cli()
@@ -2726,7 +2739,9 @@ config load_config( const fc::path& datadir )
           info["wallet_unlocked_until_timestamp"]               = *unlocked_until;
 
           const auto last_scanned_block_num                     = _wallet->get_last_scanned_block_number();
-          info["wallet_last_scanned_block_timestamp"]           = _chain_db->get_block_header( last_scanned_block_num ).timestamp;
+          if( last_scanned_block_num > 0 )
+              info["wallet_last_scanned_block_timestamp"]       = _chain_db->get_block_header( last_scanned_block_num ).timestamp;
+
           info["wallet_scan_progress"]                          = _wallet->get_scan_progress();
 
           const auto enabled_delegates                          = _wallet->get_my_delegates( enabled_delegate_status );
@@ -3412,6 +3427,12 @@ config load_config( const fc::path& datadir )
       FC_ASSERT( oresult );
       return *oresult;
    }
+
+   bts::blockchain::asset client_impl::blockchain_unclaimed_genesis() const
+   {
+        return _chain_db->unclaimed_genesis();
+   }
+
    bts::blockchain::signed_transaction client_impl::wallet_publish_price_feed( const std::string& delegate_account,
                                                                                double real_amount_per_xts,
                                                                                const std::string& real_amount_symbol )
