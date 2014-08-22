@@ -157,7 +157,7 @@ namespace bts { namespace blockchain {
         virtual vector<offer_index_key>     get_domain_offers( const string& domain_name, uint32_t limit ) const = 0;
 
 
-        virtual vector<domain_record>       get_domains_in_auction()const                           = 0;
+        virtual vector<domain_record>       get_domains_in_auction(uint32_t limit)const                           = 0;
     
         virtual uint32_t                    get_auction_throttle()const                             = 0;
 

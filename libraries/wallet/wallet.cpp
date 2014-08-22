@@ -5645,7 +5645,7 @@ namespace bts { namespace wallet {
     }
    
     signed_transaction wallet::domain_bid( const string& domain_name,
-                                           const share_type& bid_amount,
+                                           const share_type& real_bid_amount,
                                            const string& owner_name,
                                            bool  sign ) 
     {
@@ -5654,6 +5654,11 @@ namespace bts { namespace wallet {
 
         signed_transaction trx;
         unordered_set<address> required_signatures;
+
+        const auto asset_rec = my->_blockchain->get_asset_record( "DNS" );
+        FC_ASSERT( asset_rec.valid(), "No asset record for DNS" );
+        const int64_t precision = asset_rec->precision ? asset_rec->precision : 1;
+        share_type bid_amount = real_bid_amount * precision;
 
         FC_ASSERT( is_valid_domain( domain_name ), "Invalid domain name." );
         FC_ASSERT( bid_amount >= P2P_MIN_INITIAL_BID, "Must pay at least the minimum required initial bid");

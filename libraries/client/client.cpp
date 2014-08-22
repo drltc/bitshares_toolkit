@@ -3479,7 +3479,7 @@ config load_config( const fc::path& datadir )
 
     vector<pretty_domain_auction_summary>     client_impl::dotp2p_list_auctions()
     {
-        auto auctions = _chain_db->get_domains_in_auction();
+        auto auctions = _chain_db->get_domains_in_auction(_chain_db->get_auction_throttle());
         auto pretties = vector<pretty_domain_auction_summary>();
         pretties.reserve(auctions.size());
         for( auto item : auctions )

@@ -72,7 +72,7 @@ namespace bts { namespace blockchain {
 
          virtual vector<domain_record>       get_domain_records( const string& first_name,
                                                                 uint32_t count )const override;
-         virtual vector<domain_record>       get_domains_in_auction()const override;
+         virtual vector<domain_record>       get_domains_in_auction(uint32_t limit)const override;
             
          virtual uint32_t                    get_auction_throttle()const override;
 
@@ -150,7 +150,10 @@ namespace bts { namespace blockchain {
 
          unordered_map< string, domain_record>                          domains;
          map< offer_index_key, balance_id_type>                         offers;
-         //map< auction_index_key, string >                               auctions;
+         //map< auction_index_key, string >                               auctions; // TODO think carefully and maybe remove this
+
+         // "set" maybe?
+         map< string, string >                                          auction_set;
 
          /**
           * Set of markets that have had changes to their bids/asks and therefore must 

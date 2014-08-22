@@ -1669,16 +1669,17 @@ namespace bts { namespace blockchain {
        return domains;
 
     }
-    vector<domain_record>       chain_database::get_domains_in_auction()const
+    vector<domain_record>       chain_database::get_domains_in_auction(uint32_t limit)const
     {
         vector<domain_record> domains;
         auto itr = my->_auction_db.begin();
-        while( itr.valid() )
+        uint32_t count = 0;
+        while( itr.valid() && count < limit )
         {
             auto domain_rec = get_domain_record( itr.value() );
             FC_ASSERT( domain_rec.valid(), "all domain records in auction cache should be valid" );
             domains.push_back( *domain_rec );
-            itr++;
+            itr++; count++;
         }
         return domains;
     }

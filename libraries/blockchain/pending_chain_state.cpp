@@ -42,18 +42,17 @@ namespace bts { namespace blockchain {
        auto k = 0;
        auto max = 3;
        auto prev_state = _prev_state.lock();
-       auto auctions = prev_state->get_domains_in_auction();
+       auto auctions = prev_state->get_domains_in_auction( max );
+       auction_set = map<string,string>();  // TODO do I need to reset this here?
        for(auto domain_rec : auctions)
        {
-          if (k >= max)
-              break;
           domain_rec.time_in_top += BTS_BLOCKCHAIN_BLOCK_INTERVAL_SEC;
           if (domain_rec.time_in_top >= P2P_AUCTION_DURATION_SECS)
           {
               domain_rec.state = domain_record::owned;
           }
           store_domain_record( domain_rec );
-          k++;
+          auction_set[domain_rec.domain_name] = domain_rec.domain_name;
        }
    }
 
@@ -346,6 +345,10 @@ namespace bts { namespace blockchain {
    void pending_chain_state::store_domain_record( const domain_record& r )
    {
       domains[r.domain_name] = r;
+/*
+      if( r.is_in_auction() )
+        auctions[r.get_auction_key()] = r.domain_name;
+*/
    }
 
    vector<domain_record>   pending_chain_state::get_domain_records( const string& first_name,
@@ -353,7 +356,7 @@ namespace bts { namespace blockchain {
    {
         FC_ASSERT(!"unimplemented pending_state get_domain_records");
    }
-   vector<domain_record>   pending_chain_state::get_domains_in_auction()const
+   vector<domain_record>   pending_chain_state::get_domains_in_auction(uint32_t limit)const
    {
         FC_ASSERT(!"unimplemented pending_state get_domains_in_auction");
    }
@@ -400,21 +403,9 @@ namespace bts { namespace blockchain {
         return 3; //lol
     }
 
-    // TODO do better than naive scan - cache during deterministic trxs
     bool pending_chain_state::is_top_domain( const string& domain_name ) const
     {
-        uint32_t count = 0; auto max = get_auction_throttle();
-        auto prev_state = _prev_state.lock();
-        auto auctions = prev_state->get_domains_in_auction();
-        for( auto item : auctions )
-        {
-            if (count >= max)
-                break;
-            if( item.domain_name == domain_name )
-                return true;
-            count++;
-        }
-        return false;
+        return (auction_set.find(domain_name) != auction_set.end()); 
     }
 
 
