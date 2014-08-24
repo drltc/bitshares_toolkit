@@ -33,6 +33,8 @@ namespace bts { namespace blockchain {
 
    balance_id_type withdraw_condition::get_address()const
    {
+      if( this->type == withdraw_domain_offer_type )
+         return this->as<withdraw_domain_offer>().owner;
       return address( *this );
    }
 

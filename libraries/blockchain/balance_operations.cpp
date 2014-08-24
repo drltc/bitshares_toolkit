@@ -184,24 +184,29 @@ namespace bts { namespace blockchain {
             auto offer = current_balance_record->condition.as<withdraw_domain_offer>();
             try {
                 // TODO check date
-                // If it's yours it's free
+
+                // if it's a sell, there has to be a transfer to the previous owner
+                for (auto op : eval_state.trx.operations)
+                {
+                    if (op.type == operation_type_enum::domain_transfer_op_type)
+                    {
+                        auto transfer = op.as<domain_transfer_operation>();
+                        FC_ASSERT( transfer.domain_name == offer.domain_name, "transferring wrong domain name" );
+                        FC_ASSERT( transfer.owner == offer.owner, "transferring to wrong owner" );
+                        auto offer_key = offer_index_key( offer.domain_name, offer.price ); //TODO constructor for this?
+                        offer_key.offer_address = offer.owner;
+                        eval_state._current_state->remove_domain_offer( offer_key );
+                        return;
+                    }
+                }
+                // otherwise, if it's yours it's free
                 if( eval_state.check_signature( offer.owner ) )
                 {
                     FC_ASSERT(!"unimplemented withdraw_domain_offer_type for cancels");
+                    return;
                     //TODO remove offer from state
                 }
-                else  // otherwise there has to be a domain transfer to the previous owner
-                {
-                    for (auto op : eval_state.trx.operations)
-                    {
-                        if (op.type == operation_type_enum::domain_transfer_op_type)
-                        {
-                            auto transfer = op.as<domain_transfer_operation>();
-                            FC_ASSERT( transfer.domain_name == offer.domain_name, "transferring wrong domain name" );
-                            FC_ASSERT( transfer.owner == offer.owner, "transferring to wrong owner" );
-                        }
-                    }
-                }
+                FC_ASSERT(!"Neither transferred the domain nor had a signature for past owner for a domain offer");
             } FC_CAPTURE_AND_RETHROW( (offer) )
         }
 

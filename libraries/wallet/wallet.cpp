@@ -5852,6 +5852,7 @@ namespace bts { namespace wallet {
         auto seller_pubkey = get_account_public_key( oacct->name );
 
         auto priority_fee = get_transaction_fee();
+        my->withdraw_to_transaction( priority_fee, seller_pubkey, trx, required_signatures );
 
         auto offers = my->_blockchain->get_domain_offers( domain_name, 1 );
 
@@ -5869,11 +5870,10 @@ namespace bts { namespace wallet {
             transfer_op.memo = fc::optional<titan_memo>();
             trx.operations.push_back( withdraw_domain_op );
             trx.operations.push_back( transfer_op );
-            required_signatures.insert( transfer_op.owner );
+            required_signatures.insert( odomain_rec->owner );
         }
         else
         {
-            my->withdraw_to_transaction( priority_fee, seller_pubkey, trx, required_signatures );
             auto sell_op = domain_sell_operation();
             sell_op.domain_name = domain_name;
             sell_op.price = min_amount;
@@ -5957,7 +5957,7 @@ namespace bts { namespace wallet {
 
         } else // else we are placing a new offer
         {
-            FC_ASSERT(!"You cannot make offers for domains in this dry run. You can only buy domains already for sale.");
+            //FC_ASSERT(!"You cannot make offers for domains in this dry run. You can only buy domains already for sale.");
             auto addr = get_new_address( account_name );
 
             auto offer_op = domain_buy_operation();

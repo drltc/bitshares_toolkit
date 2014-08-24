@@ -1482,6 +1482,7 @@ namespace bts { namespace blockchain {
    void chain_database::store_balance_record( const balance_record& r )
    { try {
        ilog( "balance record: ${r}", ("r",r) );
+       ulog( "balance record: ${r}", ("r",r) );
        if( r.is_null() )
        {
           my->_balance_db.remove( r.id() );
@@ -1621,6 +1622,7 @@ namespace bts { namespace blockchain {
    void chain_database::store_domain_record( const domain_record& rec )
    { try {
       // delete the old auction index if it exists
+      ulog("Storing domain record: ${rec}", ("rec", rec) );
       auto old_domain_rec = my->_domain_db.find( rec.domain_name );
       if( old_domain_rec.valid() && old_domain_rec.value().is_in_auction() )
       {
@@ -1634,10 +1636,21 @@ namespace bts { namespace blockchain {
    } FC_CAPTURE_AND_RETHROW( (rec) ) }
 
 
+    void                        chain_database::remove_domain_record( const string& domain_name)
+    { try {
+        my->_domain_db.remove( domain_name );
+    } FC_CAPTURE_AND_RETHROW( (domain_name) ) }
+
     void                        chain_database::store_domain_offer( const offer_index_key& offer )
     {
         my->_offer_db.store( offer, offer.offer_address );
     }
+
+    void                        chain_database::remove_domain_offer( const offer_index_key& offer )
+    { try {
+        my->_offer_db.remove( offer );
+    } FC_CAPTURE_AND_RETHROW( (offer) ) }
+
 
     ooffer_index_key             chain_database::get_domain_offer( const balance_id_type& owner )
     {

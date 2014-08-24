@@ -231,11 +231,13 @@ namespace bts { namespace blockchain {
          else undo_state->set_feed( feed_record{item.first} );
       }
 
+
+// DNS
       for( const auto& item : domains )
       {
          auto prev_value = prev_state->get_domain_record( item.first );
          if( prev_value.valid() ) undo_state->store_domain_record( *prev_value );
-         else  undo_state->store_domain_record( domain_record() );
+         else  undo_state->remove_domain_record( item.first );
       }
 
 
@@ -243,10 +245,10 @@ namespace bts { namespace blockchain {
       {
          auto prev_value = prev_state->get_domain_offer( item.first.offer_address );
          if( prev_value.valid() ) undo_state->store_domain_offer( *prev_value );
-         else  undo_state->store_domain_offer( offer_index_key() );
+         else  undo_state->remove_domain_offer( item.first );
       }
 
-
+// END DNS
 
    }
 
@@ -343,11 +345,18 @@ namespace bts { namespace blockchain {
 
    void pending_chain_state::store_domain_record( const domain_record& r )
    {
+      ulog("Storing domain record in pending_chain_state:  ${rec}", ("rec", r));
       domains[r.domain_name] = r;
 /*
       if( r.is_in_auction() )
         auctions[r.get_auction_key()] = r.domain_name;
 */
+   }
+
+
+   void pending_chain_state::remove_domain_record( const string& domain_name )
+   {
+      domains.erase( domain_name );
    }
 
    vector<domain_record>   pending_chain_state::get_domain_records( const string& first_name,
@@ -366,6 +375,12 @@ namespace bts { namespace blockchain {
         ulog( "stored offer in pending chain state\n" );
         ulog( "  owner: ${owner}\n", ("owner", offer.offer_address));
     }
+
+    void                        pending_chain_state::remove_domain_offer( const offer_index_key& offer )
+    {
+        offers.erase(offer);
+    }
+
     vector<offer_index_key>     pending_chain_state::get_domain_offers( const string& domain_name, uint32_t limit ) const
     {
         chain_interface_ptr prev_state = _prev_state.lock();
@@ -444,6 +459,7 @@ namespace bts { namespace blockchain {
 
    void pending_chain_state::store_balance_record( const balance_record& r )
    {
+      ulog(" storing balance record in pending_chain_state with id:  ${id}", ("id", r.id()));
       balances[r.id()] = r;
    }
 
