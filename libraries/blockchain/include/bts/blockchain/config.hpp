@@ -19,8 +19,8 @@
  *  Changing these parameters will result in a hard fork.
  */
 #define BTS_ADDRESS_PREFIX                                 "KEY"
-#define BTS_BLOCKCHAIN_SYMBOL                              "DNS"
-#define BTS_BLOCKCHAIN_NAME                                "DNS"
+#define BTS_BLOCKCHAIN_SYMBOL                              "BDNS"
+#define BTS_BLOCKCHAIN_NAME                                "BDNS"
 #define BTS_BLOCKCHAIN_DESCRIPTION                         "The Decentralized Namespace Service"
 #define BTS_BLOCKCHAIN_PRECISION                           (100000)
 #define BTS_BLOCKCHAIN_MAX_TRANSACTION_EXPIRATION_SEC      (60*60*24*2)

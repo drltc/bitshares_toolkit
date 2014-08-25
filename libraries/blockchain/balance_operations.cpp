@@ -202,9 +202,10 @@ namespace bts { namespace blockchain {
                 // otherwise, if it's yours it's free
                 if( eval_state.check_signature( offer.owner ) )
                 {
-                    FC_ASSERT(!"unimplemented withdraw_domain_offer_type for cancels");
-                    return;
-                    //TODO remove offer from state
+                    auto offer_key = offer_index_key( offer.domain_name, offer.price ); //TODO constructor for this?
+                    offer_key.offer_address = offer.owner;
+                    eval_state._current_state->remove_domain_offer( offer_key );
+                    return; // tough luck if you didn't include a withdraw op in this transaction!
                 }
                 FC_ASSERT(!"Neither transferred the domain nor had a signature for past owner for a domain offer");
             } FC_CAPTURE_AND_RETHROW( (offer) )

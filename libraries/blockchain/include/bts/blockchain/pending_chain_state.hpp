@@ -62,6 +62,12 @@ namespace bts { namespace blockchain {
 
 
          // DNS
+
+         
+         virtual void                        increment_auction_counters();
+         virtual void                        cache_top_domains();
+
+
          virtual void                        store_domain_record( const domain_record& rec) override;
          virtual void                        remove_domain_record( const string& domain_name) override;
          virtual odomain_record              get_domain_record( const string& domain_name ) const override;

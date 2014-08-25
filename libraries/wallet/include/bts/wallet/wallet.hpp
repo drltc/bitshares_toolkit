@@ -530,7 +530,7 @@ namespace bts { namespace wallet {
                                                           const string& opt_pubkey,
                                                           bool sign );
 
-         signed_transaction        keyid_adjust_points( const string& name,
+         signed_transaction        keyid_adjust_vanity( const string& name,
                                                         const share_type& points,
                                                         const string& pay_from_account,
                                                         bool sign);

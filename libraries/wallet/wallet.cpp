@@ -5769,7 +5769,7 @@ namespace bts { namespace wallet {
         signed_transaction trx;
         unordered_set<address> required_signatures;
 
-        const auto asset_rec = my->_blockchain->get_asset_record( "DNS" );
+        const auto asset_rec = my->_blockchain->get_asset_record( "BDNS" );
         FC_ASSERT( asset_rec.valid(), "No asset record for DNS" );
         const int64_t precision = asset_rec->precision ? asset_rec->precision : 1;
         share_type bid_amount = real_bid_amount * precision;
@@ -5837,7 +5837,7 @@ namespace bts { namespace wallet {
         signed_transaction trx;
         unordered_set<address> required_signatures;
 
-        const auto asset_rec = my->_blockchain->get_asset_record( "DNS" );
+        const auto asset_rec = my->_blockchain->get_asset_record( "BDNS" );
         FC_ASSERT( asset_rec.valid(), "No asset record for DNS" );
         const int64_t precision = asset_rec->precision ? asset_rec->precision : 1;
         share_type min_amount = real_min_amount * precision;
@@ -5929,7 +5929,7 @@ namespace bts { namespace wallet {
         signed_transaction trx;
         unordered_set<address> required_signatures;
 
-        const auto asset_rec = my->_blockchain->get_asset_record( "DNS" );
+        const auto asset_rec = my->_blockchain->get_asset_record( "BDNS" );
         FC_ASSERT( asset_rec.valid(), "No asset record for DNS" );
         const int64_t precision = asset_rec->precision ? asset_rec->precision : 1;
         share_type price = real_price * precision;
@@ -5947,7 +5947,7 @@ namespace bts { namespace wallet {
             auto buy_op = domain_buy_operation();
             buy_op.domain_name = domain_name;
             buy_op.new_owner = get_new_address( account_name );
-            buy_op.price = price;
+            buy_op.price = odomain_rec->price; // don't overpay, validation requires exact amount
             trx.operations.push_back( buy_op );
 
             priority_fee.amount += odomain_rec->price;
@@ -6125,7 +6125,7 @@ namespace bts { namespace wallet {
 
 
 
-    signed_transaction    wallet::keyid_adjust_points( const string& name,
+    signed_transaction    wallet::keyid_adjust_vanity( const string& name,
                                                        const share_type& real_points,
                                                        const string& pay_from_account,
                                                        bool sign)
@@ -6136,8 +6136,8 @@ namespace bts { namespace wallet {
         signed_transaction trx;
         unordered_set<address>     required_signatures;
 
-        const auto asset_rec = my->_blockchain->get_asset_record( "DNS" );
-        FC_ASSERT( asset_rec.valid(), "No asset record for DNS" );
+        const auto asset_rec = my->_blockchain->get_asset_record( "BDNS" );
+        FC_ASSERT( asset_rec.valid(), "No asset record for BDNS" );
         const int64_t precision = asset_rec->precision ? asset_rec->precision : 1;
         share_type points = real_points * precision;
 
@@ -6150,7 +6150,7 @@ namespace bts { namespace wallet {
 
         trx.operations.push_back(op);
         auto required_fees = get_transaction_fee();
-        required_fees.amount += points;
+        required_fees.amount += llabs(points);
         my->withdraw_to_transaction( required_fees,
                                      from_acct.active_address(), trx, required_signatures );
 

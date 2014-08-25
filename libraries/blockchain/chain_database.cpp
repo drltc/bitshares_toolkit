@@ -842,12 +842,13 @@ namespace bts { namespace blockchain {
              **/
             update_delegate_production_info( block_data, pending_state, block_signee );
 
-            // apply any deterministic operations such as market operations before we perturb indexes
-            pending_state->apply_deterministic_updates();
-
+            
             
             pay_delegate( block_id, pending_state, block_signee );
 
+            pending_state->cache_top_domains(); // DNS
+            pending_state->increment_auction_counters();  // DNS
+  
             apply_transactions( block_data, block_data.user_transactions, pending_state );
 
             execute_markets( block_data.timestamp, pending_state );
@@ -1626,6 +1627,7 @@ namespace bts { namespace blockchain {
       auto old_domain_rec = my->_domain_db.find( rec.domain_name );
       if( old_domain_rec.valid() && old_domain_rec.value().is_in_auction() )
       {
+         ulog(" Removing old auction key: ${key}", ("key", old_domain_rec.value().get_auction_key() ) );
           my->_auction_db.remove( old_domain_rec.value().get_auction_key() );
       }
       my->_domain_db.store( rec.domain_name, rec );

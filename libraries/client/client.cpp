@@ -3542,10 +3542,10 @@ config load_config( const fc::path& datadir )
         return pretties;
     }
 
-    signed_transaction        client_impl::keyid_adjust_points(const string& name, const share_type& points,
+    signed_transaction        client_impl::keyid_adjust_vanity(const string& name, const share_type& points,
                                                                const string& pay_from_account )
     {
-        auto trx = _wallet->keyid_adjust_points( name, points, pay_from_account, true );
+        auto trx = _wallet->keyid_adjust_vanity( name, points, pay_from_account, true );
         network_broadcast_transaction( trx );
         return trx;
     }

@@ -222,8 +222,8 @@
             "prerequisites": ["json_authenticated"]
         },
         {
-            "method_name": "keyid_adjust_points",
-            "description": "Gets the user-specified value associated with this domain.",
+            "method_name": "keyid_adjust_vanity",
+            "description": "Adjust a meaningless metric associated with this account.",
             "return_type": "signed_transaction",
             "parameters": 
             [

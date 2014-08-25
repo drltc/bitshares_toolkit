@@ -33,17 +33,26 @@ namespace bts { namespace blockchain {
 
    pending_chain_state::~pending_chain_state(){}
 
-   /**
-    *  Based upon the current state of the database, calculate any updates that
-    *  should be executed in a deterministic manner.
-    */
-   void pending_chain_state::apply_deterministic_updates()
+
+// DNS
+
+   void pending_chain_state::cache_top_domains()
    {
-       auto k = 0;
-       auto max = 3;
+       auto max = get_auction_throttle();
        auto prev_state = _prev_state.lock();
        auto auctions = prev_state->get_domains_in_auction( max );
        auction_set = map<string,string>();  // TODO do I need to reset this here?
+       for(auto domain_rec : auctions)
+       {
+          auction_set[domain_rec.domain_name] = domain_rec.domain_name;
+       }
+   }
+
+   void pending_chain_state::increment_auction_counters()
+   {
+       auto max = get_auction_throttle();
+       auto prev_state = _prev_state.lock();
+       auto auctions = prev_state->get_domains_in_auction( max );
        for(auto domain_rec : auctions)
        {
           domain_rec.time_in_top += BTS_BLOCKCHAIN_BLOCK_INTERVAL_SEC;
@@ -51,10 +60,22 @@ namespace bts { namespace blockchain {
           {
               domain_rec.state = domain_record::owned;
           }
-          store_domain_record( domain_rec );
-          auction_set[domain_rec.domain_name] = domain_rec.domain_name;
+          prev_state->store_domain_record( domain_rec );
        }
    }
+
+
+// END DNS
+
+
+   /**
+    *  Based upon the current state of the database, calculate any updates that
+    *  should be executed in a deterministic manner.
+    */
+   void pending_chain_state::apply_deterministic_updates()
+   {
+   }
+
 
    /** polymorphically allcoate a new state */
    chain_interface_ptr pending_chain_state::create( const chain_interface_ptr& prev_state )const
