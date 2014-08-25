@@ -19,15 +19,15 @@ namespace bts { namespace wallet {
     struct pretty_domain_offer
     {
         string                                domain_name;
-        share_type                            price;
+        double                                price;
         address                               offer_address;
     };
 
     struct pretty_domain_auction_summary
     {
         string                                domain_name;
-        share_type                            last_bid_price;
-        share_type                            next_required_bid_price;
+        double                                last_bid_price;
+        double                                next_required_bid_price;
         fc::time_point_sec                    last_bid_time;
         uint32_t                              time_in_top;
     };

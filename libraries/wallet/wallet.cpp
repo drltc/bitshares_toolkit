@@ -5718,9 +5718,13 @@ namespace bts { namespace wallet {
 
     pretty_domain_offer   wallet::to_pretty_domain_offer( offer_index_key& offer )
     {
+        auto oasset_rec = my->_blockchain->get_asset_record( "BDNS" );
+        FC_ASSERT( oasset_rec.valid(), "No asset record for DNS" );
+        const int64_t precision = oasset_rec->precision ? oasset_rec->precision : 1;
+
         auto pretty = pretty_domain_offer();
         pretty.domain_name = offer.domain_name;
-        pretty.price = offer.price;
+        pretty.price = float(offer.price) / precision;
         pretty.offer_address = offer.offer_address;
         return pretty;
     }
@@ -5730,10 +5734,14 @@ namespace bts { namespace wallet {
         FC_ASSERT( rec.get_true_state( my->_blockchain->now().sec_since_epoch()) == domain_record::in_auction_first
                 || rec.get_true_state( my->_blockchain->now().sec_since_epoch()) == domain_record::in_auction_default
                 || rec.get_true_state( my->_blockchain->now().sec_since_epoch()) == domain_record::in_auction_kickback );
+        auto oasset_rec = my->_blockchain->get_asset_record( "BDNS" );
+        FC_ASSERT( oasset_rec.valid(), "No asset record for DNS" );
+        const int64_t precision = oasset_rec->precision ? oasset_rec->precision : 1;
+
         auto pretty = pretty_domain_auction_summary();
         pretty.domain_name = rec.domain_name;
-        pretty.last_bid_price = rec.price;
-        pretty.next_required_bid_price = rec.next_required_bid;
+        pretty.last_bid_price = float(rec.price) / precision;
+        pretty.next_required_bid_price = float(rec.next_required_bid) / precision;
         pretty.last_bid_time = fc::time_point_sec( rec.last_update );
         pretty.time_in_top = rec.time_in_top;
         return pretty;
@@ -5989,9 +5997,35 @@ namespace bts { namespace wallet {
     }
 
 
-    signed_transaction   wallet::domain_cancel_buy( const balance_id_type& offer_id, bool sign)
+    signed_transaction   wallet::domain_cancel_buy( const balance_id_type& offer_id,
+                                                    bool sign)
     {
-        FC_ASSERT(!"unimplemented");
+        if( NOT is_open() ) FC_CAPTURE_AND_THROW( wallet_closed );
+        if( NOT is_unlocked() ) FC_CAPTURE_AND_THROW( login_required );
+
+        signed_transaction trx;
+        unordered_set<address> required_signatures;
+
+        auto obalance_rec = my->_blockchain->get_balance_record( offer_id );
+        FC_ASSERT( obalance_rec.valid(), "No such balance" );
+
+        auto okey_rec = my->_wallet_db.lookup_key( offer_id );
+        FC_ASSERT( okey_rec.valid(), "no key for this offer" );
+        auto oacct_rec = my->_wallet_db.lookup_account( okey_rec->account_address );
+        FC_ASSERT(oacct_rec.valid(), "no account found for htis key" );
+
+        trx.withdraw( obalance_rec->id(), obalance_rec->get_balance().amount );
+        required_signatures.insert( offer_id );
+
+        if ( sign )
+            sign_transaction( trx, required_signatures );
+
+        // TODO are offers always more than the trx fee?
+        trx.deposit( get_new_address( oacct_rec->name ),
+                     obalance_rec->get_balance() - get_transaction_fee(), 0 );
+        return trx;
+
+          
     }
 
 

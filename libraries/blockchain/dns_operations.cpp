@@ -280,11 +280,12 @@ namespace bts { namespace blockchain {
         FC_ASSERT( deposit->condition.type == withdraw_condition_types::withdraw_domain_offer_type );
         auto condition = deposit->condition.as<withdraw_domain_offer>();
         // TODO check that the funds were withdrawn for real  ?
+        // not strictly necessary but probably good for the canceler
         auto index_key = offer_index_key();
         index_key.offer_address = condition.owner;
         index_key.domain_name = condition.domain_name;
         index_key.offer_address = condition.owner;
-        // eval_state->_current_state.remove_domain_offer(   );
+        eval_state._current_state->remove_domain_offer( index_key );
     }
 
 

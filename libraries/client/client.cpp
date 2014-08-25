@@ -3485,7 +3485,6 @@ config load_config( const fc::path& datadir )
 
     signed_transaction        client_impl::dotp2p_cancel_buy( const balance_id_type& offer_id )
     {
-        FC_ASSERT(!"unimplemented");
         auto trx = _wallet->domain_cancel_buy( offer_id, true);
         network_broadcast_transaction( trx );
         return trx;
