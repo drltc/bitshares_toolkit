@@ -1483,7 +1483,6 @@ namespace bts { namespace blockchain {
    void chain_database::store_balance_record( const balance_record& r )
    { try {
        ilog( "balance record: ${r}", ("r",r) );
-       ulog( "balance record: ${r}", ("r",r) );
        if( r.is_null() )
        {
           my->_balance_db.remove( r.id() );
@@ -1623,11 +1622,11 @@ namespace bts { namespace blockchain {
    void chain_database::store_domain_record( const domain_record& rec )
    { try {
       // delete the old auction index if it exists
-      ulog("Storing domain record: ${rec}", ("rec", rec) );
+      ilog("Storing domain record: ${rec}", ("rec", rec) );
       auto old_domain_rec = my->_domain_db.find( rec.domain_name );
       if( old_domain_rec.valid() && old_domain_rec.value().is_in_auction() )
       {
-         ulog(" Removing old auction key: ${key}", ("key", old_domain_rec.value().get_auction_key() ) );
+         ilog(" Removing old auction key: ${key}", ("key", old_domain_rec.value().get_auction_key() ) );
           my->_auction_db.remove( old_domain_rec.value().get_auction_key() );
       }
       my->_domain_db.store( rec.domain_name, rec );
@@ -1657,7 +1656,7 @@ namespace bts { namespace blockchain {
     ooffer_index_key             chain_database::get_domain_offer( const balance_id_type& owner )
     {
         auto itr = my->_balance_db.find( owner );
-        ulog( "looking up balance for owner: ${owner}", ("owner", owner) );
+        ilog( "looking up balance for owner: ${owner}", ("owner", owner) );
         if (itr.valid())
         {
             auto key = offer_index_key();
@@ -1718,14 +1717,14 @@ namespace bts { namespace blockchain {
     
     uint32_t                    chain_database::get_auction_throttle()const
     {
-        ulog( "calling get_auction_throttle in chain_database");
+        ilog( "calling get_auction_throttle in chain_database");
         return 3;
     }
 
     // TODO this won't scale
     bool                        chain_database::is_top_domain( const string& domain_name )const
     {
-        ulog("calling is_top_domain in chain_database");
+        ilog("calling is_top_domain in chain_database");
         for( auto item : get_domains_in_auction(get_auction_throttle()) )
         {
             if( item.domain_name == domain_name )
