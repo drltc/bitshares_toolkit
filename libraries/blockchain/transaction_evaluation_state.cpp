@@ -78,7 +78,7 @@ namespace bts { namespace blockchain {
 
       if( required_fees > xts_fees )
       {
-         FC_CAPTURE_AND_THROW( insufficient_fee, (required_fees)(alt_fees_paid)(xts_fees)  )
+         FC_CAPTURE_AND_THROW( insufficient_fee, (required_fees)(alt_fees_paid)(xts_fees)  );
       }
    } FC_RETHROW_EXCEPTIONS( warn, "" ) }
 
@@ -146,17 +146,6 @@ namespace bts { namespace blockchain {
         if( trx_arg.expiration > (_current_state->now() + BTS_BLOCKCHAIN_MAX_TRANSACTION_EXPIRATION_SEC) )
            FC_CAPTURE_AND_THROW( invalid_transaction_expiration, (trx_arg)(_current_state->now()) );
 
-        /**
-         * Removing transaction size limit from chain validation rules.
-         *
-         * Note: this is to give delegates maximum flexibility without having to
-         * introduce hard forks to support larger transaction sizes.
-         *
-        auto trx_size = fc::raw::pack_size(trx_arg);
-        if(  trx_size > BTS_BLOCKCHAIN_MAX_TRANSACTION_SIZE )
-           FC_CAPTURE_AND_THROW( oversized_transaction, (trx_size ) );
-        */
-       
         auto trx_id = trx_arg.id();
 
         if( _current_state->is_known_transaction( trx_id ) )

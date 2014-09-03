@@ -120,7 +120,7 @@ namespace bts { namespace wallet {
            void load_transaction_record( const wallet_transaction_record& rec, bool overwrite )
            { try {
               auto itr = self->transactions.find( rec.record_id );
-              if( !overwrite) FC_ASSERT( itr == self->transactions.end(), "Duplicate transaction found in wallet!" )
+              if( !overwrite) FC_ASSERT( itr == self->transactions.end(), "Duplicate transaction found in wallet!" );
               self->transactions[ rec.record_id ] = rec;
            } FC_RETHROW_EXCEPTIONS( warn, "", ("rec",rec) ) }
 
@@ -195,6 +195,10 @@ namespace bts { namespace wallet {
                 // prevent hanging on large wallets
                 fc::usleep( fc::microseconds(1000) );
              }
+             catch (const fc::canceled_exception&)
+             {
+                throw;
+             }
              catch ( const fc::exception& e )
              {
                 wlog( "Error loading wallet record:\n${r}\nreason: ${e}", ("e",e.to_detail_string())("r",record) );
@@ -253,8 +257,16 @@ namespace bts { namespace wallet {
       return next_rec_number;
    }
 
-   int32_t wallet_db::new_key_child_index()
+   int32_t wallet_db::new_key_child_index( const address& account_address )
    {
+      owallet_account_record account_rec = lookup_account( account_address );
+      if( account_rec )
+      {
+          account_rec->last_used_gen_sequence++;
+          cache_account( *account_rec );
+          return account_rec->last_used_gen_sequence;
+      }
+
       auto next_child_idx = get_property( next_child_key_index );
       int32_t next_child_index = 0;
       if( next_child_idx.is_null() )
@@ -269,14 +281,33 @@ namespace bts { namespace wallet {
       return next_child_index;
    }
 
+   fc::ecc::private_key wallet_db::get_private_key( const fc::sha512& password,
+                                                    int index )
+   {
+      FC_ASSERT( wallet_master_key.valid() );
+
+      const auto master_ext_priv_key = wallet_master_key->decrypt_key( password );
+      const auto new_priv_key = master_ext_priv_key.child( index );
+
+      return new_priv_key;
+   }
+
    fc::ecc::private_key wallet_db::new_private_key( const fc::sha512& password,
                                                     const address& parent_account_address,
                                                     bool store_key )
    {
       FC_ASSERT( wallet_master_key.valid() );
 
-      auto master_ext_priv_key  = wallet_master_key->decrypt_key( password );
-      auto new_priv_key = master_ext_priv_key.child( new_key_child_index() );
+      const auto master_ext_priv_key = wallet_master_key->decrypt_key( password );
+      const auto key_index    = new_key_child_index(parent_account_address);
+      auto new_priv_key = master_ext_priv_key.child( key_index );
+      if( key_index >= 10000 )
+      {
+          fc::sha256::encoder enc;
+          fc::raw::pack( enc, parent_account_address );
+          fc::raw::pack( enc, key_index );
+          new_priv_key = master_ext_priv_key.child( enc.result() );
+      }
 
       if( !store_key )
         return new_priv_key;
@@ -284,10 +315,12 @@ namespace bts { namespace wallet {
       key_data new_key;
       new_key.account_address = parent_account_address;
       new_key.encrypt_private_key( password, new_priv_key );
+      new_key.gen_seq_number = key_index;
+
       // if there is no parent account address, then the account_address of this key is itself
-      if (parent_account_address == address())
+      if( parent_account_address == address() )
       {
-         new_key.account_address = address(new_key.public_key);
+         new_key.account_address = address( new_key.public_key );
       }
 
       this->store_key( new_key );
@@ -436,13 +469,17 @@ namespace bts { namespace wallet {
 
       std::ofstream fs( filename.string() );
       fs.write( "[\n", 2 );
-      for( auto itr = my->_records.begin(); itr.valid(); ++itr )
+
+      auto itr = my->_records.begin();
+      while( itr.valid() )
       {
-          const auto str = fc::json::to_pretty_string( itr.value() ) + ",\n";
+          auto str = fc::json::to_pretty_string( itr.value() );
+          if( (++itr).valid() ) str += ",";
+          str += "\n";
           fs.write( str.c_str(), str.size() );
       }
-      fs.seekp( uint64_t( fs.tellp() ) - 2 );
-      fs.write( "\n]", 2 );
+
+      fs.write( "]", 1 );
    } FC_RETHROW_EXCEPTIONS( warn, "", ("filename",filename) ) }
 
    void wallet_db::import_from_json( const path& filename )

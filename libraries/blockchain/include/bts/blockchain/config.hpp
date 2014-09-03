@@ -2,15 +2,18 @@
 
 #include <stdint.h>
 
-/* Set to true only for test network */
-#define BTS_TEST_NETWORK                                    true
-#define BTS_TEST_NETWORK_VERSION                            101
+/* Define client version here */
+#define BTS_CLIENT_VERSION                                  "Dry Run NN"
+
+/* Comment out this line for a non-test network */
+#define BTS_TEST_NETWORK
+#define BTS_TEST_NETWORK_VERSION                            103
 
 /** @file bts/blockchain/config.hpp
  *  @brief Defines global constants that determine blockchain behavior
  */
 #define BTS_BLOCKCHAIN_VERSION                              109
-#define BTS_BLOCKCHAIN_DATABASE_VERSION                     126
+#define BTS_BLOCKCHAIN_DATABASE_VERSION                     133
 
 /**
  *  The address prepended to string representation of
@@ -19,20 +22,19 @@
  *  Changing these parameters will result in a hard fork.
  */
 #define BTS_ADDRESS_PREFIX                                 "KEY"
-#define BTS_BLOCKCHAIN_SYMBOL                              "BDNS"
+#define BTS_BLOCKCHAIN_SYMBOL                              "DNS"
 #define BTS_BLOCKCHAIN_NAME                                "BDNS"
 #define BTS_BLOCKCHAIN_DESCRIPTION                         "The Decentralized Namespace Service"
 #define BTS_BLOCKCHAIN_PRECISION                           (100000)
 #define BTS_BLOCKCHAIN_MAX_TRANSACTION_EXPIRATION_SEC      (60*60*24*2)
-#define BTS_BLOCKCHAIN_DEFAULT_TRANSACTION_EXPIRATION_SEC  (60*60*2)
 
 #define BTS_BLOCKCHAIN_DEFAULT_RELAY_FEE                   (10000) // DNS
 
 /**
  * The number of delegates that the blockchain is designed to support
  */
-#define BTS_BLOCKCHAIN_NUM_DELEGATES                        (101)
-#define BTS_BLOCKCHAIN_MAX_SLATE_SIZE                       (BTS_BLOCKCHAIN_NUM_DELEGATES)
+#define BTS_BLOCKCHAIN_NUM_DELEGATES                        uint32_t(101)
+#define BTS_BLOCKCHAIN_MAX_SLATE_SIZE                       BTS_BLOCKCHAIN_NUM_DELEGATES
 #define BTS_BLOCKCHAIN_MIN_FEEDS                            ((BTS_BLOCKCHAIN_NUM_DELEGATES/2) + 1)
 #define BTS_BLOCKCHAIN_MAX_UNDO_HISTORY                     (BTS_BLOCKCHAIN_NUM_DELEGATES*4)
 

@@ -2,6 +2,7 @@
 
 #include <bts/blockchain/chain_database.hpp>
 #include <bts/blockchain/config.hpp>
+#include <bts/mail/message.hpp>
 #include <bts/wallet/pretty.hpp>
 #include <bts/wallet/pretty_dns.hpp>
 #include <bts/wallet/wallet_db.hpp>
@@ -42,7 +43,7 @@ namespace bts { namespace wallet {
    class wallet
    {
       public:
-         wallet( chain_database_ptr chain );
+         wallet(chain_database_ptr chain, bool enabled = true);
          virtual ~wallet();
 
          //Emitted when wallet is locked or unlocked. Argument is true if wallet is now locked; false otherwise.
@@ -51,13 +52,6 @@ namespace bts { namespace wallet {
          fc::signal<void( ledger_entry )> wallet_claimed_transaction;
          //Emitted when someone (partially or fully) fills your short, thereby giving you a margin position
          fc::signal<void( ledger_entry )> update_margin_position;
-
-         /**
-          *  To generate predictable test results we need an option
-          *  to use deterministic keys rather than purely random
-          *  one-time keys.
-          */
-         void use_deterministic_one_time_keys( bool state );
 
          /**
           *  Wallet File Management
@@ -79,6 +73,7 @@ namespace bts { namespace wallet {
 
          void    close();
 
+         bool    is_enabled()const;
          bool    is_open()const;
          string  get_wallet_name()const;
          path    get_wallet_filename()const;
@@ -374,7 +369,30 @@ namespace bts { namespace wallet {
                                           const address& owner_address,
                                           bool sign = true );
 
+         signed_transaction  add_collateral( const string& from_account_name,
+                                             const address& short_id,
+                                             share_type collateral_to_add,
+                                             bool sign = true );
+
          signed_transaction  cancel_market_order( const address& owner_address );
+
+         /* New market order APIs */
+         signed_transaction  cover_short2( const string& from_account_name,
+                                           double real_quantity_usd,
+                                           const string& quote_symbol,
+                                           const order_id_type& short_id,
+                                           bool sign = true );
+
+         signed_transaction  add_collateral2( const string& from_account_name,
+                                              const order_id_type& short_id,
+                                              share_type collateral_to_add,
+                                              bool sign = true );
+
+         signed_transaction  cancel_market_order2( const order_id_type& order_id );
+
+         map<order_id_type, market_order>   get_market_orders2( const string& quote, const string& base,
+                                                                int32_t limit, const string& account_name )const;
+         /*************************/
 
          wallet_account_record get_account( const string& account_name )const;
 
@@ -403,6 +421,7 @@ namespace bts { namespace wallet {
                                                const std::string& new_active_key,
                                                bool sign = true );
 
+#if 0
          signed_transaction create_proposal( const string& delegate_account_name,
                                              const string& subject,
                                              const string& body,
@@ -415,6 +434,7 @@ namespace bts { namespace wallet {
                                            proposal_vote::vote_type vote,
                                            const string& message = string(),
                                            bool sign = true);
+#endif
 
 
          ///@} Transaction Generation Methods
@@ -426,18 +446,6 @@ namespace bts { namespace wallet {
 
          bool      is_sending_address( const address& addr )const;
          bool      is_receive_address( const address& addr )const;
-
-         /**
-          *  Bitcoin compatibility
-          */
-         ///@{
-         //address                                    get_new_address( const string& account_name );
-         //public_key_type                            get_new_public_key( const string& account_name );
-
-         /*
-         unordered_map<address,string>    get_receive_addresses()const;
-         unordered_map<address,string>    get_send_addresses()const;
-         */
 
          account_balance_summary_type       get_account_balances( const string& account_name = "" )const;
 
@@ -461,7 +469,12 @@ namespace bts { namespace wallet {
                                                            double amount_per_xts,
                                                            const string& amount_asset_symbol, bool sign = true );
 
+         uint32_t                           regenerate_keys( const string& account_name, uint32_t max_number_of_attempts );
          int32_t                            recover_accounts(int32_t number_of_accounts , int32_t max_number_of_attempts);
+
+         wallet_transaction_record          recover_transaction( const string& transaction_id_prefix, const string& recipient_account );
+         wallet_transaction_record          edit_transaction( const string& transaction_id_prefix, const string& recipient_account,
+                                                              const string& memo_message );
 
          optional<wallet_account_record>    get_account_record( const address& addr)const;
          /*
@@ -488,10 +501,8 @@ namespace bts { namespace wallet {
 
          std::string login_start( const std::string& account_name );
          fc::variant login_finish(const public_key_type& server_key,
-
-          const public_key_type& client_key,
-          const fc::ecc::compact_signature& client_signature);
-
+                                  const public_key_type& client_key,
+                                  const fc::ecc::compact_signature& client_signature);
 
          // DNS
             
@@ -544,6 +555,12 @@ namespace bts { namespace wallet {
 
         // END DNS
 
+
+         mail::message mail_create(const string& sender,
+                                   const public_key_type& recipient,
+                                   const string& subject,
+                                   const string& body);
+         mail::message mail_open(const address& recipient, const mail::message& ciphertext);
 
      private:
          unique_ptr<detail::wallet_impl> my;

@@ -1149,11 +1149,88 @@
             {
                "name" : "order_id",
                "type" : "address",
-               "description" : "the order ID you would like to cover"
+               "description" : "the order address you would like to cover"
             }
          ],
          "prerequisites" : ["wallet_unlocked"],
          "aliases" : [ "cover" ]
+      },
+      {
+         "method_name" : "wallet_market_cover2",
+         "description" : "Used to place a request to cover an existing short position",
+         "return_type" : "signed_transaction",
+         "parameters"  : [
+            {
+               "name" : "from_account_name",
+               "type" : "account_name",
+               "description" : "the account that will provide funds for the ask"
+            },
+            {
+               "name" : "quantity",
+               "type" : "real_amount",
+               "description" : "the quantity of items you would like to cover"
+            },
+            {
+               "name" : "quantity_symbol",
+               "type" : "asset_symbol",
+               "description" : "the type of asset you are covering (ie: USD)"
+            },
+            {
+               "name" : "short_id",
+               "type" : "order_id",
+               "description" : "the order ID you would like to cover"
+            }
+         ],
+         "prerequisites" : ["wallet_unlocked"],
+         "aliases" : []
+      },
+      {
+         "method_name" : "wallet_market_add_collateral",
+         "description" : "Add collateral to a short position",
+         "return_type" : "signed_transaction",
+         "parameters"  : [
+            {
+               "name" : "from_account_name",
+               "type" : "account_name",
+               "description" : "the account that will provide funds for the ask"
+            },
+            {
+               "name" : "short_id",
+               "type" : "address",
+               "description" : "the address of the order to recollateralize"
+            },
+            {
+               "name" : "collateral_to_add",
+               "type" : "share_type",
+               "description" : "Amount of collateral to add"
+            }
+          ],
+         "prerequisites" : ["wallet_unlocked"],
+         "aliases" : [ "recollateralize" ]
+      },
+      {
+         "method_name" : "wallet_market_add_collateral2",
+         "description" : "Add collateral to a short position",
+         "return_type" : "signed_transaction",
+         "parameters"  : [
+            {
+               "name" : "from_account_name",
+               "type" : "account_name",
+               "description" : "the account that will provide funds for the ask"
+            },
+            {
+               "name" : "short_id",
+               "type" : "order_id",
+               "description" : "the ID of the order to recollateralize"
+            },
+            {
+               "name" : "collateral_to_add",
+               "type" : "share_type",
+               "description" : "Amount of collateral to add"
+            }
+          ],
+         "prerequisites" : ["wallet_unlocked"],
+         "aliases" : []
       },
       {
          "method_name" : "wallet_market_order_list",
@@ -1187,6 +1264,37 @@
          "aliases" : [ "list_orders" ]
       },
       {
+         "method_name" : "wallet_market_order_list2",
+         "description" : "List an order list of a specific market",
+         "return_type" : "market_order_map",
+         "parameters"  : [
+            {
+               "name" : "base_symbol",
+               "type" : "asset_symbol",
+               "description" : "the base symbol of the market"
+            },
+            {
+               "name" : "quote_symbol",
+               "type" : "asset_symbol",
+               "description" : "the quote symbol of the market"
+            },
+            {
+               "name" : "limit",
+               "type" : "int64_t",
+               "description" : "the maximum number of items to return",
+               "default_value" : -1
+            },
+            {
+               "name" : "account_name",
+               "type" : "account_name",
+               "description" : "the account for which to get the orders, or 'ALL' to get them all",
+               "default_value" : "ALL"
+            }
+         ],
+         "prerequisites" : ["wallet_open"],
+         "aliases" : []
+      },
+      {
          "method_name" : "wallet_market_cancel_order",
          "description" : "Cancel an order",
          "return_type" : "signed_transaction",
@@ -1199,6 +1307,20 @@
           ],
          "prerequisites" : ["wallet_unlocked"],
          "aliases" : [ "cancel", "cancel_order" ]
+      },
+      {
+         "method_name" : "wallet_market_cancel_order2",
+         "description" : "Cancel an order",
+         "return_type" : "signed_transaction",
+         "parameters"  : [
+            {
+               "name" : "order_id",
+               "type" : "order_id",
+               "description" : "the ID of the order to cancel"
+            }
+          ],
+         "prerequisites" : ["wallet_unlocked"],
+         "aliases" : []
       },
       {
          "method_name" : "wallet_dump_private_key",
@@ -1385,6 +1507,52 @@
          "prerequisites" : ["wallet_unlocked"]
       },
       {
+         "method_name" : "wallet_recover_transaction",
+         "description" : "Attempts to recover any missing recipient and memo information for the specified transaction",
+         "return_type" : "transaction_record",
+         "parameters"  : [
+            {
+                "name" : "transaction_id_prefix",
+                "type" : "string",
+                "description" : "the id (or id prefix) of the transaction record"
+            },
+            {
+                "name" : "recipient_account",
+                "type" : "string",
+                "description" : "the account name of the recipient (if known)",
+                "default_value" : ""
+            }
+         ],
+         "prerequisites" : ["wallet_unlocked"],
+         "aliases" : ["recover_transaction"]
+      },
+      {
+         "method_name" : "wallet_edit_transaction",
+         "description" : "Manually edit the specified transaction entry's recipient account and memo",
+         "return_type" : "transaction_record",
+         "parameters"  : [
+            {
+                "name" : "transaction_id_prefix",
+                "type" : "string",
+                "description" : "the id (or id prefix) of the transaction record"
+            },
+            {
+                "name" : "recipient_account",
+                "type" : "string",
+                "description" : "the recipient account name to save, or leave empty to keep the existing recipient",
+                "default_value" : ""
+            },
+            {
+                "name" : "memo_message",
+                "type" : "string",
+                "description" : "the memo message to save, or leave empty to keep the existing memo message",
+                "default_value" : ""
+            }
+         ],
+         "prerequisites" : ["wallet_unlocked"],
+         "aliases" : ["edit_transaction"]
+      },
+      {
          "method_name" : "wallet_publish_price_feed",
          "description" : "publishes a price feed for BitAssets, only active delegates may do this",
          "return_type" : "signed_transaction",
@@ -1403,6 +1571,70 @@
                 "name" : "asset_symbol",
                 "type" : "asset_symbol",
                 "description" : "the type of asset being priced"
+             }
+         ],
+         "prerequisites" : ["wallet_unlocked"]
+      },
+      {
+         "method_name" : "wallet_regenerate_keys",
+         "description" : "regenerates private keys as part of wallet recovery",
+         "return_type" : "int32_t",
+         "parameters"  : [
+             {
+                "name" : "account_name",
+                "type" : "account_name",
+                "description" : "the account the generated keys should be a part of"
+             },
+             {
+                "name" : "max_key_number",
+                "type" : "uint32_t",
+                "description" : "the last key number to regenrate"
+             }
+         ],
+         "prerequisites" : ["wallet_unlocked"]
+      },
+      {
+         "method_name" : "wallet_mail_create",
+         "description" : "Creates a new mail message.",
+         "return_type" : "message",
+         "parameters"  : [
+             {
+                "name" : "sender",
+                "type" : "string",
+                "description" : "The name of the message's sender."
+             },
+             {
+                "name" : "recipient",
+                "type" : "string",
+                "description" : "The name of the message's recipient."
+             },
+             {
+                "name" : "subject",
+                "type" : "string",
+                "description" : "The subject of the message."
+             },
+             {
+                "name" : "body",
+                "type" : "string",
+                "description" : "The body of the message."
+             }
+         ],
+         "prerequisites" : ["wallet_unlocked"]
+      },
+      {
+         "method_name" : "wallet_mail_open",
+         "description" : "Opens an encrypted mail message.",
+         "return_type" : "message",
+         "parameters"  : [
+             {
+                "name" : "recipient",
+                "type" : "address",
+                "description" : "The address of the message's recipient."
+             },
+             {
+                "name" : "ciphertext",
+                "type" : "message",
+                "description" : "The encrypted message."
              }
          ],
          "prerequisites" : ["wallet_unlocked"]

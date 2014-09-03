@@ -46,7 +46,7 @@ add_library( bts_blockchain
              extended_address.cpp
              address.cpp
              pts_address.cpp
-             proposal_operations.cpp
+#proposal_operations.cpp
              feed_operations.cpp
 #fire_operation.cpp
              asset.cpp
@@ -67,7 +67,9 @@ add_library( bts_blockchain
            )
 
 if(MSVC)
-  set_source_files_properties(${generated_genesis_file} PROPERTIES COMPILE_FLAGS "/bigobj")
+  set_source_files_properties(${generated_genesis_file} PROPERTIES COMPILE_FLAGS "/bigobj /Od")
+else()
+  set_source_files_properties(${generated_genesis_file} PROPERTIES COMPILE_FLAGS "-O0")
 endif()
 
 target_link_libraries( bts_blockchain fc bts_db leveldb )
