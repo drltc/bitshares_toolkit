@@ -6765,7 +6765,7 @@ namespace bts { namespace wallet {
         unordered_set<address> required_signatures;
         auto odomain_rec = my->_blockchain->get_domain_record( domain_name );
 
-        FC_ASSERT( odomain_rec.valid(), "That domain does not appear in the blockchain." )
+        FC_ASSERT( odomain_rec.valid(), "That domain does not appear in the blockchain." );
         FC_ASSERT( odomain_rec->get_true_state(my->_blockchain->now().sec_since_epoch()) == domain_record::owned,
                    "Attempting to update a name which is not in 'owned' state");
         FC_ASSERT( is_valid_value( value ), "Trying to update with invalid value" );
@@ -6805,7 +6805,7 @@ namespace bts { namespace wallet {
         unordered_set<address> required_signatures;
         auto odomain_rec = my->_blockchain->get_domain_record( domain_name );
 
-        FC_ASSERT( odomain_rec.valid(), "That domain does not appear in the blockchain." )
+        FC_ASSERT( odomain_rec.valid(), "That domain does not appear in the blockchain." );
         FC_ASSERT( odomain_rec->get_true_state(my->_blockchain->now().sec_since_epoch()) == domain_record::owned,
                    "Attempting to update a name which is not in 'owned' state");
 
