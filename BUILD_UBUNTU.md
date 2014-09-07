@@ -2,7 +2,7 @@ These instructions worked on a fresh Ubuntu 14.04 LTS image.
 
     sudo apt-get update
     sudo apt-get install cmake git libreadline-dev uuid-dev g++ libdb++-dev libdb-dev zip libssl-dev openssl build-essential python-dev autotools-dev libicu-dev libbz2-dev libboost-dev libboost-all-dev
-    git clone https://github.com/BitShares/bitshares_toolkit.git
+    git clone https://github.com/das-lab/DNS.git
     cd bitshares_toolkit
     git submodule init
     git submodule update
@@ -12,7 +12,7 @@ These instructions worked on a fresh Ubuntu 14.04 LTS image.
 For the Qt Wallet, some extra steps are required:
 
 	sudo apt-get install npm qt5-default libqt5webkit5-dev
-	cd bitshares-toolkit
+	cd DNS
 	cmake -DINCLUDE_QT_WALLET=ON .
 	cd programs/web_wallet
 	sudo npm install -g lineman
