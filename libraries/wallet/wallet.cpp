@@ -6392,12 +6392,15 @@ namespace bts { namespace wallet {
         pretty.signin_key = rec.signin_key;
         pretty.last_renewed = fc::time_point_sec( rec.last_renewed );
         pretty.domain_state = rec.get_true_state( my->_blockchain->now().sec_since_epoch() );
+        pretty.auction_info = optional<pretty_domain_auction_summary>();
+        if( rec.is_in_auction() )
+            pretty.auction_info = to_pretty_auction_summary( rec );
         return pretty;
     }
 
     pretty_domain_offer   wallet::to_pretty_domain_offer( offer_index_key& offer )
     {
-        auto oasset_rec = my->_blockchain->get_asset_record( "BDNS" );
+        auto oasset_rec = my->_blockchain->get_asset_record( "DNS" );
         FC_ASSERT( oasset_rec.valid(), "No asset record for DNS" );
         const int64_t precision = oasset_rec->precision ? oasset_rec->precision : 1;
 
@@ -6413,7 +6416,7 @@ namespace bts { namespace wallet {
         FC_ASSERT( rec.get_true_state( my->_blockchain->now().sec_since_epoch()) == domain_record::in_auction_first
                 || rec.get_true_state( my->_blockchain->now().sec_since_epoch()) == domain_record::in_auction_default
                 || rec.get_true_state( my->_blockchain->now().sec_since_epoch()) == domain_record::in_auction_kickback );
-        auto oasset_rec = my->_blockchain->get_asset_record( "BDNS" );
+        auto oasset_rec = my->_blockchain->get_asset_record( "DNS" );
         FC_ASSERT( oasset_rec.valid(), "No asset record for DNS" );
         const int64_t precision = oasset_rec->precision ? oasset_rec->precision : 1;
 
@@ -6456,7 +6459,7 @@ namespace bts { namespace wallet {
         signed_transaction trx;
         unordered_set<address> required_signatures;
 
-        const auto asset_rec = my->_blockchain->get_asset_record( "BDNS" );
+        const auto asset_rec = my->_blockchain->get_asset_record( "DNS" );
         FC_ASSERT( asset_rec.valid(), "No asset record for DNS" );
         const int64_t precision = asset_rec->precision ? asset_rec->precision : 1;
         share_type bid_amount = real_bid_amount * precision;
@@ -6524,7 +6527,7 @@ namespace bts { namespace wallet {
         signed_transaction trx;
         unordered_set<address> required_signatures;
 
-        const auto asset_rec = my->_blockchain->get_asset_record( "BDNS" );
+        const auto asset_rec = my->_blockchain->get_asset_record( "DNS" );
         FC_ASSERT( asset_rec.valid(), "No asset record for DNS" );
         const int64_t precision = asset_rec->precision ? asset_rec->precision : 1;
         share_type min_amount = real_min_amount * precision;
@@ -6616,7 +6619,7 @@ namespace bts { namespace wallet {
         signed_transaction trx;
         unordered_set<address> required_signatures;
 
-        const auto asset_rec = my->_blockchain->get_asset_record( "BDNS" );
+        const auto asset_rec = my->_blockchain->get_asset_record( "DNS" );
         FC_ASSERT( asset_rec.valid(), "No asset record for DNS" );
         const int64_t precision = asset_rec->precision ? asset_rec->precision : 1;
         share_type price = real_price * precision;
@@ -6849,8 +6852,8 @@ namespace bts { namespace wallet {
         signed_transaction trx;
         unordered_set<address>     required_signatures;
 
-        const auto asset_rec = my->_blockchain->get_asset_record( "BDNS" );
-        FC_ASSERT( asset_rec.valid(), "No asset record for BDNS" );
+        const auto asset_rec = my->_blockchain->get_asset_record( "DNS" );
+        FC_ASSERT( asset_rec.valid(), "No asset record for DNS" );
         const int64_t precision = asset_rec->precision ? asset_rec->precision : 1;
         share_type points = real_points * precision;
 

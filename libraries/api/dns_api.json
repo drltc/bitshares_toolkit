@@ -166,6 +166,15 @@
             "prerequisites": ["json_authenticated"]
         },
         {
+            "method_name": "dotp2p_get_spotlight_size",
+            "description": "Get the number of domains whose timer is ticking."
+            "return_type": "int32_t",
+            "parameters": 
+            [
+            ],
+            "prerequisites": ["json_authenticated"]
+        },
+        {
             "method_name": "dotp2p_list_mine",
             "description": "List all the .p2p domains controlled by this wallet",
             "return_type": "domain_info_array",

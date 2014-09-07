@@ -1651,15 +1651,19 @@ namespace bts { namespace blockchain {
       // delete the old auction index if it exists
       ilog("Storing domain record: ${rec}", ("rec", rec) );
       auto old_domain_rec = my->_domain_db.find( rec.domain_name );
-      if( old_domain_rec.valid() && old_domain_rec.value().is_in_auction() )
+      if( old_domain_rec.valid() )//&& old_domain_rec.value().is_in_auction() )
       {
-         ilog(" Removing old auction key: ${key}", ("key", old_domain_rec.value().get_auction_key() ) );
+          ulog(" Removing old auction key: ${key}", ("key", old_domain_rec.value().get_auction_key() ) );
           my->_auction_db.remove( old_domain_rec.value().get_auction_key() );
       }
       my->_domain_db.store( rec.domain_name, rec );
+      ulog("Is in auction:  ${is}", ("is", rec.is_in_auction() ) );
       if( rec.is_in_auction() )
       {
+         ulog("Storing an auction in chain DB:  ${key}", ("key", rec.get_auction_key()));
          my->_auction_db.store( rec.get_auction_key(), rec.domain_name );
+         auto domain = my->_auction_db.find( rec.get_auction_key() );
+         ulog("Should have found an auction: ${dom}", ("dom", domain.value()));
       }
    } FC_CAPTURE_AND_RETHROW( (rec) ) }
 
@@ -1728,6 +1732,7 @@ namespace bts { namespace blockchain {
     vector<domain_record>       chain_database::get_domains_in_auction(uint32_t limit)const
     {
         vector<domain_record> domains;
+        ilog("Called get_domains_in_auction");
         auto itr = my->_auction_db.begin();
         uint32_t count = 0;
         while( itr.valid() && count < limit )
@@ -1737,6 +1742,7 @@ namespace bts { namespace blockchain {
             domains.push_back( *domain_rec );
             itr++; count++;
         }
+        ilog("returning domains: ${domains}", ("domains", domains));
         return domains;
     }
 

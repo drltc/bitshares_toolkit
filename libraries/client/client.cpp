@@ -2950,7 +2950,7 @@ config load_config( const fc::path& datadir )
       info["blockchain_delegate_pay_rate"]                      = _chain_db->get_delegate_pay_rate();
 
       info["blockchain_share_supply"]                           = variant();
-      const auto share_record                                   = _chain_db->get_asset_record( BTS_ADDRESS_PREFIX );
+      const auto share_record                                   = _chain_db->get_asset_record( BTS_BLOCKCHAIN_SYMBOL );
       if( share_record.valid() )
           info["blockchain_share_supply"]                       = share_record->current_share_supply;
 
@@ -3826,12 +3826,17 @@ config load_config( const fc::path& datadir )
 
     vector<pretty_domain_auction_summary>     client_impl::dotp2p_list_auctions()
     {
-        auto auctions = _chain_db->get_domains_in_auction(_chain_db->get_auction_throttle());
+        auto auctions = _chain_db->get_domains_in_auction(-1); //_chain_db->get_auction_throttle());
         auto pretties = vector<pretty_domain_auction_summary>();
         pretties.reserve(auctions.size());
         for( auto item : auctions )
             pretties.push_back( _wallet->to_pretty_auction_summary( item ) );
         return pretties;
+    }
+
+    int32_t                   client_impl::dotp2p_get_spotlight_size()
+    {
+        return _chain_db->get_auction_throttle();
     }
 
     signed_transaction        client_impl::keyid_adjust_vanity(const string& name, const share_type& points,

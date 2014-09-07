@@ -3,11 +3,11 @@
 #include <stdint.h>
 
 /* Define client version here */
-#define BTS_CLIENT_VERSION                                  "Dry Run NN"
+#define BTS_CLIENT_VERSION                                  "-1.0.1"
 
 /* Comment out this line for a non-test network */
 #define BTS_TEST_NETWORK
-#define BTS_TEST_NETWORK_VERSION                            103
+#define BTS_TEST_NETWORK_VERSION                            104
 
 /** @file bts/blockchain/config.hpp
  *  @brief Defines global constants that determine blockchain behavior
@@ -50,7 +50,7 @@
 /**
  * Defines the number of seconds that should elapse between blocks
  */
-#define BTS_BLOCKCHAIN_BLOCK_INTERVAL_SEC                   int64_t(10)
+#define BTS_BLOCKCHAIN_BLOCK_INTERVAL_SEC                   int64_t(2)
 
 /**
  *  The maximum size of the raw data contained in the blockchain, this size is
