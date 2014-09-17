@@ -135,7 +135,8 @@ FC_REFLECT_ENUM( bts::blockchain::operation_type_enum,
                  (remove_collateral_op_type)
                  (define_delegate_slate_op_type)
                  (update_feed_op_type)
-
+                 (burn_op_type)
+                 (link_account_op_type)
                  (domain_bid_op_type)
                  (domain_update_value_op_type)
                  (domain_update_signin_op_type)
@@ -143,7 +144,8 @@ FC_REFLECT_ENUM( bts::blockchain::operation_type_enum,
                  (domain_cancel_sell_op_type)
                  (domain_buy_op_type)
                  (domain_transfer_op_type)
-               )
+
+                 )
 
 FC_REFLECT( bts::blockchain::operation, (type)(data) )
 
