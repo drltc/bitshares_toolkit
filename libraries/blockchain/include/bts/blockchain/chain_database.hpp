@@ -96,8 +96,8 @@ namespace bts { namespace blockchain {
           * @brief open Open the databases, reindexing as necessary
           * @param reindex_status_callback Called for each reindexed block, with the count of blocks reindexed so far
           */
-         void open(const fc::path& data_dir, fc::optional<fc::path> genesis_file ,
-                   std::function<void(uint32_t)> reindex_status_callback = std::function<void(uint32_t)>());
+         void open(const fc::path& data_dir, fc::optional<fc::path> genesis_file,
+                   std::function<void(float)> reindex_status_callback = std::function<void(float)>());
          void close();
 
          void add_observer( chain_observer* observer );
@@ -192,6 +192,12 @@ namespace bts { namespace blockchain {
          virtual void                store_transaction( const transaction_id_type&,
                                                         const transaction_record&  ) override;
 
+
+         virtual void                store_burn_record( const burn_record& br ) override;
+         virtual oburn_record        fetch_burn_record( const burn_record_key& key )const override;
+         vector<burn_record>         fetch_burn_records( const string& account_name )const;
+
+
          map<balance_id_type, balance_record>  get_balances( const string& first,
                                                              uint32_t limit )const;
 
@@ -247,6 +253,8 @@ namespace bts { namespace blockchain {
                                                                uint32_t limit = uint32_t(-1) );
          vector<market_order>               get_market_covers( const string& quote_symbol,
                                                                uint32_t limit = uint32_t(-1) );
+   
+         share_type                         get_asset_collateral( const string& symbol );
 
          virtual omarket_order              get_lowest_ask_record( const asset_id_type& quote_id,
                                                                    const asset_id_type& base_id )override;
@@ -256,6 +264,7 @@ namespace bts { namespace blockchain {
                                                              uint32_t limit = uint32_t(-1) );
 
          // TODO: Specify order type and/or market
+         vector<market_order>               get_market_orders( std::function<bool(market_order)> filter, int32_t limit ) const;
          optional<market_order>             get_market_order( const order_id_type& order_id )const;
 
          void                               scan_assets( function<void( const asset_record& )> callback );
@@ -351,7 +360,7 @@ namespace bts { namespace blockchain {
          virtual void                       set_feed( const feed_record& )override;
          virtual ofeed_record               get_feed( const feed_index& )const override;
 
-         virtual asset                      calculate_base_supply()const override;
+         asset                              calculate_base_supply()const;
          asset                              unclaimed_genesis();
 
          // TODO: Only call on pending chain state

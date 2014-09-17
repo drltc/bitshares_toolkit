@@ -40,6 +40,8 @@ namespace bts { namespace blockchain {
    const operation_type_enum define_delegate_slate_operation::type  = define_delegate_slate_op_type;
 
    const operation_type_enum update_feed_operation::type            = update_feed_op_type;
+   const operation_type_enum burn_operation::type                   = burn_op_type;
+   const operation_type_enum link_account_operation::type           = link_account_op_type;
 
    const operation_type_enum domain_bid_operation::type                = domain_bid_op_type;
    const operation_type_enum domain_update_value_operation::type       = domain_update_value_op_type;
@@ -72,6 +74,10 @@ namespace bts { namespace blockchain {
       bts::blockchain::operation_factory::instance().register_operation<remove_collateral_operation>();
       bts::blockchain::operation_factory::instance().register_operation<define_delegate_slate_operation>();
       bts::blockchain::operation_factory::instance().register_operation<update_feed_operation>();
+
+      bts::blockchain::operation_factory::instance().register_operation<burn_operation>();
+      bts::blockchain::operation_factory::instance().register_operation<link_account_operation>();
+
 
       bts::blockchain::operation_factory::instance().register_operation<domain_bid_operation>();
       bts::blockchain::operation_factory::instance().register_operation<domain_update_value_operation>();

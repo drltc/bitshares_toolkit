@@ -3,17 +3,17 @@
 #include <stdint.h>
 
 /* Define client version here */
-#define BTS_CLIENT_VERSION                                  "-1.0.1"
+#define BTS_CLIENT_VERSION                                  "testnet-106"
 
 /* Comment out this line for a non-test network */
 #define BTS_TEST_NETWORK
-#define BTS_TEST_NETWORK_VERSION                            105
+#define BTS_TEST_NETWORK_VERSION                            106
 
 /** @file bts/blockchain/config.hpp
  *  @brief Defines global constants that determine blockchain behavior
  */
 #define BTS_BLOCKCHAIN_VERSION                              109
-#define BTS_BLOCKCHAIN_DATABASE_VERSION                     133
+#define BTS_BLOCKCHAIN_DATABASE_VERSION                     138
 
 /**
  *  The address prepended to string representation of
@@ -27,8 +27,11 @@
 #define BTS_BLOCKCHAIN_DESCRIPTION                         "The Decentralized Namespace Service"
 #define BTS_BLOCKCHAIN_PRECISION                           (100000)
 #define BTS_BLOCKCHAIN_MAX_TRANSACTION_EXPIRATION_SEC      (60*60*24*2)
+#define BTS_BLOCKCHAIN_MIN_YIELD_PERIOD_SEC                (60*60*24) // 24 hours
 
+#define BTS_BLOCKCHAIN_MIN_BURN_FEE                         BTS_BLOCKCHAIN_PRECISION * 1 // 1 XTS
 #define BTS_BLOCKCHAIN_DEFAULT_RELAY_FEE                   (10000) // DNS
+#define BTS_BLOCKCHAIN_MINIMUM_SHORT_ORDER_SIZE             (BTS_BLOCKCHAIN_PRECISION*100)
 
 /**
  * The number of delegates that the blockchain is designed to support
@@ -100,7 +103,7 @@
  *
  *   Currently set to 1% of the share in the DAC, or 0.5% for each side of the market.
  */
-#define BTS_BLOCKCHAIN_MARKET_DEPTH_REQUIREMENT             (BTS_BLOCKCHAIN_INITIAL_SHARES/1000)
+#define BTS_BLOCKCHAIN_MARKET_DEPTH_REQUIREMENT             0 //(BTS_BLOCKCHAIN_INITIAL_SHARES/200000000)
 
 /**
  *  The number of blocks expected per hour based upon the BTS_BLOCKCHAIN_BLOCK_INTERVAL_SEC

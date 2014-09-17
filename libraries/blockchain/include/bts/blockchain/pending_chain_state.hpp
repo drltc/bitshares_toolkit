@@ -1,7 +1,5 @@
-#pragma  once
-
+#pragma once
 #include <bts/blockchain/chain_interface.hpp>
-
 #include <deque>
 
 namespace bts { namespace blockchain {
@@ -9,20 +7,22 @@ namespace bts { namespace blockchain {
    class pending_chain_state : public chain_interface, public std::enable_shared_from_this<pending_chain_state>
    {
       public:
-         pending_chain_state( chain_interface_ptr prev_state = chain_interface_ptr() );
-         virtual ~pending_chain_state()override;
+                                        pending_chain_state( chain_interface_ptr prev_state = chain_interface_ptr() );
+         virtual                        ~pending_chain_state()override;
 
          void                           set_prev_state( chain_interface_ptr prev_state );
 
          fc::ripemd160                  get_current_random_seed()const override;
 
-         virtual void                  set_feed( const feed_record&  ) override;
-         virtual ofeed_record          get_feed( const feed_index& )const override;
-         virtual oprice                get_median_delegate_price( const asset_id_type& )const override;
-         virtual void                  set_market_dirty( const asset_id_type& quote_id, const asset_id_type& base_id )override;
-
+         virtual void                   set_feed( const feed_record&  ) override;
+         virtual ofeed_record           get_feed( const feed_index& )const override;
+         virtual oprice                 get_median_delegate_price( const asset_id_type& )const override;
+         virtual void                   set_market_dirty( const asset_id_type& quote_id, const asset_id_type& base_id )override;
 
          virtual fc::time_point_sec     now()const override;
+
+         virtual void                   store_burn_record( const burn_record& br ) override;
+         virtual oburn_record           fetch_burn_record( const burn_record_key& key )const override;
 
          virtual oasset_record          get_asset_record( const asset_id_type& id )const override;
          virtual obalance_record        get_balance_record( const balance_id_type& id )const override;
@@ -135,8 +135,6 @@ namespace bts { namespace blockchain {
 
          virtual void                   set_market_transactions( vector<market_transaction> trxs )override;
 
-         virtual asset                  calculate_base_supply()const override;
-
          // NOTE: this isn't really part of the chain state, but more part of the block state
          vector<market_transaction>                                     market_transactions;
 
@@ -162,6 +160,7 @@ namespace bts { namespace blockchain {
          map< std::pair<asset_id_type,asset_id_type>, market_status>    market_statuses;
          map<operation_type_enum, std::deque<operation>>                recent_operations;
          map<feed_index, feed_record>                                   feeds;
+         map<burn_record_key,burn_record_value>                         burns;
 
          unordered_map< string, domain_record>                          domains;
          map< offer_index_key, balance_id_type>                         offers;
@@ -183,6 +182,7 @@ namespace bts { namespace blockchain {
 
 } } // bts::blockchain
 
+// TODO: Why not reflect all members?
 FC_REFLECT( bts::blockchain::pending_chain_state,
             (assets)(slates)(accounts)(balances)(account_id_index)(symbol_id_index)(transactions)
-            (properties)(bids)(asks)(shorts)(collateral)(slots)(market_statuses)(feeds)(_dirty_markets) )
+            (properties)(bids)(asks)(shorts)(collateral)(slots)(market_statuses)(feeds)(burns)(_dirty_markets) )
