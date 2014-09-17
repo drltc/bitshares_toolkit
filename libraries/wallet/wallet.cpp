@@ -136,7 +136,7 @@ namespace bts { namespace wallet {
             bool scan_short( const short_operation& op, wallet_transaction_record& trx_rec, asset& total_fee );
 
             bool scan_domain_transfer( wallet_transaction_record& trx_rec, const domain_transfer_operation& op,
-                                       const private_keys& keys );
+                                       const vector<fc::ecc::private_key>& keys );
 
             bool scan_domain_modify( wallet_transaction_record& trx_rec, const operation& op );
 
@@ -1459,7 +1459,7 @@ namespace bts { namespace wallet {
        } FC_RETHROW_EXCEPTIONS( warn, "", ("op",op) ) } // wallet_impl::scan_domain_modify
       
        bool wallet_impl::scan_domain_transfer( wallet_transaction_record& trx_rec, const domain_transfer_operation& op,
-                                               const private_keys& keys )
+                                               const vector<fc::ecc::private_key>& keys )
        { try {
           bool cache_transfer = false; 
         if( _wallet_db.has_private_key( op.owner ) )
