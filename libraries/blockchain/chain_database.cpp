@@ -1820,7 +1820,7 @@ namespace bts { namespace blockchain {
             auto domain_rec = get_domain_record( itr.value() );
             FC_ASSERT( domain_rec.valid(), "all domain records in auction cache should be valid" );
             domains.push_back( *domain_rec );
-            itr++; count++;
+            ++itr; count++;
         }
         ilog("returning domains: ${domains}", ("domains", domains));
         return domains;

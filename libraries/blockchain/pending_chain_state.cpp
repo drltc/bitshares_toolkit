@@ -92,12 +92,6 @@ namespace bts { namespace blockchain {
    }
 
 
-   /** polymorphically allcoate a new state */
-   chain_interface_ptr pending_chain_state::create( const chain_interface_ptr& prev_state )const
-   {
-      return std::make_shared<pending_chain_state>(prev_state);
-   }
-
    /** Apply changes from this pending state to the previous state */
    void pending_chain_state::apply_changes()const
    {
@@ -125,16 +119,13 @@ namespace bts { namespace blockchain {
       {
          for( const auto& item : items.second )    prev_state->store_recent_operation( item );
       }
-<<<<<<< HEAD
 
+      for( const auto& item : burns ) prev_state->store_burn_record( burn_record(item.first,item.second) );
 
       for( const auto& item : domains )         prev_state->store_domain_record( item.second );
       for( const auto& item : offers )          prev_state->store_domain_offer( item.first );
 
 
-=======
-      for( const auto& item : burns ) prev_state->store_burn_record( burn_record(item.first,item.second) );
->>>>>>> 8c99991dfebf86298daafb2333e5f86231679e31
       prev_state->set_market_transactions( market_transactions );
       prev_state->set_dirty_markets(_dirty_markets);
    }
@@ -267,13 +258,8 @@ namespace bts { namespace blockchain {
             undo_state->store_market_status( market_status() );
          }
       }
-<<<<<<< HEAD
-      
 
-      for( auto const& item : feeds )
-=======
       for( const auto& item : feeds )
->>>>>>> 8c99991dfebf86298daafb2333e5f86231679e31
       {
          auto prev_value = prev_state->get_feed( item.first );
          if( prev_value ) undo_state->set_feed( *prev_value );
@@ -284,7 +270,6 @@ namespace bts { namespace blockchain {
          undo_state->store_burn_record( burn_record( item.first ) );
       }
 
-<<<<<<< HEAD
 
 // DNS
       for( const auto& item : domains )
@@ -304,10 +289,8 @@ namespace bts { namespace blockchain {
 
 // END DNS
 
-      auto dirty_markets = prev_state->get_dirty_markets();
-=======
       const auto dirty_markets = prev_state->get_dirty_markets();
->>>>>>> 8c99991dfebf86298daafb2333e5f86231679e31
+
       undo_state->set_dirty_markets(dirty_markets);
 
       /* NOTE: Recent operations are currently not rewound on undo */

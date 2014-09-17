@@ -52,7 +52,7 @@ namespace bts { namespace blockchain {
       define_delegate_slate_op_type = 18,
       update_feed_op_type         = 19,
       burn_op_type                = 20,
-      link_account_op_type        = 21
+      link_account_op_type        = 21,
 
       domain_bid_op_type               = 101,
       domain_update_value_op_type      = 102,
