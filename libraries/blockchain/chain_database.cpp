@@ -601,7 +601,7 @@ namespace bts { namespace blockchain {
             pending_base_record->collected_fees -= max_available_paycheck;
             pending_state->store_asset_record( *pending_base_record );
 
-            auto max_shares = pending_base_record->max_share_supply;
+            auto max_shares = pending_base_record->maximum_share_supply;
             auto current_shares = pending_base_record->current_share_supply;
             auto max_subsidy = (max_shares - current_shares) / P2P_DILUTION_RATE;
             auto accepted_subsidy = (max_subsidy * pay_rate_percent) / 100;
@@ -615,7 +615,7 @@ namespace bts { namespace blockchain {
             FC_ASSERT( base_asset_record.valid() );
             base_asset_record->current_share_supply -= (max_available_paycheck - accepted_paycheck);
             base_asset_record->current_share_supply += accepted_subsidy;
-            base_asset_record->max_share_supply -= burned_subsidy;
+            base_asset_record->maximum_share_supply -= burned_subsidy;
             pending_state->store_asset_record( *base_asset_record );
 
       } FC_RETHROW_EXCEPTIONS( warn, "", ("block_id",block_id) ) }
