@@ -24,6 +24,9 @@ namespace bts { namespace blockchain {
    { try {
       auto now = eval_state._current_state->now();
 
+      // DNS extra fee
+      eval_state.required_fees += asset( 100, 0 );
+
       if( !eval_state._current_state->is_valid_account_name( this->name ) )
          FC_CAPTURE_AND_THROW( invalid_account_name, (name) );
 
