@@ -4245,6 +4245,7 @@ namespace bts { namespace wallet {
       }
 
       auto required_fees = get_transaction_fee();
+      required_fees += asset(KEYID_EXTRA_FEE, 0);
 
       bool as_delegate = false;
       if( delegate_pay_rate <= 100  )
