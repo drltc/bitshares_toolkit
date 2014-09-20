@@ -1,3 +1,4 @@
+#include <bts/blockchain/dns_config.hpp>
 #include <bts/blockchain/account_operations.hpp>
 #include <bts/blockchain/chain_interface.hpp>
 #include <bts/blockchain/exceptions.hpp>
@@ -26,6 +27,13 @@ namespace bts { namespace blockchain {
 
       if( !eval_state._current_state->is_valid_account_name( this->name ) )
          FC_CAPTURE_AND_THROW( invalid_account_name, (name) );
+
+      if ( this->name.size() < KEYID_INITIAL_MIN_LENGTH )
+          FC_ASSERT(!"KeyIDs shorter than 9 characters cannot be registered at this time");
+
+      // DNS extra fee
+      eval_state.required_fees += asset( KEYID_EXTRA_FEE, 0 );
+
 
       auto current_account = eval_state._current_state->get_account_record( this->name );
       if( current_account ) FC_CAPTURE_AND_THROW( account_already_registered, (name) );
