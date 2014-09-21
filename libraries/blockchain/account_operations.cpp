@@ -29,11 +29,12 @@ namespace bts { namespace blockchain {
          FC_CAPTURE_AND_THROW( invalid_account_name, (name) );
 
       if ( this->name.size() < KEYID_INITIAL_MIN_LENGTH )
-          FC_ASSERT(!"KeyIDs shorter than 9 characters cannot be registered at this time");
+          FC_ASSERT(!"KeyIDs shorter than 10 characters cannot be registered at this time");
 
       // DNS extra fee
       eval_state.required_fees += asset( KEYID_EXTRA_FEE, 0 );
-
+      if( banned_names.find( this->name ) != banned_names.end() )
+          FC_ASSERT(!"That name is not allowed - it is a reserved word.");
 
       auto current_account = eval_state._current_state->get_account_record( this->name );
       if( current_account ) FC_CAPTURE_AND_THROW( account_already_registered, (name) );
