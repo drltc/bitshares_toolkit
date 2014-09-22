@@ -7,6 +7,8 @@
 
 namespace bts { namespace blockchain {
 
+   extern std::set<string>  banned_names;
+
    struct account_meta_info
    {
       fc::unsigned_int type;

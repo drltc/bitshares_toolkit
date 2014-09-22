@@ -21,3 +21,7 @@
 
 #define KEYID_EXTRA_FEE (100)
 #define KEYID_INITIAL_MIN_LENGTH (10)
+
+
+#define DNS_LEASE_AUCTION_DURATION_SECS (60)  // 1 month  ?
+#define DNS_MIN_BID_INCREASE(amount) ((amount * 105)/100)
