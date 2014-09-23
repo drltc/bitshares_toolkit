@@ -373,7 +373,7 @@ namespace bts { namespace blockchain {
       chain_interface_ptr prev_state = _prev_state.lock();
       auto itr = domains.find( domain_name );
       if( itr != domains.end() ) 
-        itr->second;
+        return itr->second;
       else if( prev_state ) 
         return prev_state->get_domain_record( domain_name );
       return odomain_record();
@@ -382,11 +382,17 @@ namespace bts { namespace blockchain {
    void pending_chain_state::store_domain_record( const domain_record& r )
    {
       ulog("Storing domain record in pending_chain_state:  ${rec}", ("rec", r));
+      auto domain_itr = domains.find( r.domain_name );
+      if( domain_itr != domains.end() )
+      {
+          auctions.erase(r.get_auction_key());
+      }
       domains[r.domain_name] = r;
-/*
       if( r.is_in_auction() )
-        auctions[r.get_auction_key()] = r.domain_name;
-*/
+      {
+         ulog("It is in_auction, storing it in auctions");
+         auctions[r.get_auction_key()] = r.domain_name;
+      }
    }
 
 
@@ -402,7 +408,20 @@ namespace bts { namespace blockchain {
    }
    vector<domain_record>   pending_chain_state::get_domains_in_auction(uint32_t limit)const
    {
-        FC_ASSERT(!"unimplemented pending_state get_domains_in_auction");
+        vector<domain_record> domains;
+        ilog("Called get_domains_in_auction");
+        uint32_t count = 0;
+        for( auto pair : auctions ) 
+        {
+            if( count == limit )
+                break;
+            auto domain_rec = get_domain_record( pair.second );
+            FC_ASSERT( domain_rec.valid(), "all domain records in auction cache should be valid" );
+            domains.push_back( *domain_rec );
+            count++;
+        }
+        ulog("pending::get_domains_in_auction   returning domains: ${domains}", ("domains", domains));
+        return domains;
    }
 
    void                        pending_chain_state::store_domain_offer( const offer_index_key& offer )

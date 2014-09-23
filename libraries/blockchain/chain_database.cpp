@@ -848,14 +848,15 @@ namespace bts { namespace blockchain {
             
             pay_delegate( block_id, pending_state, block_signee );
 
-            pending_state->cache_top_domains(); // DNS
-            pending_state->increment_auction_counters();  // DNS
-  
+ 
 //            apply_transactions( block_data, block_data.user_transactions, pending_state );
 
             execute_markets( block_data.timestamp, pending_state );
 
             apply_transactions( block_data, pending_state );
+
+            pending_state->cache_top_domains(); // DNS
+            pending_state->increment_auction_counters();  // DNS
 
             update_active_delegate_list( block_data, pending_state );
 
@@ -867,6 +868,7 @@ namespace bts { namespace blockchain {
             // times without changing the database other than the first
             // attempt.
             pending_state->apply_changes();
+
 
             mark_included( block_id, true );
 
