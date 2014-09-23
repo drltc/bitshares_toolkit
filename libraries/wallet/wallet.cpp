@@ -1434,6 +1434,9 @@ namespace bts { namespace wallet {
               case domain_cancel_sell_op_type:
                   existing_domain_name = op.as<domain_cancel_sell_operation>().domain_name;
                   break;
+              case domain_cancel_buy_op_type:
+                  existing_domain_name = op.as<domain_cancel_buy_operation>().domain_name;
+                  break;
               case domain_buy_op_type:
                   existing_domain_name = op.as<domain_buy_operation>().domain_name;
                   break;
@@ -1598,7 +1601,7 @@ namespace bts { namespace wallet {
            if( min_end > start + 1 )
                ulog( "Scan completed." );
          }
-         catch(exception& e)
+         catch(std::exception& e)
          {
            _scan_progress = -1;
            ulog( "Scan failure:  ${e}", ("e", e.what()) );
