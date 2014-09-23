@@ -21,8 +21,8 @@ namespace bts { namespace blockchain {
      */
     void domain_bid_operation::evaluate( transaction_evaluation_state& eval_state )
     {
+        FC_ASSERT( this->domain_name.size() >= P2P_MIN_DOMAIN_NAME_SIZE, "Domains must be at least 4 characters long." );
         FC_ASSERT( is_valid_domain( this->domain_name ) );
-        FC_ASSERT(!"this operation is disabled for this dry run");
         auto odomain_rec = eval_state._current_state->get_domain_record( this->domain_name );
         auto now = eval_state._current_state->now().sec_since_epoch();
         /* If record is invalid, nobody has bid on it yet. You can bid if you exceed current minimum bid. */
@@ -208,7 +208,6 @@ namespace bts { namespace blockchain {
     void domain_buy_operation::evaluate( transaction_evaluation_state& eval_state )
     {
         FC_ASSERT( is_valid_domain( this->domain_name ), "Trying to buy an invalid domain name" );
-        FC_ASSERT(!"this operation is disabled for this dry run");
 
         auto now = eval_state._current_state->now().sec_since_epoch();
         auto odomain_rec = eval_state._current_state->get_domain_record( this->domain_name );

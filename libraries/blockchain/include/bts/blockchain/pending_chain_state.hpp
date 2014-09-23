@@ -164,7 +164,7 @@ namespace bts { namespace blockchain {
 
          unordered_map< string, domain_record>                          domains;
          map< offer_index_key, balance_id_type>                         offers;
-         //map< auction_index_key, string >                               auctions; // TODO think carefully and maybe remove this
+         map< auction_index_key, string >                               auctions;
 
          // "set" maybe?
          map< string, string >                                          auction_set;

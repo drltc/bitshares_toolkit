@@ -17,7 +17,7 @@ namespace bts { namespace blockchain {
 
         friend bool operator == (const auction_index_key& a, const auction_index_key& b)
         {
-            return a.price == b.price;
+            return a.price == b.price && a.domain_name == b.domain_name;
         }
         friend bool operator < (const auction_index_key& a, const auction_index_key& b)
         {
@@ -25,6 +25,10 @@ namespace bts { namespace blockchain {
             if (a.price > b.price)
                 return true;
             if (a.price < b.price)
+                return false;
+            if (a.domain_name < b.domain_name)
+                return true;
+            if (a.domain_name > b.domain_name)
                 return false;
             return a.bid_time < b.bid_time;
         }
