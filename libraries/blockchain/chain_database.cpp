@@ -855,9 +855,6 @@ namespace bts { namespace blockchain {
 
             apply_transactions( block_data, pending_state );
 
-            pending_state->cache_top_domains(); // DNS
-            pending_state->increment_auction_counters();  // DNS
-
             update_active_delegate_list( block_data, pending_state );
 
             update_random_seed( block_data.previous_secret, pending_state );
@@ -869,6 +866,8 @@ namespace bts { namespace blockchain {
             // attempt.
             pending_state->apply_changes();
 
+            //pending_state->cache_top_domains(); // DNS
+            pending_state->increment_auction_counters();  // DNS
 
             mark_included( block_id, true );
 
@@ -1688,7 +1687,7 @@ namespace bts { namespace blockchain {
       // delete the old auction index if it exists
       ilog("Storing domain record: ${rec}", ("rec", rec) );
       auto old_domain_rec = my->_domain_db.find( rec.domain_name );
-      if( old_domain_rec.valid() )//&& old_domain_rec.value().is_in_auction() )
+      if( old_domain_rec.valid() && old_domain_rec.value().is_in_auction() )
       {
           ulog(" Removing old auction key: ${key}", ("key", old_domain_rec.value().get_auction_key() ) );
           my->_auction_db.remove( old_domain_rec.value().get_auction_key() );

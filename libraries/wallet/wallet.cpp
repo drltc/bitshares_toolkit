@@ -785,6 +785,7 @@ namespace bts { namespace wallet {
                   case domain_sell_op_type:
                   case domain_cancel_sell_op_type:
                   case domain_buy_op_type:
+                  case domain_cancel_buy_op_type:
                       store_record |= scan_domain_modify( *transaction_record, op );
                       break;
 
@@ -1597,10 +1598,10 @@ namespace bts { namespace wallet {
            if( min_end > start + 1 )
                ulog( "Scan completed." );
          }
-         catch(...)
+         catch(exception& e)
          {
            _scan_progress = -1;
-           ulog( "Scan failure." );
+           ulog( "Scan failure:  ${e}", ("e", e.what()) );
            throw;
          }
       }
