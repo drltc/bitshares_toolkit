@@ -785,6 +785,7 @@ namespace bts { namespace wallet {
                   case domain_sell_op_type:
                   case domain_cancel_sell_op_type:
                   case domain_buy_op_type:
+                  case domain_cancel_buy_op_type:
                       store_record |= scan_domain_modify( *transaction_record, op );
                       break;
 
@@ -1398,6 +1399,12 @@ namespace bts { namespace wallet {
                 // TODO: FC_THROW( "withdraw_option_type not implemented!" );
                 break;
              }
+             case withdraw_domain_offer_type:
+             {
+                ulog( "Warning - skipped scanning a withdraw_domain_offer_type" );
+                cache_deposit = true;
+                break;
+             }
              default:
              {
                 FC_THROW( "unknown withdraw condition type!" );
@@ -1432,6 +1439,9 @@ namespace bts { namespace wallet {
                   break;
               case domain_cancel_sell_op_type:
                   existing_domain_name = op.as<domain_cancel_sell_operation>().domain_name;
+                  break;
+              case domain_cancel_buy_op_type:
+                  //existing_domain_name = op.as<domain_cancel_buy_operation>().domain_name;
                   break;
               case domain_buy_op_type:
                   existing_domain_name = op.as<domain_buy_operation>().domain_name;
@@ -1597,10 +1607,10 @@ namespace bts { namespace wallet {
            if( min_end > start + 1 )
                ulog( "Scan completed." );
          }
-         catch(...)
+         catch(std::exception& e)
          {
            _scan_progress = -1;
-           ulog( "Scan failure." );
+           ulog( "Scan failure:  ${e}", ("e", e.what()) );
            throw;
          }
       }
