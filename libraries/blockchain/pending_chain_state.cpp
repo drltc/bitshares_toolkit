@@ -381,7 +381,7 @@ namespace bts { namespace blockchain {
 
    void pending_chain_state::store_domain_record( const domain_record& r )
    {
-      ulog("Storing domain record in pending_chain_state:  ${rec}", ("rec", r));
+      ilog("Storing domain record in pending_chain_state:  ${rec}", ("rec", r));
       auto domain_itr = domains.find( r.domain_name );
       if( domain_itr != domains.end() )
       {
@@ -390,7 +390,7 @@ namespace bts { namespace blockchain {
       domains[r.domain_name] = r;
       if( r.is_in_auction() )
       {
-         ulog("It is in_auction, storing it in auctions");
+         ilog("It is in_auction, storing it in auctions");
          auctions[r.get_auction_key()] = r.domain_name;
       }
    }
@@ -420,15 +420,15 @@ namespace bts { namespace blockchain {
             domains.push_back( *domain_rec );
             count++;
         }
-        ulog("pending::get_domains_in_auction   returning domains: ${domains}", ("domains", domains));
+        ilog("pending::get_domains_in_auction   returning domains: ${domains}", ("domains", domains));
         return domains;
    }
 
    void                        pending_chain_state::store_domain_offer( const offer_index_key& offer )
     {
         offers[offer] = offer.offer_address;
-        ulog( "stored offer in pending chain state\n" );
-        ulog( "  owner: ${owner}\n", ("owner", offer.offer_address));
+        ilog( "stored offer in pending chain state\n" );
+        ilog( "  owner: ${owner}\n", ("owner", offer.offer_address));
     }
 
     void                        pending_chain_state::remove_domain_offer( const offer_index_key& offer )
@@ -514,7 +514,7 @@ namespace bts { namespace blockchain {
 
    void pending_chain_state::store_balance_record( const balance_record& r )
    {
-      ulog(" storing balance record in pending_chain_state with id:  ${id}", ("id", r.id()));
+      ilog(" storing balance record in pending_chain_state with id:  ${id}", ("id", r.id()));
       balances[r.id()] = r;
    }
 
