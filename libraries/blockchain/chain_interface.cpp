@@ -46,6 +46,14 @@ namespace bts{ namespace blockchain {
       std::string supername;
       int dot = str.find('.');
       if( dot != std::string::npos )
+          return false;
+
+      return true;
+
+
+      /*   old stuff with subnames. Not allowed in KeyID.
+       *
+      if( dot != std::string::npos )
       {
         subname = str.substr(0, dot);
         //There is definitely a remainder; we checked above that the last character is not a dot
@@ -63,6 +71,7 @@ namespace bts{ namespace blockchain {
       if( supername.empty() )
         return true;
       return is_valid_account_name(supername);
+      */
    }
 
    asset_id_type chain_interface::last_asset_id()const
