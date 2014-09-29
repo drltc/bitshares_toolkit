@@ -586,6 +586,12 @@ namespace bts { namespace wallet {
                                                         const string& pay_from_account,
                                                         bool sign);
 
+         wallet_transaction_record    dns_set_parameter( const string& account_name,
+                                                         const string& parameter_name,
+                                                         const variant& value,
+                                                         bool sign);
+
+
          pretty_domain_info             to_pretty_domain_info( domain_record& rec );
 
          pretty_domain_offer            to_pretty_domain_offer( offer_index_key& offer );

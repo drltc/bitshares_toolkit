@@ -6874,6 +6874,65 @@ namespace bts { namespace wallet {
     }
 
 
+    wallet_transaction_record wallet::dns_set_parameter( const string& account_name,
+                                                         const string& parameter_name,
+                                                         const variant& value,
+                                                         bool sign)
+    {
+        FC_ASSERT( is_open() );
+        FC_ASSERT( is_unlocked() );
+
+        if( !is_receive_account( account_name ) )
+            FC_THROW_EXCEPTION( unknown_receive_account, "You cannot publish from this account!",
+                                ("delegate_account",account_name) );
+
+        signed_transaction     trx;
+        unordered_set<address> required_signatures;
+
+        auto current_account = my->_blockchain->get_account_record( account_name );
+        FC_ASSERT( current_account );
+        auto payer_public_key = get_account_public_key( account_name );
+        FC_ASSERT( my->_blockchain->is_active_delegate( current_account->id ) );
+
+        
+        if( parameter_name == "SPOTLIGHT" )
+            trx.publish_feed( DNS_PARAM_SPOTLIGHT, current_account->id, value );
+        else
+            FC_ASSERT(!"Unknown parameter");
+
+     
+        auto required_fees = get_transaction_fee();
+
+        if( required_fees.amount <  current_account->delegate_pay_balance() )
+        {
+          // withdraw delegate pay...
+          trx.withdraw_pay( current_account->id, required_fees.amount );
+        }
+        else
+        {
+           my->withdraw_to_transaction( required_fees,
+                                        payer_public_key,
+                                        trx, required_signatures );
+        }
+        required_signatures.insert( current_account->active_key() );
+
+        auto entry = ledger_entry();
+        entry.from_account = payer_public_key;
+        entry.to_account = payer_public_key;
+        entry.memo = "set " + parameter_name;
+
+        auto record = wallet_transaction_record();
+        record.ledger_entries.push_back( entry );
+        record.fee = required_fees;
+
+        if( sign ) sign_transaction( trx, required_signatures );
+        cache_transaction( trx, record );
+
+        return record;
+
+    }
+
+
     // END DNS
 
 

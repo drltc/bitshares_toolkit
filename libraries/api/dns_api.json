@@ -253,7 +253,30 @@
                 }
             ],
             "prerequisites": ["json_authenticated"]
+        },
+        {
+            "method_name": "dns_set_parameter",
+            "description": "publish a DAC parameter feed",
+            "return_type": "transaction_record",
+            "parameters":
+            [
+                {
+                    "name": "account_name",
+                    "type": "string",
+                    "description": ""
+                },
+                {
+                    "name": "parameter_name",
+                    "type": "string",
+                    "description": ""
+                },
+                {
+                    "name": "value",
+                    "type": "variant",
+                    "description": ""
+                }
+            ],
+            "prerequisites": ["json_authenticated", "wallet_unlocked"]
         }
-        
     ]
 }

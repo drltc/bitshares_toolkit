@@ -3949,6 +3949,16 @@ config load_config( const fc::path& datadir, bool enable_ulog )
         FC_ASSERT(!"unimplemented");
     }
 
+
+    wallet_transaction_record     client_impl::dns_set_parameter( const string& account_name,
+                                                                  const string& parameter_name,
+                                                                  const variant& value )
+    {
+        const auto record = _wallet->dns_set_parameter( account_name, parameter_name, value, true );
+        network_broadcast_transaction( record.trx );
+        return record;
+    }
+
     /* End DNS methods */
 
 
