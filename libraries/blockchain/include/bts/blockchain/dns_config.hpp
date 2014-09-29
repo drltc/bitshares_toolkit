@@ -20,7 +20,7 @@
 
 
 #define KEYID_EXTRA_FEE (100)
-// #define KEYID_INITIAL_MIN_LENGTH (4)
+#define KEYID_INITIAL_MIN_LENGTH (4)
 
 
 #define DNS_LEASE_AUCTION_DURATION_SECS (60)  // 1 month  ?
