@@ -20,7 +20,7 @@
 
 
 #define KEYID_EXTRA_FEE (100)
-#define KEYID_INITIAL_MIN_LENGTH (4)
+//#define KEYID_INITIAL_MIN_LENGTH (5)
 
 
 //  Feed IDs for dac parameters
