@@ -28,6 +28,10 @@ namespace bts { namespace blockchain {
       if( !eval_state._current_state->is_valid_account_name( this->name ) )
          FC_CAPTURE_AND_THROW( invalid_account_name, (name) );
 
+/*
+      if ( this->name.size() < KEYID_INITIAL_MIN_LENGTH )
+          FC_ASSERT(!"KeyIDs shorter than 10 characters cannot be registered at this time");
+*/
 
       // DNS extra fee
       eval_state.required_fees += asset( KEYID_EXTRA_FEE, 0 );

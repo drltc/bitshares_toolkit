@@ -13,14 +13,14 @@
 #define P2P_AUCTION_DURATION_SECS (60 * 1) //(60*60*24  * 3)
 #define P2P_EXPIRE_DURATION_SECS (60 * 60 * 24) //(60*60*24  * 365)
 
-#define P2P_MIN_DOMAIN_NAME_SIZE (1)
+#define P2P_MIN_DOMAIN_NAME_SIZE (5)
 #define P2P_MAX_DOMAIN_NAME_SIZE (63)
 
 #define P2P_DILUTION_RATE (5000000) // extra block reward = (max_supply - current_supply) / this
 
 
 #define KEYID_EXTRA_FEE (100)
-// #define KEYID_INITIAL_MIN_LENGTH (4)
+//#define KEYID_INITIAL_MIN_LENGTH (5)
 
 
 //  Feed IDs for dac parameters
