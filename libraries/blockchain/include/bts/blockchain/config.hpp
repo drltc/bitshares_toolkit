@@ -3,11 +3,11 @@
 #include <stdint.h>
 
 /* Define client version here */
-#define BTS_CLIENT_VERSION                                  "test113"
+#define BTS_CLIENT_VERSION                                  "0.0.1"
 
 /* Comment out this line for a non-test network */
-#define BTS_TEST_NETWORK
-#define BTS_TEST_NETWORK_VERSION                            113
+// #define BTS_TEST_NETWORK
+// #define BTS_TEST_NETWORK_VERSION                            201
 
 /** @file bts/blockchain/config.hpp
  *  @brief Defines global constants that determine blockchain behavior
@@ -78,7 +78,7 @@
  *  The maximum amount that can be issued for user assets.
  *
  *  10^18 / 2^63 < 1  however, to support representing all share values as a double in
- *  languages like java script, we must stay within the epsilon so
+ *  languages like javascript, we must stay within the epsilon so
  *
  *  10^15 / 2^53 < 1 allows all values to be represented as a double or an int64
  */
