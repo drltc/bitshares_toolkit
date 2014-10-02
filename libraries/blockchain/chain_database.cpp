@@ -1689,17 +1689,17 @@ namespace bts { namespace blockchain {
       auto old_domain_rec = my->_domain_db.find( rec.domain_name );
       if( old_domain_rec.valid() && old_domain_rec.value().is_in_auction() )
       {
-          ulog(" Removing old auction key: ${key}", ("key", old_domain_rec.value().get_auction_key() ) );
+          ilog(" Removing old auction key: ${key}", ("key", old_domain_rec.value().get_auction_key() ) );
           my->_auction_db.remove( old_domain_rec.value().get_auction_key() );
       }
       my->_domain_db.store( rec.domain_name, rec );
-      ulog("Is in auction:  ${is}", ("is", rec.is_in_auction() ) );
+      ilog("Is in auction:  ${is}", ("is", rec.is_in_auction() ) );
       if( rec.is_in_auction() )
       {
-         ulog("Storing an auction in chain DB:  ${key}", ("key", rec.get_auction_key()));
+         ilog("Storing an auction in chain DB:  ${key}", ("key", rec.get_auction_key()));
          my->_auction_db.store( rec.get_auction_key(), rec.domain_name );
          auto domain = my->_auction_db.find( rec.get_auction_key() );
-         ulog("Should have found an auction: ${dom}", ("dom", domain.value()));
+         ilog("Should have found an auction: ${dom}", ("dom", domain.value()));
       }
    } FC_CAPTURE_AND_RETHROW( (rec) ) }
 
