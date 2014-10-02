@@ -19,7 +19,8 @@
 #define P2P_DILUTION_RATE (5000000) // extra block reward = (max_supply - current_supply) / this
 
 
-#define KEYID_EXTRA_FEE (100)
+#define KEYID_EXTRA_FEE_0 (100)
+#define KEYID_EXTRA_FEE_1 (10000000)
 //#define KEYID_INITIAL_MIN_LENGTH (5)
 
 

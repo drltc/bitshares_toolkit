@@ -34,7 +34,12 @@ namespace bts { namespace blockchain {
 */
 
       // DNS extra fee
-      eval_state.required_fees += asset( KEYID_EXTRA_FEE, 0 );
+      if( eval_state._current_state->get_head_block_num() < 15000 )
+          eval_state.required_fees += asset( KEYID_EXTRA_FEE_0, 0 );
+      else
+          eval_state.required_fees += asset( KEYID_EXTRA_FEE_1, 0 );
+
+
       if( banned_names.find( this->name ) != banned_names.end() )
           FC_ASSERT(!"That name is not allowed - it is a reserved word.");
 
