@@ -581,6 +581,12 @@ namespace bts { namespace wallet {
                                                           const string& opt_pubkey,
                                                           bool sign );
 
+
+         signed_transaction        keyid_set_edge(const string& from_account, const string& to_account,
+                                                  const string& edge_name, const variant& value,
+                                                  bool sign );
+
+
          signed_transaction        keyid_adjust_vanity( const string& name,
                                                         const share_type& points,
                                                         const string& pay_from_account,

@@ -277,6 +277,36 @@
                 }
             ],
             "prerequisites": ["json_authenticated", "wallet_unlocked"]
+        },
+        {
+            "method_name": "keyid_set_edge",
+            "description": "Set an edge value.",
+            "return_type": "signed_transaction",
+            "parameters":
+            [
+                {
+                    "name": "from_account",
+                    "type": "account_name",
+                    "description": ""
+                },
+                {
+                    "name": "to_account",
+                    "type": "account_name",
+                    "description": ""
+                },
+                {
+                    "name": "edge_name",
+                    "type": "string",
+                    "description": ""
+                },
+                {
+                    "name": "value",
+                    "type": "variant",
+                    "description": ""
+                }
+            ],
+            "prerequisites": ["json_authenticated", "wallet_unlocked"]
         }
+
     ]
 }

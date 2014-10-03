@@ -3944,6 +3944,16 @@ config load_config( const fc::path& datadir, bool enable_ulog )
         return trx;
     }
 
+
+    signed_transaction        client_impl::keyid_set_edge(const string& from_account, const string& to_account,
+                                                          const string& edge_name, const variant& value )
+    {
+        auto trx = _wallet->keyid_set_edge( from_account, to_account, edge_name, value, true );
+        network_broadcast_transaction( trx );
+        return trx;
+    }
+
+
     signed_transaction       client_impl::dotp2p_set_signin_key(const string& name, const string& opt_pubkey)
     {
         FC_ASSERT(!"unimplemented");

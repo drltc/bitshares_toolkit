@@ -96,6 +96,19 @@ namespace bts { namespace blockchain {
     };
 
 
+
+    struct keyid_set_edge_operation
+    {
+        static const operation_type_enum type;
+        void evaluate( transaction_evaluation_state& eval_state );
+
+        string     from_name;
+        string     to_name;
+        string     edge_name;
+        variant    value;
+
+    };
+
     
     
 
@@ -109,3 +122,4 @@ FC_REFLECT( bts::blockchain::domain_cancel_sell_operation, (domain_name) );
 FC_REFLECT( bts::blockchain::domain_buy_operation, (domain_name)(price)(new_owner) );
 FC_REFLECT( bts::blockchain::domain_transfer_operation, (domain_name)(owner)(memo) );
 FC_REFLECT( bts::blockchain::domain_cancel_buy_operation, (offer_address) );
+FC_REFLECT( bts::blockchain::keyid_set_edge_operation, (from_name)(to_name)(edge_name)(value) );

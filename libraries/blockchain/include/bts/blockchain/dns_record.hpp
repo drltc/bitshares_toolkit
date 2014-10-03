@@ -132,6 +132,67 @@ namespace bts { namespace blockchain {
 
     typedef fc::optional<domain_record>           odomain_record;
 
+
+    struct account_edge_key
+    {
+        account_id_type   from;
+        account_id_type   to;
+        string            edge_name;
+
+        friend bool operator == (const account_edge_key& a, const account_edge_key& b)
+        {
+            return a.from == b.from 
+                && a.to == b.to
+                && a.edge_name == b.edge_name;
+        }
+        friend bool operator < (const account_edge_key& a, const account_edge_key& b)
+        {
+            if (a.from < b.from)
+                return true;
+            if (a.from > b.from)
+                return false;
+            // most expensive first
+            if (a.to > b.to)
+                return true;
+            if (a.to < b.to)
+                return false;
+
+            return a.edge_name < b.edge_name;
+        }
+
+
+    };
+
+    struct account_edge
+    {
+        account_id_type           from;
+        account_id_type           to;
+        string                    edge_name;
+        variant                   value;
+
+        operator account_edge_key() const
+        {
+            account_edge_key key;
+            key.from = from;
+            key.to = to;
+            key.edge_name = edge_name;
+            return key;
+        }
+
+        account_edge make_null() const
+        {
+            account_edge new_edge;
+            new_edge.from = from;
+            new_edge.to = to;
+            new_edge.edge_name = edge_name;
+            new_edge.value = variant();
+            return new_edge;
+        }
+    };
+
+    typedef fc::optional<account_edge>    oaccount_edge;
+
+
 }}; // bts::blockchain
 
 #include <fc/reflect/reflect.hpp>
@@ -140,3 +201,5 @@ FC_REFLECT_ENUM( bts::blockchain::domain_record::domain_state_type, (unclaimed)(
 FC_REFLECT( bts::blockchain::domain_record, (domain_name)(owner)(signin_key)(value)(last_update)(last_renewed)(state)(price)(next_required_bid)(time_in_top) );
 FC_REFLECT( bts::blockchain::auction_index_key, (domain_name)(price)(bid_time) );
 FC_REFLECT( bts::blockchain::offer_index_key, (domain_name)(price)(offer_address)(offer_time) );
+FC_REFLECT( bts::blockchain::account_edge_key, (from)(to)(edge_name) );
+FC_REFLECT( bts::blockchain::account_edge, (from)(to)(edge_name)(value) );

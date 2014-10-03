@@ -237,6 +237,8 @@ namespace bts { namespace blockchain {
             // an ordered cache of domain offers
             bts::db::level_map< offer_index_key, balance_id_type>               _offer_db;
 
+
+            bts::db::level_map< account_edge_key, account_edge >                 _edge_db;
             // END DNS
 
 
@@ -1718,6 +1720,19 @@ namespace bts { namespace blockchain {
     { try {
         my->_offer_db.remove( offer );
     } FC_CAPTURE_AND_RETHROW( (offer) ) }
+
+
+    oaccount_edge       chain_database::get_account_edge( const account_edge_key& key )
+    { try {
+        return my->_edge_db.fetch_optional( key );
+    } FC_CAPTURE_AND_RETHROW( (key) ) }
+
+    void                chain_database::store_account_edge( const account_edge& edge )
+    { try {
+        my->_edge_db.store( edge, edge );
+    } FC_CAPTURE_AND_RETHROW( (edge) ) }
+//    virtual void                        get_account_edges( const string& from, const string& to ) override;;
+//    virtual void                        get_account_edges( const string& from ) override;;
 
 
     ooffer_index_key             chain_database::get_domain_offer( const balance_id_type& owner )
