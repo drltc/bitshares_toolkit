@@ -163,30 +163,8 @@ set(VERSION_PATCH 0)
 
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/web_wallet")
   MESSAGE(STATUS "Found web wallet source code, attempting to bundle it in the installer")
-  find_package(Lineman)
-  IF(LINEMAN_FOUND)
-    MESSAGE(STATUS "Found lineman.js in ${LINEMAN_EXECUTABLE}")
-
-    set(WEB_WALLET_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/web_wallet")
-    set(WEB_WALLET_GENERATED "${WEB_WALLET_ROOT}/generated")
-    file(GLOB_RECURSE WEB_WALLET_SOURCES "${WEB_WALLET_ROOT}/app" "*.css" "*.coffee" "*.png" "*.jpg" "*.html" "*.ico")
-
-    #                  COMMAND "echo" "${NPM_EXECUTABLE}" "install"
-    ADD_CUSTOM_TARGET(web_wallet_htdocs ALL
-                      WORKING_DIRECTORY "${WEB_WALLET_ROOT}"
-                      COMMAND "${CMAKE_COMMAND}" "-E" "remove_directory" "${WEB_WALLET_GENERATED}"
-                      COMMAND "${LINEMAN_EXECUTABLE}" "build"
-                      DEPENDS ${WEB_WALLET_SOURCES})
-    INSTALL(DIRECTORY "${WEB_WALLET_GENERATED}/" DESTINATION htdocs)
-
-    #add_custom_target(INSTALL_WITH_HTDOCS)
-    #add_dependencies(INSTALL_WITH_HTDOCS web_wallet_htdocs INSTALL)
-
-  ELSE(LINEMAN_FOUND)
-    MESSAGE(WARNING "Unable to find lineman.js to process web wallet source, web wallet will be omitted")
-  ENDIF(LINEMAN_FOUND)
+  INSTALL(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/web_wallet/htdocs" DESTINATION htdocs)
 endif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/web_wallet")
-
 
 include(InstallRequiredSystemLibraries)
 
