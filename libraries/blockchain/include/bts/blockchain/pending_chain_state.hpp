@@ -67,8 +67,8 @@ namespace bts { namespace blockchain {
          // DNS
          virtual void                        store_account_edge( const account_edge& edge ) override;
          virtual oaccount_edge               get_account_edge( const account_edge_key& key ) override;
-//         virtual void                        get_account_edges( const string& from, const string& to ) override;
-//         virtual void                        get_account_edges( const string& from ) override;
+         virtual vector<account_edge>        get_account_edges( const string& from, const string& to ) override;
+         virtual vector<account_edge>        get_account_edges( const string& from ) override;
 
 
 

@@ -23,6 +23,9 @@
 #define KEYID_EXTRA_FEE_1 (10000000)
 //#define KEYID_INITIAL_MIN_LENGTH (5)
 
+#define KEYID_MAX_EDGE_NAME_SIZE (32)
+
+#define DNS_EDGE_VALIDATION_PREFIX ("_chain")
 
 //  Feed IDs for dac parameters
 #define DNS_PARAM_SPOTLIGHT (100001)
@@ -30,3 +33,5 @@
 
 #define DNS_LEASE_AUCTION_DURATION_SECS (60)  // 1 month  ?
 #define DNS_MIN_BID_INCREASE(amount) ((amount * 105)/100)
+
+

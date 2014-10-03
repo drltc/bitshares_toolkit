@@ -1731,8 +1731,16 @@ namespace bts { namespace blockchain {
     { try {
         my->_edge_db.store( edge, edge );
     } FC_CAPTURE_AND_RETHROW( (edge) ) }
-//    virtual void                        get_account_edges( const string& from, const string& to ) override;;
-//    virtual void                        get_account_edges( const string& from ) override;;
+
+    vector<account_edge>                        get_account_edges( const string& from, const string& to )
+    {
+        FC_ASSERT(!"unimplemented");
+    }
+
+    vector<account_edge>                        get_account_edges( const string& from )
+    {
+        FC_ASSERT(!"unimplemented");
+    }
 
 
     ooffer_index_key             chain_database::get_domain_offer( const balance_id_type& owner )

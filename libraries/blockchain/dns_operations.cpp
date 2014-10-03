@@ -404,4 +404,25 @@ namespace bts { namespace blockchain {
     }
 
 
+    void keyid_set_edge_operation::evaluate( transaction_evaluation_state& eval_state )
+    {
+        auto _chain = eval_state._current_state;
+        auto from_acct = _chain->get_account_record( this->from_name );
+        auto to_acct = _chain->get_account_record( this->to_name );
+        FC_ASSERT( from_acct.valid(), "Invalid 'from' account" );
+        FC_ASSERT( to_acct.valid(), "Invalid 'to' account" );
+        FC_ASSERT( this->edge_name.size() <= KEYID_MAX_EDGE_NAME_SIZE, "Edge name is too long" );
+
+        auto found = this->edge_name.find( DNS_EDGE_VALIDATION_PREFIX );
+        if( found == 0 )
+        {
+            FC_ASSERT(!"Not a valid on-chain edge");
+        }
+        else
+        {
+            FC_ASSERT( eval_state.check_signature( from_acct->active_address() ), "Not signed by 'from' account." );
+        }
+    }
+
+
 }} // bts::blockchain

@@ -150,8 +150,8 @@ namespace bts { namespace blockchain {
 
         virtual void                        store_account_edge( const account_edge& edge ) = 0;
         virtual oaccount_edge               get_account_edge( const account_edge_key& key ) = 0;
-//        virtual void                        get_account_edges( const string& from, const string& to ) = 0;
-//        virtual void                        get_account_edges( const string& from ) = 0;
+        virtual vector<account_edge>        get_account_edges( const string& from, const string& to ) = 0;
+        virtual vector<account_edge>        get_account_edges( const string& from ) = 0;
 
 
         virtual void                        store_domain_record( const domain_record& rec)          = 0;

@@ -52,6 +52,8 @@ namespace bts { namespace blockchain {
    const operation_type_enum domain_cancel_buy_operation::type         = domain_cancel_buy_op_type;
    const operation_type_enum domain_transfer_operation::type           = domain_transfer_op_type;
 
+   const operation_type_enum keyid_set_edge_operation::type           = keyid_set_edge_op_type;
+
    static bool first_chain = []()->bool{
       bts::blockchain::operation_factory::instance().register_operation<withdraw_operation>();
       bts::blockchain::operation_factory::instance().register_operation<deposit_operation>();
@@ -87,6 +89,8 @@ namespace bts { namespace blockchain {
       bts::blockchain::operation_factory::instance().register_operation<domain_buy_operation>();
       bts::blockchain::operation_factory::instance().register_operation<domain_cancel_buy_operation>();
       bts::blockchain::operation_factory::instance().register_operation<domain_transfer_operation>();
+
+      bts::blockchain::operation_factory::instance().register_operation<keyid_set_edge_operation>();
 
       return true;
    }();

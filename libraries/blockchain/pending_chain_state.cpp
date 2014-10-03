@@ -377,7 +377,17 @@ namespace bts { namespace blockchain {
 
 
     // DNS
-   
+
+    vector<account_edge>                        get_account_edges( const string& from, const string& to )
+    {
+        FC_ASSERT(!"unimplemented");
+    }
+
+    vector<account_edge>                        get_account_edges( const string& from )
+    {
+        FC_ASSERT(!"unimplemented");
+    }
+
 
    oaccount_edge  pending_chain_state::get_account_edge( const account_edge_key& edge )
    {
@@ -389,6 +399,9 @@ namespace bts { namespace blockchain {
         return prev_state->get_account_edge( edge );
       return oaccount_edge();
    }
+
+
+
 
    odomain_record pending_chain_state::get_domain_record( const std::string& domain_name )const
    {
