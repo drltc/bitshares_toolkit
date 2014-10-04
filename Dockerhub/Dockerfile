@@ -6,7 +6,6 @@ RUN apt-get -y install git cmake g++ libz-dev libboost-all-dev \
 CMD ["keyid"]
 RUN (git clone https://github.com/keyid/keyid src && cd src && \
   git checkout develop && \
-  git submodule update --init && cmake . && \
-  make -j`grep ^processor /proc/cpuinfo | wc -l` && \
+  git submodule update --init && cmake . && make -j && \
   install programs/client/bitshares_client /usr/bin/keyid) && \
   rm -rf src
