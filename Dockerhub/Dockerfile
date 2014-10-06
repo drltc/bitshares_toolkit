@@ -7,5 +7,5 @@ CMD ["keyid"]
 RUN (git clone https://github.com/keyid/keyid src && cd src && \
   git checkout develop && \
   git submodule update --init && cmake . && make -j && \
-  install programs/client/bitshares_client /usr/bin/keyid) && \
+  install programs/client/bitshares_client /usr/local/bin/keyid) && \
   rm -rf src
