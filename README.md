@@ -1,23 +1,32 @@
-BitShares Development Toolkit [![Build Status](https://travis-ci.org/vikramrajkumar/bitshares_toolkit.png)](https://travis-ci.org/vikramrajkumar/bitshares_toolkit)
-===============================
-The BitShares development toolkit is a set of libraries used to facilitate
-the development of Decentralized Autonomous Companies (DACs).  It provides
-a framework upon which new DACs can be developed based upon a common 
-architecture.  
+KeyID (a.k.a. DNS DAC)
+======================
 
-Build Instructions
-------------------
-BitShares Toolkit uses git submodules for managing certain external dependencies. Before
-you can build you will need to fetch the submodules with the following commands:
+Powered by the BitShares DAC toolkit, KeyID is a decentralized autonomous
+company based on delegated proof-of-stake (DPoS) blockchain technology.
+See <http://keyid.info> for more information.
 
-    git submodule init
-    git submodule update
-    cmake .
-    make
 
-Different platforms have different steps for handling dependencies, if you 
-would like to build on OS X see BUILD_OSX.md
+Running KeyID using Docker
+--------------------------
 
-Documentation
-------------------
-Documentation is available at the GitHub wiki: https://github.com/BitShares/bitshares_toolkit/wiki.
+The easiest way to run the KeyID client in a command-line environment is by
+using the official Docker images automatically built from this repository:
+
+    $ docker run -it keyid/keyid
+
+To run a KeyID node in the background and expose the HTTP API on port 5044:
+
+    $ docker run -d --name=keyid -p 5044:80 -v /var/local/lib/keyid:/root \
+        keyid/keyid --daemon --httpdendpoint=127.0.0.1:80 \
+          --rpcuser=user --rpcpass=pass
+
+See also <https://github.com/dbrock/btsc> for a convenient way to communicate
+with a KeyID node running in the background.
+
+
+Building and installing KeyID manually
+--------------------------------------
+
+    $ git submodule update --init
+    $ cmake . && make -j
+    $ install programs/client/bitshares_client /usr/local/bin/keyid
