@@ -1732,14 +1732,51 @@ namespace bts { namespace blockchain {
         my->_edge_db.store( edge, edge );
     } FC_CAPTURE_AND_RETHROW( (edge) ) }
 
-    vector<account_edge>                        get_account_edges( const string& from, const string& to )
+    vector<account_edge>           chain_database::get_account_edges( const string& from, const string& to )
     {
-        FC_ASSERT(!"unimplemented");
+        vector<account_edge> edges;
+        account_edge_key key;
+        auto from_acct = get_account_record( from );
+        auto to_acct = get_account_record( to );
+        FC_ASSERT( from_acct.valid(), "invalid 'from' account" );
+        FC_ASSERT( to_acct.valid(), "invalid 'to' account" );
+        key.from = from_acct->id;
+        key.to = to_acct->id;
+        key.edge_name = "";
+        auto itr = my->_edge_db.lower_bound( key );
+        auto count = 0;
+        while( itr.valid() &&
+               itr.value().from == from_acct->id &&
+               itr.value().to == to_acct->id &&
+               count < 1000 ) // TODO put limit in argument, or enforce global limits
+        {
+            edges.push_back( itr.value() );
+            ++itr;
+            ++count;
+        }
+        return edges;
     }
 
-    vector<account_edge>                        get_account_edges( const string& from )
+    vector<account_edge>           chain_database::get_account_edges( const string& from )
     {
-        FC_ASSERT(!"unimplemented");
+        vector<account_edge> edges;
+        account_edge_key key;
+        auto from_acct = get_account_record( from );
+        FC_ASSERT( from_acct.valid(), "invalid 'from' account" );
+        key.from = from_acct->id;
+        key.to = 0;
+        key.edge_name = "";
+        auto itr = my->_edge_db.lower_bound( key );
+        auto count = 0;
+        while( itr.valid() &&
+               itr.value().from == from_acct->id &&
+               count < 1000 ) // TODO put limit in argument, or enforce global limits
+        {
+            edges.push_back( itr.value() );
+            ++itr;
+            ++count;
+        }
+        return edges;
     }
 
 

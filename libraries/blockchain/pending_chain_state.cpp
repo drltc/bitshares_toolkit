@@ -378,12 +378,17 @@ namespace bts { namespace blockchain {
 
     // DNS
 
-    vector<account_edge>                        get_account_edges( const string& from, const string& to )
+    void                       pending_chain_state::store_account_edge( const account_edge& edge )
+    { try {
+        edges[account_edge_key(edge)] = edge;
+    } FC_CAPTURE_AND_RETHROW( ( edge ) ) }
+
+    vector<account_edge>       pending_chain_state::get_account_edges( const string& from, const string& to )
     {
         FC_ASSERT(!"unimplemented");
     }
 
-    vector<account_edge>                        get_account_edges( const string& from )
+    vector<account_edge>       pending_chain_state::get_account_edges( const string& from )
     {
         FC_ASSERT(!"unimplemented");
     }
