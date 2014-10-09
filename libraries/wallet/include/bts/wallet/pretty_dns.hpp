@@ -33,8 +33,17 @@ namespace bts { namespace wallet {
         address                               offer_address;
     };
 
+    struct pretty_account_edge
+    {
+        string     from;
+        string     to;
+        string     edge_name;
+        variant    value;
+    };
+
 }} //bts::wallet
 
 FC_REFLECT( bts::wallet::pretty_domain_info, (domain_name)(owner)(signin_key)(last_renewed)(domain_state)(auction_info) );
 FC_REFLECT( bts::wallet::pretty_domain_offer, (domain_name)(price)(offer_address) );
 FC_REFLECT( bts::wallet::pretty_domain_auction_summary, (domain_name)(last_bid_price)(next_required_bid_price)(last_bid_time)(time_in_top) );
+FC_REFLECT( bts::wallet::pretty_account_edge, (from)(to)(edge_name)(value) );

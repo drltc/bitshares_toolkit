@@ -598,6 +598,8 @@ namespace bts { namespace wallet {
                                                          bool sign);
 
 
+         pretty_account_edge            to_pretty_edge( account_edge& edge );
+
          pretty_domain_info             to_pretty_domain_info( domain_record& rec );
 
          pretty_domain_offer            to_pretty_domain_offer( offer_index_key& offer );

@@ -151,10 +151,9 @@ namespace bts { namespace blockchain {
                 return true;
             if (a.from > b.from)
                 return false;
-            // most expensive first
-            if (a.to > b.to)
-                return true;
             if (a.to < b.to)
+                return true;
+            if (a.to > b.to)
                 return false;
 
             return a.edge_name < b.edge_name;

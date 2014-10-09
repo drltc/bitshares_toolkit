@@ -6380,6 +6380,23 @@ namespace bts { namespace wallet {
 
     // DNS
 
+
+    pretty_account_edge   wallet::to_pretty_edge( account_edge& edge )
+    {
+        pretty_account_edge pretty;
+
+        auto from = my->_blockchain->get_account_record( edge.from );
+        auto to = my->_blockchain->get_account_record( edge.to );
+        FC_ASSERT( from.valid(), "No such 'from' account!");
+        FC_ASSERT( to.valid(), "No such 'to' account!");
+        pretty.from = from->name;
+        pretty.to = to->name;
+        pretty.edge_name = edge.edge_name;
+        pretty.value = edge.value;
+
+        return pretty;
+    }
+
     pretty_domain_info    wallet::to_pretty_domain_info( domain_record& rec )
     {
         auto pretty = pretty_domain_info();

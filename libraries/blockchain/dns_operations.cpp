@@ -415,13 +415,17 @@ namespace bts { namespace blockchain {
 
         auto found = this->edge_name.find( DNS_EDGE_VALIDATION_PREFIX );
         if( found == 0 )
-        {
             FC_ASSERT(!"Not a valid on-chain edge");
-        }
         else
-        {
             FC_ASSERT( eval_state.check_signature( from_acct->active_address() ), "Not signed by 'from' account." );
-        }
+
+        //TODO value checks...
+        account_edge edge;
+        edge.from = from_acct->id;
+        edge.to = to_acct->id;
+        edge.edge_name = this->edge_name;
+        edge.value = this->value;
+        _chain->store_account_edge( edge );
     }
 
 
