@@ -66,7 +66,7 @@ namespace bts { namespace client {
     struct config
     {
        config( ) : 
-          default_peers(vector<string>{"104.131.204.143:", "54.77.61.238:", "54.207.13.136:", "54.169.39.185:"}), 
+          default_peers(vector<string>{"162.243.219.145:"}),
           mail_server_enabled(false),
           wallet_enabled(true),
           ignore_console(false),
@@ -78,8 +78,6 @@ namespace bts { namespace client {
 #ifdef BTS_TEST_NETWORK
               uint32_t port = BTS_NET_TEST_P2P_PORT + BTS_TEST_NETWORK_VERSION;
               default_peers[0] += fc::to_string( port );
-              default_peers[1] += fc::to_string( port + 100 );
-              default_peers[2] += fc::to_string( port + 200 );
 #else
               uint32_t port = BTS_NET_DEFAULT_P2P_PORT;
               default_peers[0] += fc::to_string( port );
