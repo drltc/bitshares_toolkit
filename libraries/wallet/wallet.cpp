@@ -4255,7 +4255,10 @@ namespace bts { namespace wallet {
       }
 
       auto required_fees = get_transaction_fee();
-      required_fees += asset( KEYID_EXTRA_FEE_1, 0 );
+      if( my->blockchain->get_head_block_num() < KEYID_HARDFORK_2 )
+          required_fees += asset( KEYID_EXTRA_FEE_1, 0 );
+      else
+          required_fees += asset( KEYID_EXTRA_FEE_2, 0 );
 
       bool as_delegate = false;
       if( delegate_pay_rate <= 100  )
@@ -6865,7 +6868,8 @@ namespace bts { namespace wallet {
         unordered_set<address>     required_signatures;
 
         auto from_acct = get_account( from_account ); // checks for existence
-        auto to_acct = get_account( to_account );
+        auto to_acct = my->_blockchain->get_account_record( to_account );
+        FC_ASSERT( to_acct.valid(), "Unknown 'to' account" );
 
         FC_ASSERT( edge_name.size() < 32 );
         FC_ASSERT( edge_name != "" );
@@ -6878,6 +6882,7 @@ namespace bts { namespace wallet {
         trx.operations.push_back(op);
      
         auto required_fees = get_transaction_fee();
+        required_fees += asset( KEYID_EXTRA_FEE_2, 0 );
 
         my->withdraw_to_transaction( required_fees,
                                      from_acct.active_address(), trx, required_signatures );

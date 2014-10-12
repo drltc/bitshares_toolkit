@@ -407,6 +407,8 @@ namespace bts { namespace blockchain {
     void keyid_set_edge_operation::evaluate( transaction_evaluation_state& eval_state )
     {
         auto _chain = eval_state._current_state;
+        if( _chain->get_head_block_num() < KEYID_HARDFORK_2 )
+            FC_ASSERT(!"Setting edges is not enabled yet.");
         auto from_acct = _chain->get_account_record( this->from_name );
         auto to_acct = _chain->get_account_record( this->to_name );
         FC_ASSERT( from_acct.valid(), "Invalid 'from' account" );
