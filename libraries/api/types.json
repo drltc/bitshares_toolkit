@@ -660,6 +660,16 @@
         "contained_type" : "domain_offer"
       },
       {
+        "type_name": "pretty_account_edge",
+        "cpp_return_type" : "bts::wallet::pretty_account_edge",
+        "cpp_include_file" : "bts/wallet/pretty_dns.hpp"
+      },
+      {
+        "type_name": "edge_list",
+        "container_type" : "array",
+        "contained_type" : "pretty_account_edge"
+      },
+      {
         "type_name" : "mail_inventory",
         "cpp_return_type" : "bts::mail::inventory_type",
         "cpp_include_file" : "bts/mail/server.hpp"

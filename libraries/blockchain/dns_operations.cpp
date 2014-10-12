@@ -21,7 +21,7 @@ namespace bts { namespace blockchain {
      */
     void domain_bid_operation::evaluate( transaction_evaluation_state& eval_state )
     {
-        FC_ASSERT(!"This operation is not enabled yet.");
+        FC_ASSERT(!"This operation is disabled.");
         FC_ASSERT( this->domain_name.size() >= P2P_MIN_DOMAIN_NAME_SIZE, "Domains must be at least 4 characters long." );
         FC_ASSERT( is_valid_domain( this->domain_name ) );
         auto odomain_rec = eval_state._current_state->get_domain_record( this->domain_name );
@@ -208,7 +208,7 @@ namespace bts { namespace blockchain {
 
     void domain_buy_operation::evaluate( transaction_evaluation_state& eval_state )
     {
-        FC_ASSERT(!"This operation is not enabled yet.");
+        FC_ASSERT(!"This operation is disabled.");
         FC_ASSERT( is_valid_domain( this->domain_name ), "Trying to buy an invalid domain name" );
 
         auto now = eval_state._current_state->now().sec_since_epoch();
@@ -401,6 +401,34 @@ namespace bts { namespace blockchain {
         odomain_rec->signin_key = this->signin_key;
         odomain_rec->last_update = eval_state._current_state->now().sec_since_epoch();
         eval_state._current_state->store_domain_record( *odomain_rec );
+    }
+
+
+    void keyid_set_edge_operation::evaluate( transaction_evaluation_state& eval_state )
+    {
+        auto _chain = eval_state._current_state;
+        auto from_acct = _chain->get_account_record( this->from_name );
+        auto to_acct = _chain->get_account_record( this->to_name );
+        FC_ASSERT( from_acct.valid(), "Invalid 'from' account" );
+        FC_ASSERT( to_acct.valid(), "Invalid 'to' account" );
+        FC_ASSERT( this->edge_name.size() <= KEYID_MAX_EDGE_NAME_SIZE, "Edge name is too long" );
+        FC_ASSERT( this->value.size() <= KEYID_MAX_EDGE_NAME_SIZE, "Edge name is too long" );
+
+        eval_state.required_fees += asset( KEYID_EXTRA_FEE_2, 0 );
+
+        auto found = this->edge_name.find( DNS_EDGE_VALIDATION_PREFIX );
+        if( found == 0 )
+            FC_ASSERT(!"Not a valid on-chain edge");
+        else
+            FC_ASSERT( eval_state.check_signature( from_acct->active_address() ), "Not signed by 'from' account." );
+
+        //TODO value checks...
+        account_edge edge;
+        edge.from = from_acct->id;
+        edge.to = to_acct->id;
+        edge.edge_name = this->edge_name;
+        edge.value = this->value;
+        _chain->store_account_edge( edge );
     }
 
 

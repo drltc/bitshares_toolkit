@@ -124,6 +124,7 @@ namespace bts { namespace blockchain {
 
       for( const auto& item : domains )         prev_state->store_domain_record( item.second );
       for( const auto& item : offers )          prev_state->store_domain_offer( item.first );
+      for( const auto& item : edges )           prev_state->store_account_edge( item.second );
 
 
       prev_state->set_market_transactions( market_transactions );
@@ -276,7 +277,7 @@ namespace bts { namespace blockchain {
       {
          auto prev_value = prev_state->get_domain_record( item.first );
          if( prev_value.valid() ) undo_state->store_domain_record( *prev_value );
-         else  undo_state->remove_domain_record( item.first );
+         else  undo_state->remove_domain_record( item.first ); // TODO you can't remove this...
       }
 
 
@@ -286,6 +287,14 @@ namespace bts { namespace blockchain {
          if( prev_value.valid() ) undo_state->store_domain_offer( *prev_value );
          else  undo_state->remove_domain_offer( item.first );
       }
+
+      for( const auto& item : edges )
+      {
+         auto prev_value = prev_state->get_account_edge( item.second );
+         if( prev_value.valid() ) undo_state->store_account_edge( *prev_value );
+         else  undo_state->store_account_edge( item.second.make_null() );
+      }
+
 
 // END DNS
 
@@ -368,6 +377,37 @@ namespace bts { namespace blockchain {
 
 
     // DNS
+
+    void                       pending_chain_state::store_account_edge( const account_edge& edge )
+    { try {
+        edges[account_edge_key(edge)] = edge;
+    } FC_CAPTURE_AND_RETHROW( ( edge ) ) }
+
+    vector<account_edge>       pending_chain_state::get_account_edges( const string& from, const string& to )
+    {
+        FC_ASSERT(!"unimplemented");
+    }
+
+    vector<account_edge>       pending_chain_state::get_account_edges( const string& from )
+    {
+        FC_ASSERT(!"unimplemented");
+    }
+
+
+   oaccount_edge  pending_chain_state::get_account_edge( const account_edge_key& edge )
+   {
+      chain_interface_ptr prev_state = _prev_state.lock();
+      auto itr = edges.find( edge );
+      if( itr != edges.end() ) 
+        return itr->second;
+      else if( prev_state ) 
+        return prev_state->get_account_edge( edge );
+      return oaccount_edge();
+   }
+
+
+
+
    odomain_record pending_chain_state::get_domain_record( const std::string& domain_name )const
    {
       chain_interface_ptr prev_state = _prev_state.lock();

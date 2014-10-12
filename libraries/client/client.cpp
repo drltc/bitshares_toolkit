@@ -3944,6 +3944,52 @@ config load_config( const fc::path& datadir, bool enable_ulog )
         return trx;
     }
 
+
+    signed_transaction        client_impl::keyid_set_edge(const string& from_account, const string& to_account,
+                                                          const string& edge_name, const variant& value )
+    {
+        auto trx = _wallet->keyid_set_edge( from_account, to_account, edge_name, value, true );
+        network_broadcast_transaction( trx );
+        return trx;
+    }
+
+    vector<pretty_account_edge>     client_impl::keyid_get_edges( const string& from_account,
+                                                                  const string& to_account,
+                                                                  const string& edge_name )
+    {
+        ilog( "called keyid_set_edges:  from: ${from}   to: ${to}   name:  ${name}",
+              ("from", from_account)("to", to_account)("name", edge_name) );
+        vector<account_edge> edges;
+        vector<account_edge> filtered;
+        if ( to_account != "" )
+        {
+            edges = _chain_db->get_account_edges( from_account, to_account );
+        }
+        else
+        {
+            edges = _chain_db->get_account_edges( from_account );
+        }
+        ilog(" Got edges: ${edges}", ("edges", edges));
+        if( edge_name != "" )
+        {
+            for( auto edge : edges )
+            {
+                if( edge.edge_name == edge_name )
+                {
+                    filtered.push_back( edge );
+                }
+            }
+            edges = filtered;
+        }
+
+        auto pretties = vector<pretty_account_edge>();
+        for( auto edge : edges )
+        {
+            pretties.push_back( _wallet->to_pretty_edge( edge ) );
+        }
+        return pretties;
+    }
+
     signed_transaction       client_impl::dotp2p_set_signin_key(const string& name, const string& opt_pubkey)
     {
         FC_ASSERT(!"unimplemented");

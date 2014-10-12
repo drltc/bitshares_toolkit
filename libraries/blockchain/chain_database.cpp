@@ -237,6 +237,8 @@ namespace bts { namespace blockchain {
             // an ordered cache of domain offers
             bts::db::level_map< offer_index_key, balance_id_type>               _offer_db;
 
+
+            bts::db::level_map< account_edge_key, account_edge >                _edge_db;
             // END DNS
 
 
@@ -321,6 +323,7 @@ namespace bts { namespace blockchain {
           _domain_db.open( data_dir / "index/domain_db" );
           _auction_db.open( data_dir / "index/auction_db" );
           _offer_db.open( data_dir / "index/offer_db" );
+          _edge_db.open( data_dir / "index/edge_db" );
 
           _pending_trx_state = std::make_shared<pending_chain_state>( self->shared_from_this() );
       } FC_CAPTURE_AND_RETHROW( (data_dir) ) }
@@ -1214,6 +1217,7 @@ namespace bts { namespace blockchain {
       my->_domain_db.close();
       my->_auction_db.close();
       my->_offer_db.close();
+      my->_edge_db.close();
 
    } FC_RETHROW_EXCEPTIONS( warn, "" ) }
 
@@ -1718,6 +1722,70 @@ namespace bts { namespace blockchain {
     { try {
         my->_offer_db.remove( offer );
     } FC_CAPTURE_AND_RETHROW( (offer) ) }
+
+
+    oaccount_edge       chain_database::get_account_edge( const account_edge_key& key )
+    { try {
+        return my->_edge_db.fetch_optional( key );
+    } FC_CAPTURE_AND_RETHROW( (key) ) }
+
+    void                chain_database::store_account_edge( const account_edge& edge )
+    { try {
+        my->_edge_db.store( edge, edge );
+    } FC_CAPTURE_AND_RETHROW( (edge) ) }
+
+    vector<account_edge>           chain_database::get_account_edges( const string& from, const string& to )
+    {
+        vector<account_edge> edges;
+        account_edge_key key;
+        auto from_acct = get_account_record( from );
+        auto to_acct = get_account_record( to );
+        FC_ASSERT( from_acct.valid(), "invalid 'from' account" );
+        FC_ASSERT( to_acct.valid(), "invalid 'to' account" );
+        key.from = from_acct->id;
+        key.to = to_acct->id;
+        key.edge_name = "";
+        auto itr = my->_edge_db.lower_bound( key );
+        auto count = 0;
+        while( itr.valid() &&
+               itr.value().from == from_acct->id &&
+               itr.value().to == to_acct->id &&
+               count < 1000 ) // TODO put limit in argument, or enforce global limits
+        {
+            edges.push_back( itr.value() );
+            ++itr;
+            ++count;
+        }
+        return edges;
+    }
+
+    vector<account_edge>           chain_database::get_account_edges( const string& from )
+    {
+        ilog( "Getting edges from: ${from}", ("from", from ) );
+        vector<account_edge> edges;
+        auto from_acct = get_account_record( from );
+        FC_ASSERT( from_acct.valid(), "invalid 'from' account" );
+        account_edge_key key;
+        key.from = from_acct->id;
+        key.to = 0;
+        key.edge_name = "";
+        auto itr = my->_edge_db.lower_bound( key );
+        if( ! itr.valid() )
+            ilog("Invalid iterator!");
+        else
+            ilog( "Got iterator: ${itr}", ("itr", itr.value()) );
+        auto count = 0;
+        while( itr.valid() &&
+               itr.value().from == from_acct->id &&
+               count < 1000 ) // TODO put limit in argument, or enforce global limits
+        {
+            ilog("Iterating...");
+            edges.push_back( itr.value() );
+            ++itr;
+            ++count;
+        }
+        return edges;
+    }
 
 
     ooffer_index_key             chain_database::get_domain_offer( const balance_id_type& owner )

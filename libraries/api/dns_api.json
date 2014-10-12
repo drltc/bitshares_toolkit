@@ -277,6 +277,62 @@
                 }
             ],
             "prerequisites": ["json_authenticated", "wallet_unlocked"]
+        },
+        {
+            "method_name": "keyid_set_edge",
+            "description": "Set an edge value.",
+            "return_type": "signed_transaction",
+            "parameters":
+            [
+                {
+                    "name": "from_account",
+                    "type": "account_name",
+                    "description": ""
+                },
+                {
+                    "name": "to_account",
+                    "type": "account_name",
+                    "description": ""
+                },
+                {
+                    "name": "edge_name",
+                    "type": "string",
+                    "description": ""
+                },
+                {
+                    "name": "value",
+                    "type": "variant",
+                    "description": ""
+                }
+            ],
+            "prerequisites": ["json_authenticated", "wallet_unlocked"]
+        },
+        {
+            "method_name": "keyid_get_edges",
+            "description": "Get the edges from this account.",
+            "return_type": "edge_list",
+            "parameters":
+            [
+                {
+                    "name": "from_account",
+                    "type": "account_name",
+                    "description": ""
+                },
+                {
+                    "name": "to_account",
+                    "type": "account_name",
+                    "description": "optionally filter edges by this 'to' account",
+                    "default_value": "",
+                },
+                {
+                    "name": "edge_name",
+                    "type": "string",
+                    "description": "optionally filter edges by this edge name",
+                    "default_value": "",
+                }
+            ],
+            "prerequisites": ["json_authenticated", "wallet_unlocked"]
         }
+
     ]
 }

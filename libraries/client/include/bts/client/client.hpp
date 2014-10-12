@@ -66,7 +66,7 @@ namespace bts { namespace client {
     struct config
     {
        config( ) : 
-          default_peers(vector<string>{"104.131.204.143:", "54.77.61.238:", "54.207.13.136:", "54.169.39.185:", "95.85.33.16:", "104.131.35.149:"}), 
+          default_peers(vector<string>{});
           mail_server_enabled(false),
           wallet_enabled(true),
           ignore_console(false),
@@ -77,12 +77,31 @@ namespace bts { namespace client {
           {
 #ifdef BTS_TEST_NETWORK
               uint32_t port = BTS_NET_TEST_P2P_PORT + BTS_TEST_NETWORK_VERSION;
+              //default_peers[0] += fc::to_string( port );
 #else
               uint32_t port = BTS_NET_DEFAULT_P2P_PORT;
+              default_peers.push_back( "104.131.204.143:1791" );
+              default_peers.push_back( "54.77.61.238:1791" );
+              default_peers.push_back( "54.207.13.136:1791" );
+              default_peers.push_back( "54.169.39.185:1791" );
+              default_peers.push_back( "95.85.33.16:1791" );
+              default_peers.push_back( "104.131.35.149:1791" );
+              default_peers.push_back( "95.85.33.16:1791" );
+              default_peers.push_back( "122.114.38.178:2222" );
+              default_peers.push_back( "107.170.220.18:17777" );
+              default_peers.push_back( "178.62.59.135:17777" );
+              default_peers.push_back( "128.199.136.220:17777" );
+              default_peers.push_back( "61.129.33.213:365" );
+              default_peers.push_back( "104.131.106.18:1776" );
+              default_peers.push_back( "115.29.104.188:1791" );
+              default_peers.push_back( "46.10.205.0:42124" );
+              default_peers.push_back( "88.204.169.250:1791" );
+              default_peers.push_back( "42.121.29.59:1791" );
+              default_peers.push_back( "23.239.20.171:2221" );
+              default_peers.push_back( "185.25.22.21:1777" );
+              default_peers.push_back( "162.243.152.150:8764" );
+              default_peers.push_back( "178.62.195.69:1791" );
 #endif
-              default_peers[0] += fc::to_string( port );
-              default_peers[1] += fc::to_string( port + 100 );
-              default_peers[2] += fc::to_string( port + 200 );
               logging = fc::logging_config::default_config();
           }
 
