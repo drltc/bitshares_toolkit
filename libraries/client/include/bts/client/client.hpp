@@ -66,7 +66,7 @@ namespace bts { namespace client {
     struct config
     {
        config( ) : 
-          default_peers(vector<string>{});
+          default_peers(vector<string>({})),
           mail_server_enabled(false),
           wallet_enabled(true),
           ignore_console(false),

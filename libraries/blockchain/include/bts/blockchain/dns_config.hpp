@@ -20,7 +20,7 @@
 
 
 #define KEYID_HARDFORK_1 (15000)
-#define KEYID_HARDFORK_2 (15000)
+#define KEYID_HARDFORK_2 (105000)
 
 
 #define KEYID_EXTRA_FEE_0 (100)
