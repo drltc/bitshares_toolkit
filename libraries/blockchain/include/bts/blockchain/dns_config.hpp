@@ -19,11 +19,17 @@
 #define P2P_DILUTION_RATE (5000000) // extra block reward = (max_supply - current_supply) / this
 
 
+#define KEYID_HARDFORK_1 (15000)
+#define KEYID_HARDFORK_2 (15000)
+
+
 #define KEYID_EXTRA_FEE_0 (100)
 #define KEYID_EXTRA_FEE_1 (10000000)
-//#define KEYID_INITIAL_MIN_LENGTH (5)
+#define KEYID_EXTRA_FEE_2 (50000000)
 
-#define KEYID_MAX_EDGE_NAME_SIZE (32)
+
+#define KEYID_MAX_EDGE_NAME_SIZE (64)
+#define KEYID_MAX_EDGE_VALUE_SIZE (512)
 
 #define DNS_EDGE_VALIDATION_PREFIX ("_chain")
 

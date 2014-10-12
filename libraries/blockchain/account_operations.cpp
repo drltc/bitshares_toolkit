@@ -34,10 +34,13 @@ namespace bts { namespace blockchain {
 */
 
       // DNS extra fee
-      if( eval_state._current_state->get_head_block_num() < 15000 )
+      auto block_num = eval_state._current_state->get_head_block_num();
+      if( block_num < KEYID_HARDFORK_1 )
           eval_state.required_fees += asset( KEYID_EXTRA_FEE_0, 0 );
-      else
+      else if (block_num < KEYID_HARDFORK_2 )
           eval_state.required_fees += asset( KEYID_EXTRA_FEE_1, 0 );
+      else
+          eval_state.required_fees += asset( KEYID_EXTRA_FEE_2, 0 );
 
 
       if( banned_names.find( this->name ) != banned_names.end() )
