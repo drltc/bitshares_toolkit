@@ -1,11 +1,13 @@
-Building BitShares Toolkit on OS X 10.9
-===============================
+Building KeyID on OS X 10.9
+===========================
+
+**Note: these instructions may not be fully up-to-date**
 
 0) Install X Code by following these instructions https://guide.macports.org/chunked/installing.xcode.html
 
 1) Download boost 1.54.0 from http://sourceforge.net/projects/boost/files/boost/1.54.0/
    
-   Note: boost 1.55 does not compile with clang using the latest version of XCode as of (March 2014)
+Note: boost 1.55 does not compile with clang using the latest version of XCode as of (March 2014)
 
 2) If you happen to have boost already installed and it was not compiled with clang or libc++ and c++11 then you will
  need to uninstall it prior to running the above steps.   
@@ -57,16 +59,8 @@ Building BitShares Toolkit on OS X 10.9
 
 8) To build the Desktop Client
 
-    TODO: describe Install Node
-
-    git clone git@github.com:BitShares/web_wallet.git
-    git clone git@github.com:BitShares/qt_wallet.git
-    cd programs/web_wallet/
-    sudo npm install lineman-angular
-    sudo npm install lineman-less
-    cd ../..
+    git clone https://github.com/keyid/keyid-gui
+    git clone https://github.com/keyid/qt_wallet.git
     export CMAKE_PREFIX_PATH=~/Qt/5.3/
     make buildweb
     cmake -DINCLUDE_QT_WALLET=TRUE -DCMAKE_PREFIX_PATH=/usr/local/ssl  .
-
-By default, the web wallet will not be rebuilt even after pulling new changes. To force the web wallet to rebuild, use `make forcebuildweb`.

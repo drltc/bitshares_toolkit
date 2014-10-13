@@ -1,5 +1,8 @@
 Windows - Visual Studio 2013
 ============================
+
+**Note: these instructions are currently not up-to-date**
+
 #### Prerequisites ####
 * Microsoft Visual C++ 2013 Update 1 (the free Express edition will work)
 * If you have multiple MSVS installation use MSVS Developer console from target version.
