@@ -15,16 +15,30 @@ using the Docker images automatically built from this repository:
 
     $ docker run -it keyid/keyid
 
-To start a KeyID daemon and expose its JSON RPC HTTP API on port 5044:
+Data is stored in the `/root` directory in the container, so if you want to
+store data on the host file system, you can mount that directory using `-v`:
 
-    $ docker run -d --name=keyid -p 5044:80 -v /var/local/lib/keyid:/root \
-        keyid/keyid --daemon --httpdendpoint=127.0.0.1:80 \
-          --rpcuser=user --rpcpass=pass
+    $ docker run -it -v /var/local/lib/keyid:/root keyid/keyid
+
+To run a KeyID node in the background, you should do something like this:
+
+    $ docker run --name=keyid -d keyid/keyid --daemon
+
+Seed nodes need to expose port 1791 so that others can connect to them:
+
+    $ docker run --name=keyid -d -p 1791:1791 keyid/keyid --daemon
+
+To run a seed node outside of Docker, no special configuration is necessary
+except to make sure that your firewall allows incoming connections to 1791.
 
 
 Building and installing KeyID manually
 --------------------------------------
 
+Of course, there is no need to use Docker if you prefer not to.  To build and
+install KeyID directly onto your machine, run the following commands:
+
     $ git submodule update --init
-    $ cmake . && make -j
+    $ cmake .
+    $ make -j
     $ install programs/client/bitshares_client /usr/local/bin/keyid
