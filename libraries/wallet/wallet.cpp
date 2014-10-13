@@ -789,6 +789,9 @@ namespace bts { namespace wallet {
                       store_record |= scan_domain_modify( *transaction_record, op );
                       break;
 
+                  case keyid_set_edge_op_type:
+                      break;
+
                   default:
                       FC_THROW_EXCEPTION( invalid_operation, "Unknown operation type!", ("op",op) );
                       break;
@@ -4254,8 +4257,8 @@ namespace bts { namespace wallet {
         }
       }
 
-      auto required_fees = get_transaction_fee();
-      if( my->blockchain->get_head_block_num() < KEYID_HARDFORK_2 )
+      auto required_fees = asset(0, 0);
+      if( my->_blockchain->get_head_block_num() < KEYID_HARDFORK_2 )
           required_fees += asset( KEYID_EXTRA_FEE_1, 0 );
       else
           required_fees += asset( KEYID_EXTRA_FEE_2, 0 );
@@ -6881,7 +6884,7 @@ namespace bts { namespace wallet {
         op.value = value;
         trx.operations.push_back(op);
      
-        auto required_fees = get_transaction_fee();
+        auto required_fees = asset(0, 0);
         required_fees += asset( KEYID_EXTRA_FEE_2, 0 );
 
         my->withdraw_to_transaction( required_fees,
