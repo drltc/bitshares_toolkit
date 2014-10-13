@@ -4258,7 +4258,7 @@ namespace bts { namespace wallet {
       }
 
       auto required_fees = asset(0, 0);
-      if( my->blockchain->get_head_block_num() < KEYID_HARDFORK_2 )
+      if( my->_blockchain->get_head_block_num() < KEYID_HARDFORK_2 )
           required_fees += asset( KEYID_EXTRA_FEE_1, 0 );
       else
           required_fees += asset( KEYID_EXTRA_FEE_2, 0 );
