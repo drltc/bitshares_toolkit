@@ -6,7 +6,7 @@ RUN apt-get -y install git cmake g++ libz-dev libboost-all-dev \
 RUN (git clone https://github.com/keyid/keyid && cd keyid && \
   git submodule update --init && cmake . && make -j && \
   install programs/client/bitshares_client /usr/local/bin/keyid) && \
-  rm -rf src
+  rm -rf keyid
 ENTRYPOINT ["keyid", "--httpdendpoint=0.0.0.0:80", "--data-dir=/data"]
 EXPOSE 80 1791
 VOLUME ["/data"]
