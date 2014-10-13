@@ -3,11 +3,11 @@
 #include <stdint.h>
 
 /* Define client version here */
-#define BTS_CLIENT_VERSION                                  "0.0.3"
+#define BTS_CLIENT_VERSION                                  "test-0.0.3"
 
 /* Comment out this line for a non-test network */
-//#define BTS_TEST_NETWORK
-//#define BTS_TEST_NETWORK_VERSION                            204
+#define BTS_TEST_NETWORK
+#define BTS_TEST_NETWORK_VERSION                            204
 
 /** @file bts/blockchain/config.hpp
  *  @brief Defines global constants that determine blockchain behavior
@@ -22,9 +22,9 @@
  *  Changing these parameters will result in a hard fork.
  */
 #define BTS_ADDRESS_PREFIX                                 "KEY"
-#define BTS_BLOCKCHAIN_SYMBOL                              "DNS"
+#define BTS_BLOCKCHAIN_SYMBOL                              "DNST"
 #define BTS_BLOCKCHAIN_NAME                                "KeyID"
-#define BTS_BLOCKCHAIN_DESCRIPTION                         ""
+#define BTS_BLOCKCHAIN_DESCRIPTION                         "KeyID Test Network"
 #define BTS_BLOCKCHAIN_PRECISION                           (100000)
 #define BTS_BLOCKCHAIN_MAX_TRANSACTION_EXPIRATION_SEC      (60*60*24*2)
 #define BTS_BLOCKCHAIN_MIN_YIELD_PERIOD_SEC                (60*60*24) // 24 hours
