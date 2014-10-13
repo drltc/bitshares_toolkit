@@ -789,6 +789,9 @@ namespace bts { namespace wallet {
                       store_record |= scan_domain_modify( *transaction_record, op );
                       break;
 
+                  case keyid_set_edge_op_type:
+                      break;
+
                   default:
                       FC_THROW_EXCEPTION( invalid_operation, "Unknown operation type!", ("op",op) );
                       break;
