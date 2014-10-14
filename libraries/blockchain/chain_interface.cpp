@@ -48,6 +48,17 @@ namespace bts{ namespace blockchain {
       if( dot != std::string::npos )
           return false;
 
+      if( get_head_block_num() >= KEYID_HARDFORK_2 )
+      {
+          for( const auto& c : subname )
+          {
+              if( isalnum(c) && !isupper(c) ) continue;
+              else if( c == '-' ) continue;
+              else return false;
+          }
+      }
+
+
       return true;
 
 
@@ -61,13 +72,6 @@ namespace bts{ namespace blockchain {
       }
 
       if ( !isalnum(subname[subname.size()-1]) || isupper(subname[subname.size()-1]) ) return false;
-      for( const auto& c : subname )
-      {
-          if( isalnum(c) && !isupper(c) ) continue;
-          else if( c == '-' ) continue;
-          else return false;
-      }
-
       if( supername.empty() )
         return true;
       return is_valid_account_name(supername);
