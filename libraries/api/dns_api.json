@@ -331,7 +331,7 @@
                     "default_value": "",
                 }
             ],
-            "prerequisites": ["json_authenticated", "wallet_unlocked"]
+            "prerequisites": ["json_authenticated" ]
         }
 
     ]
