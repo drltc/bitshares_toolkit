@@ -21,7 +21,7 @@ flag to KeyID --- see below.)
 Blockchain and wallet data is stored in a volume called `/data`, which we can
 mount to the host file system using the `-v` option.
 
-    export KEYID_DATA=~/.keyid
+    export KEYID_DATA="$HOME/.keyid"
     docker run -it -v $KEYID_DATA:/data keyid/keyid
 
 ### Running KeyID as a daemon
@@ -74,7 +74,7 @@ section contains installation instructions for Ubuntu 14.04.
 When you run KeyID directly on your machine, the `~/.KeyID` directory is used
 to store blockchain and wallet data.  This can be changed using `--data-dir`:
 
-    keyid --data-dir=~/.KeyID-foo
+    keyid --data-dir="$HOME/.KeyID-foo"
 
 To use the JSON-RPC API, you may want to specify the port to listen to:
 
