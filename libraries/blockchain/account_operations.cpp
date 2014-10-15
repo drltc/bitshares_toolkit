@@ -21,12 +21,49 @@ namespace bts { namespace blockchain {
        return delegate_pay_rate <= 100;
    }
 
+   string  coerce_bad_names( const string& account_name )
+   {
+       string ret = "";
+       bool coerce = false;
+       for( auto c : account_name )
+       {
+           if( c == ' ')
+           {
+               coerce = true;
+           }
+           else if( c == '_' )
+           {
+               ret.push_back('-');
+               coerce = true;
+           }
+           else if( isupper(c) )
+           {
+               ret.push_back( tolower(c) );
+               coerce = true;
+           }
+           else
+           {
+               ret.push_back(c);
+           }
+       }
+       if( coerce )
+       {
+           ret += "-renamed";
+           ulog("Coerced a name: ${name}", ("name", ret));
+       }
+
+       return ret;
+   }
+
    void register_account_operation::evaluate( transaction_evaluation_state& eval_state )
    { try {
       auto now = eval_state._current_state->now();
 
       if( !eval_state._current_state->is_valid_account_name( this->name ) )
          FC_CAPTURE_AND_THROW( invalid_account_name, (name) );
+
+
+      this->name = coerce_bad_names( this->name );
 
 /*
       if ( this->name.size() < KEYID_INITIAL_MIN_LENGTH )

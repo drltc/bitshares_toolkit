@@ -2340,6 +2340,22 @@ config load_config( const fc::path& datadir, bool enable_ulog )
       return _chain_db->get_accounts( first, limit );
     }
 
+
+    vector<account_record> detail::client_impl::blockchain_list_bad_accounts()const
+    {
+      auto ret = vector<account_record>();
+      for( auto account : blockchain_list_accounts( "", -1 ) )
+      {
+          if( ! _chain_db->is_valid_account_name( account.name ) )
+          {
+              ulog(account.name);
+              ret.push_back( account );
+          }
+      }
+      ulog("${count} invalid names", ("count", ret.size() ));
+      return ret;
+    }
+
     vector<account_record> detail::client_impl::blockchain_list_recently_registered_accounts()const
     {
       vector<operation> account_registrations = _chain_db->get_recent_operations(register_account_op_type);
