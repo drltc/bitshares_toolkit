@@ -18,3 +18,6 @@ then
 else
     . "$VE_BASE/bin/activate"
 fi
+
+cd ../../..
+python3 -m bts_tests "$@"
