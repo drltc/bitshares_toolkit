@@ -5,13 +5,22 @@
 """
 
 import json
+import subprocess
 
-def create_genesis_file(seed):
+def create_genesis_file():
     # programs/utils/bts_create_key --count=101 --seed=test-delegate-
+    keydata = subprocess.check_output(
+        [
+         "programs/utils/bts_create_key",
+         "--count=200",
+         "--seed=testkey-",
+        ],
+        )
+    print("here is the key data:")
+    print(keydata)
+    print(type(keydata))
     return
 
 import sys
 
-print("hello from bts_tests")
-print("here are the arguments:")
-print(sys.argv)
+create_genesis_file()
