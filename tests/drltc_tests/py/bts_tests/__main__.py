@@ -38,7 +38,7 @@ def create_genesis_file():
       ],
 
       "balances" : balances,
-    ]
+    }
     
     bts_sharedrop = []
 
