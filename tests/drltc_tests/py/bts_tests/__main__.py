@@ -47,4 +47,4 @@ def create_genesis_file():
 import sys
 
 with open("genesis.json", "w") as f:
-    json.dump(f, create_genesis_file(), indent=4)
+    json.dump(create_genesis_file(), f, indent=4)
