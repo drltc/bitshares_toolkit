@@ -4,6 +4,7 @@
 2. Produce blocks
 """
 
+import io
 import json
 import subprocess
 
@@ -17,8 +18,8 @@ def create_genesis_file():
         ],
         )
     print("here is the key data:")
-    print(keydata)
-    print(type(keydata))
+    key_data = json.loads(keydata.decode())
+    print(key_data)
     return
 
 import sys
