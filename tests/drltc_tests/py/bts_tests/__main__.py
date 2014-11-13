@@ -18,10 +18,33 @@ def create_genesis_file():
         ],
         )
     print("here is the key data:")
-    key_data = json.loads(keydata.decode())
-    print(key_data)
-    return
+    key = json.loads(keydata.decode())
+
+    balances = [[key[i]["pts_address"], 100000000000] for i in x]
+    
+    genesis_json = {
+      "timestamp" : "2014-11-13T15:00:00",
+      
+      "market_assets" : [],
+      
+      "names" :
+      [
+        {
+          "name" : "init"+str(i),
+          "owner" : key[i]["public_key"],
+          "delegate_pay_rate" : 1,
+        }
+        for i in range(101)
+      ],
+
+      "balances" : balances,
+    ]
+    
+    bts_sharedrop = []
+
+    return genesis_json
 
 import sys
 
-create_genesis_file()
+with open("genesis.json", "w") as f:
+    json.dump(f, create_genesis_file(), indent=4)
