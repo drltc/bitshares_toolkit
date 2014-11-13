@@ -20,7 +20,7 @@ def create_genesis_file():
     print("here is the key data:")
     key = json.loads(keydata.decode())
 
-    balances = [[key[i]["pts_address"], 100000000000] for i in x]
+    balances = [[key[i]["pts_address"], 100000000000] for i in range(101)]
     
     genesis_json = {
       "timestamp" : "2014-11-13T15:00:00",
