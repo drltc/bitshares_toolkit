@@ -13,7 +13,7 @@ if [ ! -e "$VE_BASE" ]
 then
     virtualenv -p $(readlink -f $(which python3)) "$VE_BASE"
     . "$VE_BASE/bin/activate"
-    pip install -e .
+    pip install -r requirements.txt -e .
 else
     . "$VE_BASE/bin/activate"
 fi
