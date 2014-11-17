@@ -87,7 +87,7 @@ class Node(object):
         return
 
     def get_data_dir(self):
-        return os.path.join(self.basedir, self.client_num)
+        return os.path.join(self.basedir, self.clientnum)
 
     def get_genesis_path(self):
         return os.path.join(self.basedir, self.genesis_filename)
