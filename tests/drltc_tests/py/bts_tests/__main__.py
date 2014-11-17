@@ -31,7 +31,6 @@ class TestFixture(object):
              "--seed=testkey-",
             ],
             )
-        print("here is the key data:")
         key = json.loads(keydata.decode())
 
         balances = [[key[i]["pts_address"], 100000000000] for i in range(101)]
