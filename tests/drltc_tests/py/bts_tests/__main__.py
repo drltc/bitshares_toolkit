@@ -7,7 +7,8 @@
 import io
 import json
 import os
-import subprocess
+
+import tornado.process
 
 def mkdir_p(path):
     try:
@@ -73,6 +74,7 @@ class Node(object):
         clientnum,
         basedir="tmp",
         genesis_filename="genesis.json",
+        io_loop=None,
         ):
 
         self.clientnum = clientnum
@@ -83,6 +85,9 @@ class Node(object):
         self.rpcport = 9300+clientnum
         #self.csport = 9400+clientnum
         self.csport = None
+        
+        self.io_loop = None
+        self.process = None
         return
 
     def get_data_dir(self):
@@ -113,6 +118,14 @@ class Node(object):
             args.extend(["--connect-to", "127.0.0.1:9200"])
         print(os.getcwd())
         print(args)
+        
+        self.process = tornado.subprocess.Subprocess(args,
+            io_loop=self.io_loop,
+            stdin=tornado.process.Subprocess.STREAM,
+            stdout=tornado.process.Subprocess.STREAM,
+            stderr=tornado.process.Subprocess.STREAM,
+            )
+        
         return
 
 tf = TestFixture()
