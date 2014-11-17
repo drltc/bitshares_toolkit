@@ -9,6 +9,13 @@ import json
 import os
 import subprocess
 
+def mkdir_p(path):
+    try:
+        os.makedirs(path)
+    except FileExistsError:
+        pass
+    return
+
 class TestFixture(object):
     def __init__(self):
         self.genesis_filename = "genesis.json"
@@ -49,6 +56,7 @@ class TestFixture(object):
         
         bts_sharedrop = []
 
+        mkdir_p(os.path.dirname(self.get_genesis_path()))
         with open(self.get_genesis_path(), "w") as f:
             json.dump(genesis_json, f, indent=4)
         return
