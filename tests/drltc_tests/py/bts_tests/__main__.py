@@ -12,8 +12,9 @@ import subprocess
 import tornado.process
 import tornado.gen
 from tornado.ioloop import IOLoop
+from tornado.gen import coroutine
 
-@tornado.gen.coroutine
+@coroutine
 def call_cmd(cmd, stdin_data=None):
     """
     Wrapper around subprocess call using Tornado's Subprocess class.
@@ -54,7 +55,7 @@ class TestFixture(object):
         self.node = []
         return
 
-    @tornado.gen.coroutine
+    @coroutine
     def create_genesis_file(self):
         # programs/utils/bts_create_key --count=101 --seed=test-delegate-
 
@@ -153,7 +154,7 @@ class Node(object):
     def get_genesis_path(self):
         return os.path.join(self.basedir, self.genesis_filename)
 
-    @tornado.gen.coroutine
+    @coroutine
     def launch(self):
         args = [
          "programs/client/bitshares_client",
@@ -186,7 +187,7 @@ class Node(object):
             )
         return
 
-    @tornado.gen.coroutine
+    @coroutine
     def start_http_client(self):
         yield self.http_server_up
         self.socket = socket.socket(
@@ -198,7 +199,7 @@ class Node(object):
         yield self.http_conn.connect(("127.0.0.1", self.httpport))
         return
 
-    @tornado.gen.coroutine
+    @coroutine
     def read_stdout_forever(self):
         seen_http_start = False
         while True:
@@ -224,7 +225,7 @@ class Node(object):
             )
         return
 
-@tornado.gen.coroutine
+@coroutine
 def main():
     tf = TestFixture()
     yield tf.create_genesis_file()
