@@ -205,7 +205,7 @@ class Node(object):
         seen_http_start = False
         while True:
             try:
-                line = yield self.process.stdout.read_until("\n")
+                line = yield self.process.stdout.read_until(b"\n")
                 print("client: "+line)
             except tornado.iostream.StreamClosedError:
                 print("finished with StreamClosedError")
@@ -219,7 +219,7 @@ class Node(object):
     @coroutine
     def read_stderr_forever(self):
         while True:
-            line = yield self.process.stderr.read_until("\n")
+            line = yield self.process.stderr.read_until(b"\n"))
             print("client: "+line)
         return
 
