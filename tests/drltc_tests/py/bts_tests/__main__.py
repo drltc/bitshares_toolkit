@@ -242,6 +242,8 @@ def _main():
 def main():
     try:
         _main()
+    except Exception as e:
+        print(e)
     finally:
         the_io_loop.stop()
     return
