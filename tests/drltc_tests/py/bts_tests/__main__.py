@@ -146,6 +146,8 @@ class Node(object):
                 user_agent="drltc-BTS-API-Tester",
             )
             )
+            
+        self.next_request_id = 1
         return
 
     def get_data_dir(self):
@@ -232,7 +234,14 @@ class Node(object):
         return
 
     @coroutine
-    def run_cmd(self, cmd):
+    def run_cmd(self, method, *params):
+        req_id = self.alloc_request_id()
+        req_body = json.dumps(
+        {
+            "method" : method,
+            "params" : params,
+            "id" : req_id,
+        })
         yield self.http_server_up
         response = yield self.http_client.fetch(
             "http://127.0.0.1:"+str(self.httpport)+"/rpc",
@@ -241,11 +250,18 @@ class Node(object):
             auth_password="pass",
             auth_mode="basic",
             user_agent="drltc-bts-api-tester",
+            body=req_body,
             headers={
-            "content-type" : "application/json",
+            "Content-Type" : "application/json",
             },
             )
+        print("response:", response.body)
         return
+
+    def alloc_request_id(self):
+        result = self.next_request_id
+        self.next_request_id = result+1
+        return result
 
 @coroutine
 def _main():
