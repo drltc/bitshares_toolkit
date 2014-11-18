@@ -13,7 +13,7 @@ import traceback
 import tornado.process
 import tornado.gen
 from tornado.ioloop import IOLoop
-from tornado.gen import coroutine
+from tornado.gen import coroutine, Task
 
 @coroutine
 def call_cmd(cmd, stdin_data=None):
