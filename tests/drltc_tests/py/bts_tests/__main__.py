@@ -228,7 +228,9 @@ class Node(object):
 @coroutine
 def _main():
     tf = TestFixture()
+    print("TestFixture created")
     yield tf.create_genesis_file()
+    print("Genesis file created")
     yield tf.launch(2)
     info0 = yield tf.node[0].run_cmd("info")
     print("info0:")
