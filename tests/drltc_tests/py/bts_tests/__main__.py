@@ -236,7 +236,7 @@ def _main():
 @coroutine
 def main():
     try:
-        _main()
+        yield _main()
     except Exception as e:
         print("caught exception")
         print(e)
