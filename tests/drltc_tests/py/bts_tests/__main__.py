@@ -8,6 +8,7 @@ import io
 import json
 import os
 import subprocess
+import traceback
 
 import tornado.process
 import tornado.gen
@@ -221,7 +222,6 @@ class Node(object):
 def _main():
     tf = TestFixture()
     print("TestFixture created")
-    import pdb; pdb.set_trace()
     yield tf.create_genesis_file()
     print("Genesis file created")
     yield tf.launch(2)
@@ -239,7 +239,7 @@ def main():
         yield _main()
     except Exception as e:
         print("caught exception")
-        print(e)
+        print(traceback.format_exc())
     finally:
         the_io_loop.stop()
     return
