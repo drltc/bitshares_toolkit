@@ -7,6 +7,7 @@
 import io
 import json
 import os
+import re
 import subprocess
 import traceback
 
@@ -110,6 +111,8 @@ class TestFixture(object):
         yield tasks
         return
 
+re_http_start = re.compile("^Starting HTTP JSON RPC server on port ([0-9]+).*$")
+
 class Node(object):
     def __init__(self,
         clientnum,
@@ -210,11 +213,15 @@ class Node(object):
             except tornado.iostream.StreamClosedError:
                 print("finished with StreamClosedError")
                 break
-            if (not seen_http_start) and (
-                line.startswith(b"Starting HTTP JSON RPC server")):
-                # enable future
-                self.http_server_up.set_result(int(line.split()[-1]))
-                seen_http_start = True
+            if not seen_http_start:
+                sline = line.decode()
+                m = re_http_start.match(sline)
+                if m is not None:
+                    port = int(m.group(1))
+                    print("saw HTTP port", port)
+                    # enable future
+                    self.http_server_up.set_result(port)
+                    seen_http_start = True
         return
 
     @coroutine
