@@ -153,6 +153,7 @@ class Node(object):
 
     @coroutine
     def launch(self):
+        print("in Node.launch()")
         args = [
          "programs/client/bitshares_client",
          "--data-dir", self.get_data_dir(),
@@ -203,7 +204,11 @@ class Node(object):
     def read_stdout_forever(self):
         seen_http_start = False
         while True:
-            line = yield self.process.stdout.read_until("\n")
+            try:
+                line = yield self.process.stdout.read_until("\n")
+            except tornado.iostream.StreamClosedError:
+                print("finished with StreamClosedError")
+                break
             if (not seen_result) and line.startswith("Starting HTTP JSON RPC server"):
                 # enable future
                 self.http_server_up.set_result(int(line.split()[-1]))
