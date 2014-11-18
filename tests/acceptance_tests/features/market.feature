@@ -87,3 +87,36 @@ Scenario: Alice shorts BitUSD and sells to Bob, and later Alice uses relative or
 #  And I wait for 2 blocks
 #  Then I should have around 20 USD
 #  And I should have no USD/XTS margin orders
+
+Scenario: Alice shorts BitUSD and sells to Bob
+  Given I'm Alice
+  And feed price is 0.02 USD/XTS
+  And I wait for one block
+  And I received 10,100 XTS from angel
+  And Bob received 10,100 XTS from angel
+  And I wait for one block
+  When I short USD, collateral 10,000 XTS
+  And Bob submits ask for 10,000 XTS at 0.02 USD/XTS
+  And I wait for one block
+  Then Bob should have   0 USD and 100 XTS minus fee
+  And  I   should have 200 USD and 100 XTS minus fee
+  
+Scenario: Alice shorts BitUSD and sells to Bob, Bob sells BitUSD above margin call price, feed moves above margin call price, Alice is forced to margin call
+  Given I'm Alice
+  And feed price is 0.02 USD/XTS
+  And I wait for one block
+  And I received 10,100 XTS from angel
+  And Bob received 10,100 XTS from angel
+  And I wait for one block
+  When I short USD, collateral 10,000 XTS
+  And Bob submits ask for 10,000 XTS at 0.02 USD/XTS
+  And I wait for one block
+  Then Bob should have 200 USD and 100 XTS minus fee
+  And  I   should have   0 USD and 100 XTS minus fee
+  When feed price is 0.0125 USD/XTS
+  And Bob submits bid for 16,000 XTS at .0125 USD/XTS
+  And I wait for one block
+  Then Bob should have   0 USD and 16,100 XTS minus 2*fee
+  And  I   should have   0 USD and  3,900 XTS minus fee
+  And  I   should have  no USD/XTS margin orders
+
