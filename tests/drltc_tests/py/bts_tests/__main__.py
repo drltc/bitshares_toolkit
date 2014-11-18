@@ -182,9 +182,9 @@ class Node(object):
             stdout=tornado.process.Subprocess.STREAM,
             stderr=tornado.process.Subprocess.STREAM,
             )
-        self.io_loop.add_callback(read_stdout_forever)
-        self.io_loop.add_callback(read_stderr_forever)
-        self.io_loop.add_callback(start_http_client)
+        self.io_loop.add_callback(self.read_stdout_forever)
+        self.io_loop.add_callback(self.read_stderr_forever)
+        self.io_loop.add_callback(self.start_http_client)
         return
 
     @coroutine
