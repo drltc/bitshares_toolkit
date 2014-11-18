@@ -7,8 +7,38 @@
 import io
 import json
 import os
+import subprocess
 
 import tornado.process
+import tornado.gen
+from tornado.ioloop import IOLoop
+
+@tornado.gen.coroutine
+def call_cmd(cmd, stdin_data=None):
+    """
+    Wrapper around subprocess call using Tornado's Subprocess class.
+    """
+    try:
+        p = tornado.process.Subprocess(
+            cmd,
+            stdin=subprocess.PIPE,
+            stdout=tornado.process.Subprocess.STREAM,
+            stderr=tornado.process.Subprocess.STREAM,
+        )
+    except OSError as e:
+        raise Return((None, e))
+
+    if stdin_data:
+        p.stdin.write(stdin_data)
+        p.stdin.flush()
+        p.stdin.close()
+
+    result, error = yield [
+        Task(p.stdout.read_until_close),
+        Task(p.stderr.read_until_close),
+    ]
+
+    raise tornado.gen.Return((result, error))
 
 def mkdir_p(path):
     try:
@@ -21,18 +51,28 @@ class TestFixture(object):
     def __init__(self):
         self.genesis_filename = "genesis.json"
         self.basedir = "tmp"
+        self.node = []
         return
 
+    @tornado.gen.coroutine
     def create_genesis_file(self):
         # programs/utils/bts_create_key --count=101 --seed=test-delegate-
-        keydata = subprocess.check_output(
+
+        self.process = tornado.subprocess.Subprocess(args,
+            io_loop=self.io_loop,
+            stdin=tornado.process.Subprocess.STREAM,
+            stdout=tornado.process.Subprocess.STREAM,
+            stderr=tornado.process.Subprocess.STREAM,
+            )
+
+        keyout, keyerr = yield call_cmd(
             [
              "programs/utils/bts_create_key",
              "--count=200",
              "--seed=testkey-",
             ],
             )
-        key = json.loads(keydata.decode())
+        key = json.loads(keyout.decode())
 
         balances = [[key[i]["pts_address"], 100000000000] for i in range(101)]
         
@@ -64,9 +104,16 @@ class TestFixture(object):
     def get_genesis_path(self):
         return os.path.join(self.basedir, self.genesis_filename)
 
+    @coroutine
     def launch(self, client_count):
-        for clientnum in range(client_count):
-            Node(clientnum).launch()
+        newnodes = [Node(i) for i in range(client_count)]
+        self.node.extend(newnodes)
+        tasks = [
+                 node.launch() for node in newnodes
+                ] + [
+                 node.start_http_client() for node in newnodes
+                ]
+        yield tasks
         return
 
 class Node(object):
@@ -88,6 +135,16 @@ class Node(object):
         
         self.io_loop = None
         self.process = None
+        
+        self.http_server_up = tornado.concurrent.Future()
+        self.http_client_up = tornado.concurrent.Future()
+        
+        self.http_client = tornado.httpclient.AsyncHTTPClient(
+            force_instance=True,
+            defaults=dict(
+                user_agent="drltc-BTS-API-Tester",
+            )
+            )
         return
 
     def get_data_dir(self):
@@ -96,6 +153,7 @@ class Node(object):
     def get_genesis_path(self):
         return os.path.join(self.basedir, self.genesis_filename)
 
+    @tornado.gen.coroutine
     def launch(self):
         args = [
          "programs/client/bitshares_client",
@@ -105,6 +163,7 @@ class Node(object):
          "--server",
          "--rpc-user", "user",
          "--rpc-password", "pass",
+         
         ]
         if self.httpport is not None:
             args.extend(["--httpport", str(self.httpport)])
@@ -125,9 +184,61 @@ class Node(object):
             stdout=tornado.process.Subprocess.STREAM,
             stderr=tornado.process.Subprocess.STREAM,
             )
-        
         return
 
-tf = TestFixture()
-tf.create_genesis_file()
-tf.launch(2)
+    @tornado.gen.coroutine
+    def start_http_client(self):
+        yield self.http_server_up
+        self.socket = socket.socket(
+            socket.AF_INET,
+            socket.SOCK_STREAM,
+            0,
+            )
+        self.http_conn = tornado.iostream.IOStream(self.socket)
+        yield self.http_conn.connect(("127.0.0.1", self.httpport))
+        return
+
+    @tornado.gen.coroutine
+    def read_stdout_forever(self):
+        seen_http_start = False
+        while True:
+            line = yield self.process.stdout.read_until("\n")
+            if (not seen_result) and line.startswith("Starting HTTP JSON RPC server"):
+                # enable future
+                self.http_server_up.set_result(int(line.split()[-1]))
+                seen_http_start = True
+        return
+        
+    @coroutine
+    def run_cmd(self, cmd):
+        response = yield self.http_client.fetch(
+            "http://127.0.0.1:"+str(self.httpport)+"/rpc",
+            method="POST",
+            auth_username="user",
+            auth_password="pass",
+            auth_mode="basic",
+            user_agent="drltc-bts-api-tester",
+            headers={
+            "content-type" : "application/json",
+            },
+            )
+        return
+
+@tornado.gen.coroutine
+def main():
+    tf = TestFixture()
+    yield tf.create_genesis_file()
+    yield tf.launch(2)
+    info0 = yield tf.node[0].run_cmd("info")
+    print("info0:")
+    print(info0)
+    info1 = yield tf.node[1].run_cmd("info")
+    print("info1:")
+    print(info1)
+    the_io_loop.stop()
+    return
+
+if __name__ == "__main__":
+    the_io_loop = tornado.ioloop.IOLoop.instance()
+    the_io_loop.add_callback(main)
+    the_io_loop.start()
