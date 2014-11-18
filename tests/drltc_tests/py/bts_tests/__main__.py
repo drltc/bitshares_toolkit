@@ -210,7 +210,8 @@ class Node(object):
             except tornado.iostream.StreamClosedError:
                 print("finished with StreamClosedError")
                 break
-            if (not seen_result) and line.startswith(b"Starting HTTP JSON RPC server"):
+            if (not seen_http_start) and (
+                line.startswith(b"Starting HTTP JSON RPC server")):
                 # enable future
                 self.http_server_up.set_result(int(line.split()[-1]))
                 seen_http_start = True
