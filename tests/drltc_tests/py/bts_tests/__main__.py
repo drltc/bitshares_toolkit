@@ -59,7 +59,7 @@ class TestFixture(object):
     def create_genesis_file(self):
         # programs/utils/bts_create_key --count=101 --seed=test-delegate-
 
-        self.process = tornado.subprocess.Subprocess(args,
+        self.process = tornado.process.Subprocess(args,
             io_loop=self.io_loop,
             stdin=tornado.process.Subprocess.STREAM,
             stdout=tornado.process.Subprocess.STREAM,
@@ -179,7 +179,7 @@ class Node(object):
         print(os.getcwd())
         print(args)
         
-        self.process = tornado.subprocess.Subprocess(args,
+        self.process = tornado.process.Subprocess(args,
             io_loop=self.io_loop,
             stdin=tornado.process.Subprocess.STREAM,
             stdout=tornado.process.Subprocess.STREAM,
