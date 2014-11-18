@@ -206,11 +206,11 @@ class Node(object):
         while True:
             try:
                 line = yield self.process.stdout.read_until(b"\n")
-                print("client: "+line)
+                print("client: "+line.decode())
             except tornado.iostream.StreamClosedError:
                 print("finished with StreamClosedError")
                 break
-            if (not seen_result) and line.startswith("Starting HTTP JSON RPC server"):
+            if (not seen_result) and line.startswith(b"Starting HTTP JSON RPC server"):
                 # enable future
                 self.http_server_up.set_result(int(line.split()[-1]))
                 seen_http_start = True
@@ -220,7 +220,7 @@ class Node(object):
     def read_stderr_forever(self):
         while True:
             line = yield self.process.stderr.read_until(b"\n")
-            print("client: "+line)
+            print("client: "+line.decode())
         return
 
     @coroutine
