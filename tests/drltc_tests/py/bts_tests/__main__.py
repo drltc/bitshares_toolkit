@@ -12,6 +12,8 @@ import traceback
 
 import tornado.process
 import tornado.gen
+import tornado.httpclient
+
 from tornado.ioloop import IOLoop
 from tornado.gen import coroutine, Task
 
