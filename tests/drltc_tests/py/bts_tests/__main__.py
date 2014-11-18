@@ -106,8 +106,6 @@ class TestFixture(object):
         self.node.extend(newnodes)
         tasks = [
                  node.launch() for node in newnodes
-                ] + [
-                 node.start_http_client() for node in newnodes
                 ]
         yield tasks
         return
@@ -120,6 +118,11 @@ class Node(object):
         io_loop=None,
         ):
 
+        if io_loop is not None:
+            self.io_loop = io_loop
+        else:
+            self.io_loop = tornado.ioloop.IOLoop.instance()
+
         self.clientnum = clientnum
         self.basedir = basedir
         self.genesis_filename = genesis_filename
@@ -128,8 +131,7 @@ class Node(object):
         self.rpcport = 9300+clientnum
         #self.csport = 9400+clientnum
         self.csport = None
-        
-        self.io_loop = None
+
         self.process = None
         
         self.http_server_up = tornado.concurrent.Future()
@@ -180,6 +182,9 @@ class Node(object):
             stdout=tornado.process.Subprocess.STREAM,
             stderr=tornado.process.Subprocess.STREAM,
             )
+        self.io_loop.add_callback(read_stdout_forever)
+        self.io_loop.add_callback(read_stderr_forever)
+        self.io_loop.add_callback(start_http_client)
         return
 
     @coroutine
@@ -204,9 +209,16 @@ class Node(object):
                 self.http_server_up.set_result(int(line.split()[-1]))
                 seen_http_start = True
         return
-        
+
+    @coroutine
+    def read_stderr_forever(self):
+        while True:
+            yield self.process.stderr.read(4096)
+        return
+
     @coroutine
     def run_cmd(self, cmd):
+        yield self.http_server_up
         response = yield self.http_client.fetch(
             "http://127.0.0.1:"+str(self.httpport)+"/rpc",
             method="POST",
