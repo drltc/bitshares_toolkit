@@ -226,7 +226,7 @@ class Node(object):
         return
 
 @coroutine
-def main():
+def _main():
     tf = TestFixture()
     yield tf.create_genesis_file()
     yield tf.launch(2)
@@ -236,7 +236,14 @@ def main():
     info1 = yield tf.node[1].run_cmd("info")
     print("info1:")
     print(info1)
-    the_io_loop.stop()
+    return
+
+@coroutine
+def main():
+    try:
+        _main()
+    finally:
+        the_io_loop.stop()
     return
 
 if __name__ == "__main__":
