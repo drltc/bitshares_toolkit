@@ -190,19 +190,6 @@ class Node(object):
             )
         self.io_loop.add_callback(self.read_stdout_forever)
         self.io_loop.add_callback(self.read_stderr_forever)
-        self.io_loop.add_callback(self.start_http_client)
-        return
-
-    @coroutine
-    def start_http_client(self):
-        yield self.http_server_up
-        self.socket = socket.socket(
-            socket.AF_INET,
-            socket.SOCK_STREAM,
-            0,
-            )
-        self.http_conn = tornado.iostream.IOStream(self.socket)
-        yield self.http_conn.connect(("127.0.0.1", self.httpport))
         return
 
     @coroutine
