@@ -219,7 +219,7 @@ class Node(object):
     @coroutine
     def read_stderr_forever(self):
         while True:
-            line = yield self.process.stderr.read_until(b"\n"))
+            line = yield self.process.stderr.read_until(b"\n")
             print("client: "+line)
         return
 
