@@ -206,6 +206,7 @@ class Node(object):
         while True:
             try:
                 line = yield self.process.stdout.read_until("\n")
+                print("client: "+line)
             except tornado.iostream.StreamClosedError:
                 print("finished with StreamClosedError")
                 break
