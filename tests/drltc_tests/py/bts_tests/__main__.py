@@ -58,14 +58,6 @@ class TestFixture(object):
     @coroutine
     def create_genesis_file(self):
         # programs/utils/bts_create_key --count=101 --seed=test-delegate-
-
-        self.process = tornado.process.Subprocess(args,
-            io_loop=self.io_loop,
-            stdin=tornado.process.Subprocess.STREAM,
-            stdout=tornado.process.Subprocess.STREAM,
-            stderr=tornado.process.Subprocess.STREAM,
-            )
-
         keyout, keyerr = yield call_cmd(
             [
              "programs/utils/bts_create_key",
@@ -246,6 +238,7 @@ def main():
     try:
         _main()
     except Exception as e:
+        print("caught exception")
         print(e)
     finally:
         the_io_loop.stop()
