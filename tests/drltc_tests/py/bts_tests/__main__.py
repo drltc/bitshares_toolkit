@@ -160,8 +160,8 @@ class Node(object):
          "--genesis-config", self.get_genesis_path(),
          "--min-delegate-connection-count", "0",
          "--server",
-         "--rpc-user", "user",
-         "--rpc-password", "pass",
+         "--rpcuser", "user",
+         "--rpcpassword", "pass",
          
         ]
         if self.httpport is not None:
