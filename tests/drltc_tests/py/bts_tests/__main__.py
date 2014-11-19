@@ -80,7 +80,8 @@ class TestFixture(object):
             )
         key = json.loads(keyout.decode())
 
-        balances = [[key[i]["pts_address"], 100000000000] for i in range(DELEGATE_COUNT)]
+        balances =  [[key[0]["pts_address"], 10000 * 2 * (10**8)]]
+        balances += [[key[i]["pts_address"], 100000000000] for i in range(1, DELEGATE_COUNT)]
         
         genesis_json = {
           "timestamp" : self.genesis_timestamp,
@@ -192,6 +193,11 @@ class TestFixture(object):
         yield n.run_cmd("wallet_account_create", "angel")
         yield n.run_cmd("wallet_account_register", "angel", "init0")
         yield self.clients("debug_advance_time 1 blocks")
+        yield n.run_cmd(
+            "wallet_transfer", "100000000", "XTS", "init0", "angel",
+            "hello_world", "vote_none"
+            )
+        yield self.clients("debug_advance_time 1 blocks")
         yield self.cmd_loop()
         return
 
@@ -205,7 +211,7 @@ class TestFixture(object):
         if m is not None:
             u = node_exp.split(",")
             for i in range(len(u)):
-                yield dict(node_id=i, acct=None)
+                yield dict(node_id=i, acct="")
         elif node_exp == "alice":
             yield dict(node_id=1, acct="alice")
         elif node_exp == "bob":
@@ -229,7 +235,7 @@ class TestFixture(object):
         while True:
             prompt = ">>> "
             if active_nodes is not None:
-                prompt = "("+active_nodes+") >>>"
+                prompt = "("+active_nodes+") >>> "
             cmd = input(prompt)
             if cmd[0] == ">":
                 active_nodes = cmd[1:]
@@ -237,7 +243,7 @@ class TestFixture(object):
                 break
             else:
                 for o in self.get_nodes(active_nodes):
-                    cmd_sub = cmd.replace("$acct", o["acct"] or "")
+                    cmd_sub = cmd.replace("$acct", o["acct"])
                     n = self.node[o["node_id"]]
                     yield n.run_cmd(*cmd.split(" "))
         return
