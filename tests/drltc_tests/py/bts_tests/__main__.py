@@ -52,11 +52,16 @@ def mkdir_p(path):
         pass
     return
 
+DELEGATE_COUNT = 101
+
 class TestFixture(object):
     def __init__(self):
         self.genesis_filename = "genesis.json"
         self.basedir = "tmp"
         self.node = []
+        self.delegate2nodeid = DELEGATE_COUNT*[0]
+        self.name2privkey = {}
+        self.genesis_timestamp = "2014-11-13T15:00:00"
         return
 
     @coroutine
@@ -71,10 +76,10 @@ class TestFixture(object):
             )
         key = json.loads(keyout.decode())
 
-        balances = [[key[i]["pts_address"], 100000000000] for i in range(101)]
+        balances = [[key[i]["pts_address"], 100000000000] for i in range(DELEGATE_COUNT)]
         
         genesis_json = {
-          "timestamp" : "2014-11-13T15:00:00",
+          "timestamp" : self.genesis_timestamp,
           
           "market_assets" : [],
           
@@ -96,6 +101,9 @@ class TestFixture(object):
         mkdir_p(os.path.dirname(self.get_genesis_path()))
         with open(self.get_genesis_path(), "w") as f:
             json.dump(genesis_json, f, indent=4)
+            
+        for i in range(DELEGATE_COUNT):
+            self.name2privkey["delegate"+str(i)] = key[i]["wif_private_key"]
         return
 
     def get_genesis_path(self):
@@ -109,6 +117,41 @@ class TestFixture(object):
                  node.launch() for node in newnodes
                 ]
         yield tasks
+        return
+
+    @coroutine
+    def clients(self, cmd):
+        u = cmd.split()
+        for n in self.node:
+            yield n.run_cmd(*u)
+        return
+
+    @coroutine
+    def create_wallets(self):
+        yield self.clients("debug_start_simulated_time "+self.genesis_timestamp)
+        yield self.clients("debug_advance_time 1 seconds")
+        yield self.clients("wallet_create default walletpassword")
+        yield self.clients("wallet_unlock 9999999 walletpassword")
+        return
+
+    @coroutine
+    def register_delegates(self):
+        for i in range(DELEGATE_COUNT):
+            n = self.node[self.delegate2nodeid[i]]
+            yield n.run_cmd("wallet_import_private_key",
+                self.name2privkey["delegate"+str(i)])
+            yield n.run_cmd("wallet_delegate_set_block_production",
+                "delegate"+str(i),
+                True,
+                )
+        return
+
+    @coroutine
+    def delegates(self, cmd):
+        u = cmd.split()
+        for i in range(DELEGATE_COUNT):
+            n = self.node[self.delegate2nodeid[i]]
+            yield 
         return
 
 re_http_start = re.compile("^Starting HTTP JSON RPC server on port ([0-9]+).*$")
@@ -198,7 +241,7 @@ class Node(object):
         while True:
             try:
                 line = yield self.process.stdout.read_until(b"\n")
-                print("client: "+line.decode())
+                print(str(self.clientnum)+": "+line.decode())
             except tornado.iostream.StreamClosedError:
                 print("finished with StreamClosedError")
                 break
@@ -207,7 +250,6 @@ class Node(object):
                 m = re_http_start.match(sline)
                 if m is not None:
                     port = int(m.group(1))
-                    print("saw HTTP port", port)
                     # enable future
                     self.http_server_up.set_result(port)
                     seen_http_start = True
@@ -230,6 +272,7 @@ class Node(object):
             "id" : req_id,
         })
         yield self.http_server_up
+        print(str(self.clientnum)+"> "+method+" "+" ".join(params))
         response = yield self.http_client.fetch(
             "http://127.0.0.1:"+str(self.httpport)+"/rpc",
             method="POST",
@@ -242,7 +285,7 @@ class Node(object):
             "Content-Type" : "application/json",
             },
             )
-        print("response:", response.body)
+        print(str(self.clientnum)+"< ", response.body)
         return
 
     def alloc_request_id(self):
@@ -256,13 +299,10 @@ def _main():
     print("TestFixture created")
     yield tf.create_genesis_file()
     print("Genesis file created")
-    yield tf.launch(2)
-    info0 = yield tf.node[0].run_cmd("info")
-    print("info0:")
-    print(info0)
-    info1 = yield tf.node[1].run_cmd("info")
-    print("info1:")
-    print(info1)
+    yield tf.launch(3)
+    yield tf.create_wallets()
+    yield tf.register_delegates()
+
     return
 
 @coroutine
