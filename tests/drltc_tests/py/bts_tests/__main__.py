@@ -237,7 +237,7 @@ class TestFixture(object):
                 break
             else:
                 for o in self.get_nodes(active_nodes):
-                    cmd_sub = cmd.replace("$acct", o["acct"])
+                    cmd_sub = cmd.replace("$acct", o["acct"] or "")
                     n = self.node[o["node_id"]]
                     yield n.run_cmd(*cmd.split(" "))
         return
