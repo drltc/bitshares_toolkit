@@ -118,8 +118,10 @@ class TestFixture(object):
     def launch(self, client_count):
         newnodes = [Node(i, cmd_loop=self.cmd_loop) for i in range(client_count)]
         self.node.extend(newnodes)
+        n0 = newnodes[0]
+        yield n0.launch()
         tasks = [
-                 node.launch() for node in newnodes
+                 node.launch() for node in newnodes[1:]
                 ]
         yield tasks
         return
