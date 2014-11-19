@@ -273,18 +273,23 @@ class Node(object):
         })
         yield self.http_server_up
         print(str(self.clientnum)+"> "+req_body)
-        response = yield self.http_client.fetch(
-            "http://127.0.0.1:"+str(self.httpport)+"/rpc",
-            method="POST",
-            auth_username="user",
-            auth_password="pass",
-            auth_mode="basic",
-            user_agent="drltc-bts-api-tester",
-            body=req_body,
-            headers={
-            "Content-Type" : "application/json",
-            },
-            )
+        try:
+            response = yield self.http_client.fetch(
+                "http://127.0.0.1:"+str(self.httpport)+"/rpc",
+                method="POST",
+                auth_username="user",
+                auth_password="pass",
+                auth_mode="basic",
+                user_agent="drltc-bts-api-tester",
+                body=req_body,
+                headers={
+                "Content-Type" : "application/json",
+                },
+                )
+        except tornado.httpclient.HTTPError as e:
+            print(str(self.clientnum)+"! "+str(e.code))
+            print(e.response.body)
+            sys.exit(1)
         print(str(self.clientnum)+"< ", response.body)
         return
 
