@@ -120,6 +120,7 @@ class TestFixture(object):
         self.node.extend(newnodes)
         n0 = newnodes[0]
         yield n0.launch()
+        yield n0.p2p_server_up
         tasks = [
                  node.launch() for node in newnodes[1:]
                 ]
@@ -254,6 +255,7 @@ class TestFixture(object):
 
 
 re_http_start = re.compile("^Starting HTTP JSON RPC server on port ([0-9]+).*$")
+re_p2p_start = re.compile("^Listening for P2P connections on port ([0-9]+).*$")
 
 class Node(object):
     def __init__(self,
@@ -282,6 +284,7 @@ class Node(object):
         
         self.http_server_up = tornado.concurrent.Future()
         self.http_client_up = tornado.concurrent.Future()
+        self.p2p_server_up = tornado.concurrent.Future()
         
         self.http_client = tornado.httpclient.AsyncHTTPClient(
             force_instance=True,
@@ -340,6 +343,7 @@ class Node(object):
     @coroutine
     def read_stdout_forever(self):
         seen_http_start = False
+        seen_p2p_start = False
         while True:
             try:
                 line = yield self.process.stdout.read_until(b"\n")
@@ -355,6 +359,14 @@ class Node(object):
                     # enable future
                     self.http_server_up.set_result(port)
                     seen_http_start = True
+            if not seen_p2p_start:
+                sline = line.decode()
+                m = re_p2p_start.match(sline)
+                if m is not None:
+                    port = int(m.group(1))
+                    # enable future
+                    self.p2p_server_up.set_result(port)
+                    seen_p2p_start = True
         return
 
     @coroutine
