@@ -308,7 +308,8 @@ class Node(object):
          "--server",
          "--rpcuser", "user",
          "--rpcpassword", "pass",
-         
+         "--upnp", "false",
+         "--disable-default-peers",
         ]
         if self.httpport is not None:
             args.extend(["--httpport", str(self.httpport)])
