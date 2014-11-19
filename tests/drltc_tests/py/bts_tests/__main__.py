@@ -388,6 +388,7 @@ class Node(object):
             print(str(self.clientnum)+"! "+str(e.code))
             print(e.response.body)
             yield self.cmd_loop()
+            sys.exit(1)
         print(str(self.clientnum)+"< ", response.body)
         return json.loads(response.body.decode("utf-8"))["result"]
 
