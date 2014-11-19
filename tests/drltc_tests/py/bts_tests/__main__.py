@@ -131,8 +131,13 @@ class TestFixture(object):
     def create_wallets(self):
         yield self.clients("debug_start_simulated_time "+self.genesis_timestamp)
         yield self.clients("debug_advance_time 1 seconds")
-        yield self.clients("wallet_create default walletpassword")
-        yield self.clients("wallet_unlock 9999999 walletpassword")
+        for i in range(1, len(self.node)):
+            yield self.node[i].run_cmd(
+                ["wallet_create", "default", "walletpassword"]
+            )
+            yield self.node[i].run_cmd(
+                ["wallet_unlock", "9999999", "walletpassword"]
+            )
         return
 
     @coroutine
@@ -146,6 +151,12 @@ class TestFixture(object):
                 )
             return
 
+        yield self.node[0].run_cmd(
+            ["wallet_create", "default", "walletpassword"]
+        )
+        yield self.node[0].run_cmd(
+            ["wallet_unlock", "9999999", "walletpassword"]
+        )
         for i in range(DELEGATE_COUNT):
             n = self.node[self.delegate2nodeid[i]]
             yield n.run_cmd("wallet_import_private_key",
