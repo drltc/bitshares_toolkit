@@ -194,17 +194,21 @@ class TestFixture(object):
     def setup_angel(self):
         n = self.node[self.delegate2nodeid[0]]
         yield self.clients("debug_advance_time 1 blocks")
+        yield self.clients("debug_wait_for_block_by_number 1")
         yield n.run_cmd("wallet_account_create", "angel")
         yield n.run_cmd("wallet_account_register", "angel", "init0")
         yield self.clients("debug_advance_time 1 blocks")
+        yield self.clients("debug_wait_for_block_by_number 2")
         yield self.clients("debug_advance_time 1 blocks")
+        yield self.clients("debug_wait_for_block_by_number 3")
         xfer = yield n.run_cmd(
             "wallet_transfer", "100", "XTS", "init0", "angel",
             "hello_world", "vote_none"
             )
         yield self.clients("debug_advance_time 1 blocks")
+        yield self.clients("debug_wait_for_block_by_number 4")
         yield self.clients("debug_advance_time 1 blocks")
-        yield n.run_cmd("get_block", "2")
+        yield self.clients("debug_wait_for_block_by_number 5")
         #yield n.run_cmd("wallet_scan_transaction", xfer["record_id"])
         yield self.cmd_loop()
         return
