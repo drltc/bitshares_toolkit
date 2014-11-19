@@ -340,9 +340,9 @@ class Node(object):
         while True:
             try:
                 line = yield self.process.stdout.read_until(b"\n")
-                print(str(self.clientnum)+": "+line.decode())
+                print(str(self.clientnum)+": "+line.decode(), end="")
             except tornado.iostream.StreamClosedError:
-                print("finished with StreamClosedError")
+                print(str(self.clientnum)+": finished with StreamClosedError")
                 break
             if not seen_http_start:
                 sline = line.decode()
