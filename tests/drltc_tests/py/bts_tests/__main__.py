@@ -10,6 +10,7 @@ import os
 import re
 import subprocess
 import sys
+import readline
 import traceback
 
 import tornado.process
@@ -54,6 +55,8 @@ def mkdir_p(path):
     return
 
 DELEGATE_COUNT = 101
+
+re_number = re.compile(r"^\s*([0-9]+)")
 
 class TestFixture(object):
     def __init__(self):
@@ -189,11 +192,54 @@ class TestFixture(object):
         yield n.run_cmd("wallet_account_create", "angel")
         yield n.run_cmd("wallet_account_register", "angel", "init0")
         yield self.clients("debug_advance_time 1 blocks")
+        yield self.cmd_loop()
         return
 
     @coroutine
     def simple_transfer(self):
         
+        return
+
+    def get_nodes(self, node_exp):
+        m = re_number.match(node_exp)
+        if m is not None:
+            u = node_exp.split(",")
+            for i in range(len(u)):
+                yield dict(node_id=i, acct=None)
+        elif node_exp == "alice":
+            yield dict(node_id=1, acct="alice")
+        elif node_exp == "bob":
+            yield dict(node_id=2, acct="bob")
+        elif node_exp == "delegates":
+            for i in range(len(DELEGATE_COUNT)):
+                yield dict(
+                    node_id=self.delegate2nodeid[i],
+                    acct="init"+str(i))
+        elif node_exp == "angel":
+            yield dict(node_id=0, acct="angel")
+        elif node_exp == "none":
+            pass
+        else:
+            pass
+        return
+
+    @coroutine
+    def cmd_loop(self):
+        active_nodes = None
+        while True:
+            prompt = ">>> "
+            if active_nodes is not None:
+                prompt = "("+active_nodes+") >>>"
+            cmd = input(prompt)
+            if cmd[0] == ">":
+                active_nodes = cmd[1:]
+            elif cmd == "quit":
+                break
+            else:
+                for o in self.get_nodes(active_nodes):
+                    cmd_sub = cmd.replace("$acct", o["acct"])
+                    n = self.node[o["node_id"]]
+                    yield n.run_cmd(*cmd.split(" "))
         return
 
 
