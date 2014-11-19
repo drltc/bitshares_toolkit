@@ -180,8 +180,23 @@ class TestFixture(object):
         u = cmd.split()
         for i in range(DELEGATE_COUNT):
             n = self.node[self.delegate2nodeid[i]]
-            yield 
+            yield n.run_cmd(*u)
         return
+
+    @coroutine
+    def setup_angel(self):
+        u = cmd.split()
+        n = self.node[self.delegate2nodeid[0]]
+        yield n.run_cmd("wallet_account_create", "angel")
+        yield n.run_cmd("wallet_account_register", "angel", "init0")
+        yield self.clients("debug_wait_block_interval 1")
+        return
+
+    @coroutine
+    def simple_transfer(self):
+        
+        return
+
 
 re_http_start = re.compile("^Starting HTTP JSON RPC server on port ([0-9]+).*$")
 
@@ -336,6 +351,7 @@ def _main():
     yield tf.launch(3)
     yield tf.create_wallets()
     yield tf.register_delegates()
+    yield tf.setup_angel()
 
     return
 
