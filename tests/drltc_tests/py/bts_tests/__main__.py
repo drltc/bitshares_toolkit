@@ -116,7 +116,7 @@ class TestFixture(object):
 
     @coroutine
     def launch(self, client_count):
-        newnodes = [Node(i) for i in range(client_count)]
+        newnodes = [Node(i, cmd_loop=self.cmd_loop) for i in range(client_count)]
         self.node.extend(newnodes)
         tasks = [
                  node.launch() for node in newnodes
@@ -258,6 +258,7 @@ class Node(object):
         basedir="tmp",
         genesis_filename="genesis.json",
         io_loop=None,
+        cmd_loop=None,
         ):
 
         if io_loop is not None:
@@ -287,6 +288,7 @@ class Node(object):
             )
             
         self.next_request_id = 1
+        self.cmd_loop = cmd_loop
         return
 
     def get_data_dir(self):
@@ -385,7 +387,7 @@ class Node(object):
         except tornado.httpclient.HTTPError as e:
             print(str(self.clientnum)+"! "+str(e.code))
             print(e.response.body)
-            sys.exit(1)
+            yield self.cmd_loop()
         print(str(self.clientnum)+"< ", response.body)
         return json.loads(response.body.decode("utf-8"))["result"]
 
