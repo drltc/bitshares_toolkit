@@ -141,7 +141,8 @@ class TestFixture(object):
             n = self.node[self.delegate2nodeid[i]]
             yield n.run_cmd("wallet_import_private_key",
                 self.name2privkey["init"+str(i)],
-                False,
+                "init"+str(i),
+                True,
                 True,
                 )
             yield n.run_cmd("wallet_delegate_set_block_production",
