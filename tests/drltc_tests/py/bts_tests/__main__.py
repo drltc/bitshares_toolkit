@@ -185,7 +185,6 @@ class TestFixture(object):
 
     @coroutine
     def setup_angel(self):
-        u = cmd.split()
         n = self.node[self.delegate2nodeid[0]]
         yield n.run_cmd("wallet_account_create", "angel")
         yield n.run_cmd("wallet_account_register", "angel", "init0")
