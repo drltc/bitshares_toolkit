@@ -188,7 +188,7 @@ class TestFixture(object):
         n = self.node[self.delegate2nodeid[0]]
         yield n.run_cmd("wallet_account_create", "angel")
         yield n.run_cmd("wallet_account_register", "angel", "init0")
-        yield self.clients("debug_wait_block_interval 1")
+        yield self.clients("debug_advance_time 1 blocks")
         return
 
     @coroutine
