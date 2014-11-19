@@ -193,11 +193,12 @@ class TestFixture(object):
         yield n.run_cmd("wallet_account_create", "angel")
         yield n.run_cmd("wallet_account_register", "angel", "init0")
         yield self.clients("debug_advance_time 1 blocks")
-        yield n.run_cmd(
+        xfer = yield n.run_cmd(
             "wallet_transfer", "100000000", "XTS", "init0", "angel",
             "hello_world", "vote_none"
             )
         yield self.clients("debug_advance_time 1 blocks")
+        yield n.run_cmd("wallet_scan_transaction", xfer["record_id"])
         yield self.cmd_loop()
         return
 
