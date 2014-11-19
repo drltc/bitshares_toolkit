@@ -387,7 +387,7 @@ class Node(object):
             print(e.response.body)
             sys.exit(1)
         print(str(self.clientnum)+"< ", response.body)
-        return json.loads(response.body.decode("utf-8"))
+        return json.loads(response.body.decode("utf-8"))["result"]
 
     def alloc_request_id(self):
         result = self.next_request_id
