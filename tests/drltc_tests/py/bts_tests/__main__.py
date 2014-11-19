@@ -104,7 +104,7 @@ class TestFixture(object):
             json.dump(genesis_json, f, indent=4)
             
         for i in range(DELEGATE_COUNT):
-            self.name2privkey["delegate"+str(i)] = key[i]["wif_private_key"]
+            self.name2privkey["init"+str(i)] = key[i]["wif_private_key"]
         return
 
     def get_genesis_path(self):
@@ -140,9 +140,12 @@ class TestFixture(object):
         for i in range(DELEGATE_COUNT):
             n = self.node[self.delegate2nodeid[i]]
             yield n.run_cmd("wallet_import_private_key",
-                self.name2privkey["delegate"+str(i)])
+                self.name2privkey["init"+str(i)],
+                True,
+                True,
+                )
             yield n.run_cmd("wallet_delegate_set_block_production",
-                "delegate"+str(i),
+                "init"+str(i),
                 True,
                 )
         return
