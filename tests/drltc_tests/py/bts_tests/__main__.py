@@ -137,6 +137,15 @@ class TestFixture(object):
 
     @coroutine
     def register_delegates(self):
+
+        if os.path.exists("delegate-wallet-bup.json"):
+            yield self.node[0].run_cmd("wallet_backup_restore",
+                "delegate-wallet-bup.json",
+                "default",
+                "walletpassword",
+                )
+            return
+
         for i in range(DELEGATE_COUNT):
             n = self.node[self.delegate2nodeid[i]]
             yield n.run_cmd("wallet_import_private_key",
@@ -149,6 +158,10 @@ class TestFixture(object):
                 "init"+str(i),
                 True,
                 )
+        
+        yield self.node[0].run_cmd("wallet_backup_create",
+            "delegate-wallet-bup.json",
+            )
         return
 
     @coroutine
