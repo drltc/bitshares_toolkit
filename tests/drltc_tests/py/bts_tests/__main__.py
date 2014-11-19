@@ -133,10 +133,10 @@ class TestFixture(object):
         yield self.clients("debug_advance_time 1 seconds")
         for i in range(1, len(self.node)):
             yield self.node[i].run_cmd(
-                ["wallet_create", "default", "walletpassword"]
+                "wallet_create", "default", "walletpassword"
             )
             yield self.node[i].run_cmd(
-                ["wallet_unlock", "9999999", "walletpassword"]
+                "wallet_unlock", "9999999", "walletpassword"
             )
         return
 
@@ -152,10 +152,10 @@ class TestFixture(object):
             return
 
         yield self.node[0].run_cmd(
-            ["wallet_create", "default", "walletpassword"]
+            "wallet_create", "default", "walletpassword"
         )
         yield self.node[0].run_cmd(
-            ["wallet_unlock", "9999999", "walletpassword"]
+            "wallet_unlock", "9999999", "walletpassword"
         )
         for i in range(DELEGATE_COUNT):
             n = self.node[self.delegate2nodeid[i]]
