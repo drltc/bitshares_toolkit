@@ -272,7 +272,7 @@ class Node(object):
             "id" : req_id,
         })
         yield self.http_server_up
-        print(str(self.clientnum)+"> "+method+" "+" ".join(params))
+        print(str(self.clientnum)+"> "+method+" "+" ".join(str(p) for p in params))
         response = yield self.http_client.fetch(
             "http://127.0.0.1:"+str(self.httpport)+"/rpc",
             method="POST",
