@@ -88,7 +88,16 @@ class TestFixture(object):
         genesis_json = {
           "timestamp" : self.genesis_timestamp,
           
-          "market_assets" : [],
+          "market_assets" : [
+            {
+                "symbol" : "USD",
+                "name" : "United States Dollar",
+                "descrption" : "Federally Reserved, Inflation Guaranteed",
+                "precision" : 10000,
+                "min_price" : 0.000001,
+                "max_price" : 1000000,
+            }
+          ],
           
           "names" :
           [
@@ -291,6 +300,50 @@ class TestFixture(object):
             ]]]])
         return
         
+    @coroutine
+    def test_uia_market(self):
+        yield self.angel(
+            "wallet_transfer 5000000 XTS $acct alice hello_world vote_none",
+            )
+        yield self.angel(
+            "wallet_transfer 5000000 XTS $acct bob hello_world vote_none",
+            )
+        yield self.step()
+        yield self.alice(
+            "wallet_asset_create DOGS WhoLetTheDogesOut alice some_kind_of_canine_animal {} 10000000 "+str(dogs_prec)
+            )
+        yield self.step()
+        dogs_info = yield self.alice(
+            "blockchain_get_asset DOGS"
+            )
+        dogs_id = dogs_info["id"]
+        yield self.alice(
+            "wallet_asset_issue 1000 DOGS alice"
+            )
+        yield self.step()
+        yield self.delegates(
+            "wallet_publish_price_feed $acct 0.02 USD"
+            )
+        yield self.step()
+        yield self.alice(
+            "wallet_market_submit_short alice 100000 XTS 0 USD"
+            )
+        yield self.step()
+        yield self.alice(
+            "wallet_market_order_list USD XTS"
+            )
+        yield self.bob(
+            "wallet_market_submit_bid bob 2000 USD 0.02 XTS"
+            )
+        yield self.step()
+        yield self.alice(
+            "wallet_market_order_list USD XTS"
+            )
+        yield self.alice("wallet_account_balance")
+        yield self.bob("wallet_account_balance")
+
+        return
+    
     @coroutine
     def run_cmd_as(self, ename, cmd):
         result = []
@@ -549,7 +602,7 @@ def _main():
     yield tf.create_wallets()
     yield tf.register_delegates()
     yield tf.setup_accounts()
-    yield tf.test_uia_create()
+    yield tf.test_uia_market()
     yield tf.shutdown()
     return
 
