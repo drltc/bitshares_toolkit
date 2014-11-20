@@ -256,7 +256,6 @@ class TestFixture(object):
         yield self.step()
         return
 
-        
     @coroutine
     def test_uia_create(self):
         yield self.angel(
@@ -267,6 +266,9 @@ class TestFixture(object):
             "wallet_asset_create DOGS WhoLetTheDogesOut alice some_kind_of_canine_animal {} 10000000 10000"
             )
         yield self.step()
+        yield self.alice(
+            "blockchain_get_asset DOGS"
+            )
         yield self.alice(
             "wallet_asset_issue 1000 DOGS bob"
             )
