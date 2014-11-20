@@ -279,8 +279,10 @@ class TestFixture(object):
             "wallet_account_balance"
             )
         self.assert_equal(bob_balance, [["bob", [[dogs_id, 1000*dogs_prec]]]])
+        bi = self.blockchain_info
+        print("bi:", bi)
         return
-
+        
     @coroutine
     def run_cmd_as(self, ename, cmd):
         result = []
