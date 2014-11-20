@@ -11,6 +11,7 @@ import re
 import subprocess
 import sys
 import readline
+import time
 import traceback
 
 import tornado.process
@@ -200,7 +201,7 @@ class TestFixture(object):
         return
 
     @coroutine
-    def setup_angel(self):
+    def setup_accounts(self):
         n = self.node[self.delegate2nodeid[0]]
         n_alice = self.node[1]
         n_bob   = self.node[2]
@@ -227,7 +228,7 @@ class TestFixture(object):
         return
 
     @coroutine
-    def simple_transfer(self):
+    def test_simple_transfer(self):
         xfer = yield self.angel(
             "wallet_transfer 100 XTS $acct alice hello_world vote_none",
             )
@@ -302,12 +303,19 @@ class TestFixture(object):
             if cmd[0] == ">":
                 active_nodes = cmd[1:]
             elif cmd == "quit":
-                break
+                yield self.shutdown()
             else:
                 for o in self.get_nodes(active_nodes):
                     cmd_sub = cmd.replace("$acct", o["acct"])
                     n = self.node[o["node_id"]]
                     yield n.run_cmd(*cmd.split(" "))
+        return
+
+    @coroutine
+    def shutdown(self):
+        yield self.clients("quit")
+        # TODO: Wait for connection release
+        time.sleep(1)
         return
 
 re_http_start = re.compile("^Starting HTTP JSON RPC server on port ([0-9]+).*$")
@@ -460,7 +468,6 @@ class Node(object):
             print(str(self.clientnum)+"! "+str(e.code))
             print(e.response.body)
             yield self.cmd_loop()
-            sys.exit(1)
         print(str(self.clientnum)+"< ", response.body)
         return json.loads(response.body.decode("utf-8"))["result"]
 
@@ -478,7 +485,9 @@ def _main():
     yield tf.launch(3)
     yield tf.create_wallets()
     yield tf.register_delegates()
-    yield tf.setup_angel()
+    yield tf.setup_accounts()
+    yield tf.test_simple_transfer()
+    
 
     return
 
