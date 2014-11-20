@@ -331,6 +331,8 @@ class TestFixture(object):
             "wallet_market_submit_ask bob 100000 XTS 0.02 USD"
             )
         yield self.step()
+        yield self.step()
+        yield self.step()
         yield self.alice(
             "wallet_market_order_list USD XTS"
             )
