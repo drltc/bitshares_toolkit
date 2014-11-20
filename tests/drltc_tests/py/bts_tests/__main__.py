@@ -235,7 +235,7 @@ class TestFixture(object):
         alice_balance = yield self.alice(
             "wallet_account_balance"
             )
-        self.assert_equal(alice_balance, ["alice",[0,100 * 10000]])
+        self.assert_equal(alice_balance, [["alice",[[0,100 * 10000]]]])
         return
 
     @coroutine
