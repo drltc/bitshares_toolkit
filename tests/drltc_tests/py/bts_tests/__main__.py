@@ -224,7 +224,6 @@ class TestFixture(object):
             "wallet_account_register", "bob", "init0"
             )
         yield self.step()
-        yield self.cmd_loop()
         return
 
     @coroutine
@@ -487,8 +486,7 @@ def _main():
     yield tf.register_delegates()
     yield tf.setup_accounts()
     yield tf.test_simple_transfer()
-    
-
+    yield tf.shutdown()
     return
 
 @coroutine
