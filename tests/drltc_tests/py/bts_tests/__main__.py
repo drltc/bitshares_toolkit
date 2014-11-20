@@ -240,7 +240,8 @@ class TestFixture(object):
         return
         
     @coroutine
-    def test_uia_create(self):
+    def test_uia_create_failing(self):
+        # TODO:  This test fails showing optional params aren't optional!
         yield self.angel(
             "wallet_transfer 5000000 XTS $acct alice hello_world vote_none",
             )
@@ -254,7 +255,24 @@ class TestFixture(object):
             )
         yield self.step()
         return
+
         
+    @coroutine
+    def test_uia_create(self):
+        yield self.angel(
+            "wallet_transfer 5000000 XTS $acct alice hello_world vote_none",
+            )
+        yield self.step()
+        yield self.alice(
+            "wallet_asset_create DOGS WhoLetTheDogesOut alice some_kind_of_canine_animal {} 10000000 10000"
+            )
+        yield self.step()
+        yield self.alice(
+            "wallet_asset_issue 1000 DOGS bob"
+            )
+        yield self.step()
+        return
+
     @coroutine
     def run_cmd_as(self, ename, cmd):
         result = []
