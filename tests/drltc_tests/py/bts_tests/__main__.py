@@ -194,14 +194,6 @@ class TestFixture(object):
         return
 
     @coroutine
-    def delegates(self, cmd):
-        u = cmd.split()
-        for i in range(DELEGATE_COUNT):
-            n = self.node[self.delegate2nodeid[i]]
-            yield n.run_cmd(*u)
-        return
-
-    @coroutine
     def step(self, steps=1):
         for i in range(steps):
             yield self.clients("debug_advance_time 1 blocks")
@@ -372,6 +364,11 @@ class TestFixture(object):
     @coroutine
     def bob(self, cmd):
         result = yield self.run_cmd_as("bob", cmd)
+        return result
+
+    @coroutine
+    def delegates(self, cmd):
+        result = yield self.run_cmd_as("delegates", cmd)
         return result
 
     def assert_equal(self, a, b):
