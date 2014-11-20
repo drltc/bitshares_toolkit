@@ -316,7 +316,8 @@ class TestFixture(object):
 
     @coroutine
     def shutdown(self):
-        yield self.clients("quit")
+        for n in self.node:
+            yield n.finish()
         # TODO: Wait for connection release
         time.sleep(1)
         return
