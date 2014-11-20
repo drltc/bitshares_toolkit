@@ -193,6 +193,26 @@ class TestFixture(object):
     @coroutine
     def setup_angel(self):
         n = self.node[self.delegate2nodeid[0]]
+        n_alice = self.node[1]
+        n_bob   = self.node[2]
+        alice_key = yield n_alice.run_cmd(
+            "wallet_account_create", "alice",
+            )
+        bob_key   = yield n_bob.run_cmd(
+            "wallet_account_create", "bob",
+            )
+        yield n.run_cmd(
+            "wallet_add_contact_account", "alice", alice_key
+            )
+        yield n.run_cmd(
+            "wallet_add_contact_account", "bob", bob_key
+            )
+        yield n.run_cmd(
+            "wallet_account_register", "alice", "init0"
+            )
+        yield n.run_cmd(
+            "wallet_account_register", "bob", "init0"
+            )
         yield self.clients("debug_advance_time 1 blocks")
         yield self.clients("debug_wait_for_block_by_number 1")
         xfer = yield n.run_cmd(
