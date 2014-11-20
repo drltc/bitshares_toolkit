@@ -66,6 +66,7 @@ class TestFixture(object):
         self.delegate2nodeid = DELEGATE_COUNT*[0]
         self.name2privkey = {}
         self.genesis_timestamp = "2014-11-13T15:00:00"
+        self.nextblock = 1
         return
 
     @coroutine
@@ -191,6 +192,14 @@ class TestFixture(object):
         return
 
     @coroutine
+    def step(self, steps=1):
+        for i in range(steps):
+            yield self.clients("debug_advance_time 1 blocks")
+            yield self.clients("debug_wait_for_block_by_number "+str(self.nextblock))
+            self.nextblock += 1
+        return
+
+    @coroutine
     def setup_angel(self):
         n = self.node[self.delegate2nodeid[0]]
         n_alice = self.node[1]
@@ -213,22 +222,51 @@ class TestFixture(object):
         yield n.run_cmd(
             "wallet_account_register", "bob", "init0"
             )
-        yield self.clients("debug_advance_time 1 blocks")
-        yield self.clients("debug_wait_for_block_by_number 1")
-        xfer = yield n.run_cmd(
-            "wallet_transfer", "100", "XTS", "init0", "alice",
-            "hello_world", "vote_none"
-            )
-        yield self.clients("debug_advance_time 1 blocks")
-        yield self.clients("debug_wait_for_block_by_number 2")
-        #yield n.run_cmd("wallet_scan_transaction", xfer["record_id"])
+        yield self.step()
         yield self.cmd_loop()
         return
 
     @coroutine
     def simple_transfer(self):
-        
+        xfer = yield self.angel(
+            "wallet_transfer 100 XTS $acct alice hello_world vote_none",
+            )
+        yield self.step()
+        alice_balance = yield self.alice(
+            "wallet_account_balance"
+            )
+        self.assert_equal(alice_balance, ["alice",[0,100 * 10000]])
         return
+
+    @coroutine
+    def run_cmd_as(self, ename, cmd):
+        for o in self.get_nodes(ename):
+            cmd_sub = cmd.replace("$acct", o["acct"])
+            n = self.node[o["node_id"]]
+            yield n.run_cmd(*cmd.split(" "))
+        return
+
+    @coroutine
+    def angel(self, cmd):
+        result = yield self.run_cmd_as("angel", cmd)
+        return result
+
+    @coroutine
+    def alice(self, cmd):
+        result = yield self.run_cmd_as("alice", cmd)
+        return result
+        
+    @coroutine
+    def bob(self, cmd):
+        result = yield self.run_cmd_as("bob", cmd)
+        return result
+
+    def assert_equal(self, a, b):
+        if a == b:
+            return
+        print(a)
+        print(b)
+        raise RuntimeError("Failed")
 
     def get_nodes(self, node_exp):
         m = re_number.match(node_exp)
@@ -246,7 +284,7 @@ class TestFixture(object):
                     node_id=self.delegate2nodeid[i],
                     acct="init"+str(i))
         elif node_exp == "angel":
-            yield dict(node_id=0, acct="angel")
+            yield dict(node_id=0, acct="init0")
         elif node_exp == "none":
             pass
         else:
@@ -271,7 +309,6 @@ class TestFixture(object):
                     n = self.node[o["node_id"]]
                     yield n.run_cmd(*cmd.split(" "))
         return
-
 
 re_http_start = re.compile("^Starting HTTP JSON RPC server on port ([0-9]+).*$")
 re_p2p_start = re.compile("^Listening for P2P connections on port ([0-9]+).*$")
