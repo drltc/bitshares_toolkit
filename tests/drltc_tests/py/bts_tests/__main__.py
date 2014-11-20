@@ -223,6 +223,7 @@ class TestFixture(object):
         yield n.run_cmd(
             "wallet_account_register", "bob", "init0"
             )
+        self.blockchain_info = yield n.run_cmd("blockchain_get_info")
         yield self.step()
         return
 
@@ -237,7 +238,23 @@ class TestFixture(object):
             )
         self.assert_equal(alice_balance, [["alice",[[0,100 * 100000]]]])
         return
-
+        
+    @coroutine
+    def test_uia_create(self):
+        yield self.angel(
+            "wallet_transfer 5000000 XTS $acct alice hello_world vote_none",
+            )
+        yield self.step()
+        yield self.alice(
+            "wallet_asset_create DOGS WhoLetTheDogesOut alice some_kind_of_canine_animal"
+            )
+        yield self.step()
+        yield self.alice(
+            "wallet_asset_issue 1000 DOGS bob"
+            )
+        yield self.step()
+        return
+        
     @coroutine
     def run_cmd_as(self, ename, cmd):
         result = []
@@ -496,7 +513,7 @@ def _main():
     yield tf.create_wallets()
     yield tf.register_delegates()
     yield tf.setup_accounts()
-    yield tf.test_simple_transfer()
+    yield tf.test_uia_create()
     yield tf.shutdown()
     return
 
