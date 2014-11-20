@@ -344,11 +344,17 @@ class TestFixture(object):
             )
         usd_id = usd_info["id"]
         
+        #yield self.alice(
+        #    "wallet_market_submit_ask alice 1000 DOGS 0.0025 USD"
+        #    )
+        #yield self.bob(
+        #    "wallet_market_submit_bid bob 1000 DOGS 0.0025 USD"
+        #    )
         yield self.alice(
-            "wallet_market_submit_ask alice 1000 DOGS 0.0025 USD"
+            "wallet_market_submit_ask alice 2 USD 400 DOGS"
             )
         yield self.bob(
-            "wallet_market_submit_bid bob 1000 DOGS 0.0025 USD"
+            "wallet_market_submit_bid bob 2 USD 400 DOGS"
             )
         yield self.step(3)
 
