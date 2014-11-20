@@ -480,6 +480,12 @@ class Node(object):
         self.next_request_id = result+1
         return result
 
+    @coroutine
+    def finish(self):
+        yield self.run_cmd("quit")
+        yield self.http_client.close()
+        return
+
 @coroutine
 def _main():
     tf = TestFixture()
