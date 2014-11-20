@@ -339,6 +339,19 @@ class TestFixture(object):
         yield self.alice("wallet_account_balance")
         yield self.bob("wallet_account_balance")
 
+        usd_info = yield self.alice(
+            "blockchain_get_asset USD"
+            )
+        usd_id = usd_info["id"]
+        
+        yield self.alice(
+            "wallet_market_submit_ask alice 1000 DOGS 0.0025 USD"
+            )
+        yield self.bob(
+            "wallet_market_submit_bid bob 1000 DOGS 0.0025 USD"
+            )
+        yield self.step(3)
+
         return
     
     @coroutine
