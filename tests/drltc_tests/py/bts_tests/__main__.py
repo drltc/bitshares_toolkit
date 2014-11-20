@@ -235,7 +235,7 @@ class TestFixture(object):
         if m is not None:
             u = node_exp.split(",")
             for i in range(len(u)):
-                yield dict(node_id=i, acct="")
+                yield dict(node_id=int(u[i]), acct="")
         elif node_exp == "alice":
             yield dict(node_id=1, acct="alice")
         elif node_exp == "bob":
