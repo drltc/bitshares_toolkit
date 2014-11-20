@@ -483,7 +483,7 @@ class Node(object):
     @coroutine
     def finish(self):
         yield self.run_cmd("quit")
-        yield self.http_client.close()
+        self.http_client.close()
         return
 
 @coroutine
