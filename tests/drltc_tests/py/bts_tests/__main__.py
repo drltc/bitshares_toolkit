@@ -302,6 +302,9 @@ class TestFixture(object):
         
     @coroutine
     def test_uia_market(self):
+        dogs_prec = 10000
+        xts_prec = 100000
+        tx_fee = 50000
         yield self.angel(
             "wallet_transfer 5000000 XTS $acct alice hello_world vote_none",
             )
