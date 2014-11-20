@@ -389,7 +389,7 @@ class TestFixture(object):
         elif node_exp == "bob":
             yield dict(node_id=2, acct="bob")
         elif node_exp == "delegates":
-            for i in range(len(DELEGATE_COUNT)):
+            for i in range(DELEGATE_COUNT):
                 yield dict(
                     node_id=self.delegate2nodeid[i],
                     acct="init"+str(i))
