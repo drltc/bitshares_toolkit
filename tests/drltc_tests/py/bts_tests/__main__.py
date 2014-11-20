@@ -262,17 +262,23 @@ class TestFixture(object):
             "wallet_transfer 5000000 XTS $acct alice hello_world vote_none",
             )
         yield self.step()
+        dogs_prec = 10000
         yield self.alice(
-            "wallet_asset_create DOGS WhoLetTheDogesOut alice some_kind_of_canine_animal {} 10000000 10000"
+            "wallet_asset_create DOGS WhoLetTheDogesOut alice some_kind_of_canine_animal {} 10000000 "+str(dogs_prec)
             )
         yield self.step()
-        yield self.alice(
+        dogs_info = yield self.alice(
             "blockchain_get_asset DOGS"
             )
+        dogs_id = dogs_info["id"]
         yield self.alice(
             "wallet_asset_issue 1000 DOGS bob"
             )
         yield self.step()
+        bob_balance = yield self.bob(
+            "wallet_account_balance"
+            )
+        self.assert_equal(bob_balance, [["bob", [[dogs_id, 1000*dogs_prec]]]])
         return
 
     @coroutine
