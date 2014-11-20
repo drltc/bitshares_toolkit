@@ -243,7 +243,7 @@ class TestFixture(object):
         for o in self.get_nodes(ename):
             cmd_sub = cmd.replace("$acct", o["acct"])
             n = self.node[o["node_id"]]
-            yield n.run_cmd(*cmd.split(" "))
+            yield n.run_cmd(*cmd_sub.split(" "))
         return
 
     @coroutine
